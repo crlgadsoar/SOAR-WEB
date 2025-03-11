@@ -1,0 +1,18 @@
+.container {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.large-container {
+  overflow: hidden;
+}
+
+.scroll-container {
+  width: calc(100% - 22px);
+  height: calc(100vh - 22px);
+  overflow: auto;
+  margin: 10px;
+  border: 1px solid grey;
+}

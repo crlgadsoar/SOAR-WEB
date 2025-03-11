@@ -1,0 +1,1 @@
+eslint . -f node_modules/eslint-detailed-reporter/lib/detailed.js -o report.html

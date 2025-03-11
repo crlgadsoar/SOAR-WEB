@@ -1,0 +1,11 @@
+{
+  "main": "ಮುಖ್ಯ",
+  "main.home": "ಮನೆ",
+  "main.changelog": "ಚೇಂಜ್ಲಾಗ್",
+  "main.status": "ಸ್ಥಿತಿ",
+  "main.status.equipment": "ಉಪಕರಣ",
+  "configuration": "Configuration",
+  "asset": "Asset",
+  "jcm": "JCM",
+  "fm": "FM"
+}

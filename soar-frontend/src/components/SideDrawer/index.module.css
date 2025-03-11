@@ -1,0 +1,25 @@
+.sideMenu {
+  width: 50%; /* Set the width to 50% of the screen */
+  height: 100%;
+
+  box-sizing: border-box;
+  background-color: white;
+  box-shadow: 5px 5px 5px rgba(17, 26, 41, 0.4);
+  transition: 0.9s;
+  transform: translateX(0); /* Initial translation */
+
+  /* Add a translateX transformation for the sliding effect */
+  transform: translateX(-80%);
+}
+
+#sideMenuSwitch {
+  position: absolute;
+  opacity: 0;
+}
+#sideMenuSwitch:checked + .sideMenu {
+  transform: translateX(-50%);
+}
+#sideMenuSwitch:checked + .sideMenu label .fas {
+  /* transform: scaleX(-1); */
+  /* transform: scaleX(-1); */
+}

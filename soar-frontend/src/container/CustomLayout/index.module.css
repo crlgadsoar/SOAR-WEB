@@ -1,0 +1,50 @@
+.full-page {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+}
+
+.profile-container {
+  margin-right: 0px;
+}
+
+.scrollable-content {
+  overflow: auto;
+}
+
+.scroll-to-top-button {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1;
+}
+.footer {
+  text-align: center !important;
+  max-height: 12px;
+  margin-top: auto;
+  background-color: #f0f0f0;
+  /* position: fixed; */
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.watermark {
+  position: fixed;
+  top: 30%;
+  left: 25%;
+  /* transform: translate(-50%, -50%); */
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 30px;
+  color: rgba(0, 0, 0, 0.1);
+  opacity: 0.5;
+  pointer-events: none; /* Prevent the watermark from being selectable */
+  z-index: 9999;
+}

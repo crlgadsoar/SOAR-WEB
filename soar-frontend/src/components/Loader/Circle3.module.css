@@ -1,0 +1,125 @@
+.flex {
+  /* position: relative; */
+  display: flex;
+  /* flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start; */
+
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+
+  /* padding-bottom: 40px; */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+/* loader */
+.loader {
+  flex-basis: 100%;
+  max-width: 100%;
+  min-height: 300px;
+  max-height: 300px;
+  height: 50vh;
+  position: relative;
+  overflow: hidden;
+  border: 0px solid #ffffff;
+  z-index: 1;
+}
+.loader-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.ball {
+  position: absolute;
+}
+
+.loader ::before,
+.loader ::after {
+  position: absolute;
+  content: '';
+  box-sizing: border-box;
+}
+
+@media screen and (min-width: 700px) {
+  .loader {
+    flex-basis: 33.33%;
+    max-width: 33.33%;
+  }
+}
+
+/* loader default-04 */
+.default-04 .loader-container {
+  width: 80px;
+  height: 80px;
+}
+.default-04 .ball::before {
+  top: 0;
+  left: 0;
+  width: 80%;
+  padding-bottom: 80%;
+  border-radius: 50%;
+  /* background-color: #ef1144; */
+  background-color: var(--bgColor);
+}
+.default-04 .ball {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 15%;
+  height: 50%;
+  background-color: transparent;
+  transform-origin: bottom center;
+  overflow: visible;
+  animation: default4 5s infinite linear;
+}
+.default-04 .ball:nth-of-type(2) {
+  animation-delay: 0.15s;
+}
+.default-04 .ball:nth-of-type(3) {
+  animation-delay: 0.3s;
+}
+.default-04 .ball:nth-of-type(4) {
+  animation-delay: 0.45s;
+}
+.default-04 .ball:nth-of-type(5) {
+  animation-delay: 0.6s;
+}
+.default-04 .ball:nth-of-type(6) {
+  animation-delay: 0.75s;
+}
+.default-04 .ball:nth-of-type(7) {
+  animation-delay: 0.9s;
+}
+.default-04 .ball:nth-of-type(8) {
+  animation-delay: 1.05s;
+}
+.default-04 .ball:nth-of-type(9) {
+  animation-delay: 1.2s;
+}
+.default-04 .ball:nth-of-type(10) {
+  animation-delay: 1.35s;
+}
+.default-04 .ball:nth-of-type(11) {
+  animation-delay: 1.5s;
+}
+@keyframes default4 {
+  0% {
+    transform: translate(-50%, 0%) rotate(0deg);
+  }
+  40% {
+    transform: translate(-50%, 0%) rotate(360deg);
+  }
+  60% {
+    transform: translate(-50%, 0%) rotate(520deg);
+  }
+  90% {
+    transform: translate(-50%, 0%) rotate(590deg);
+  }
+  100% {
+    transform: translate(-50%, 0%) rotate(720deg);
+  }
+}

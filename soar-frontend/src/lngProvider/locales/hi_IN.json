@@ -1,0 +1,11 @@
+{
+  "main": "मुख्य",
+  "main.home": "होम",
+  "main.changelog": "संस्करण चेंजलॉग",
+  "main.status": "स्थति",
+  "main.status.equipment": "उपकरण",
+  "configuration": "कॉन्फ़िगरेशन",
+  "asset": "संपत्ति",
+  "jcm": "जॉब कार्ड",
+  "fm": "फॉल्ट"
+}

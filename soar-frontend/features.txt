@@ -1,0 +1,129 @@
+CHART DASHBOARD WITH LIBRARY FOR DEVELOPERS
+
+1. Subhash
+a) Nivo (DASHBOARD3)
+b) Antd chart (DASHBOARD4)
+c) Recharts  (DASHBOARD9)
+d) React Google Charts (DASHBOARD7)
+
+
+2. Govind
+a) CanvasJS (DASHBOARD5)
+b) react-chartjs-2  (DASHBOARD6)
+c) React Charts Tanstack (DASHBOARD8)
+d) SONARLINT ISSUES
+
+3. Anurag
+a) Echarts (DASHBOARD1)
+b) BizCharts  (DASHBOARD11)
+c) FusionCharts (DASHBOARD12)
+d) MUI Xcharts  (DASHBOARD10)
+
+4. Lalit
+a) D3 (DASHBOARD2)
+b) Plot
+c) VisX
+d) React-vis
+e) Victory
+ 
+
+
+5. Paid 
+a) HighCharts
+b) Ag Charts
+c) Syncfusion
+d)
+
+
+
+
+Cards Link
+
+
+1.https://freefrontend.com/css-cards/page/6/
+
+
+
+https://codepen.io/designfenix/pen/yLJWMKV
+https://codepen.io/havardob/pen/RwVbaLo
+https://codepen.io/seyedi/pen/zYoeLEv
+
+https://codepen.io/luisoms/pen/PoGGRKp
+
+https://codepen.io/andyfought/pen/XWKJJwB
+
+https://codepen.io/dickyal6/pen/rNeRepd
+
+https://codepen.io/saviomartin/pen/LYNgqKW
+
+https://codepen.io/yemon/pen/yLeGQwx
+
+https://codepen.io/hourwinner/pen/gOaWdNy
+
+https://codepen.io/iPhyse/pen/yLBGWVg
+
+
+https://codepen.io/joshuaward/pen/dKmZVZ
+
+
+https://codepen.io/Maza-designDev/pen/KKdmyGb
+
+
+https://codepen.io/markelrayes/pen/ZEGVBZm
+
+
+https://codepen.io/rpandrews/pen/ZEGGZXq
+
+
+https://codepen.io/RemiRuc/pen/PowrNmb
+
+https://codepen.io/iamjoshellis/pen/YWReeQ
+https://codepen.io/that_boy_curt/pen/mdbvxoW
+
+https://codepen.io/trevoreyre/pen/bRrrEx
+https://codepen.io/oliviale/pen/WqwOzv
+
+https://codepen.io/kylehyams/pen/rYMEYp
+https://codepen.io/steveschoger/pen/XwzRRZ
+
+
+https://codepen.io/team/keyframers/pen/YbGbOd
+
+
+https://codepen.io/steveeeie/pen/NVWMEM
+
+
+https://codepen.io/JanneLeppanen/pen/EMRrOX 
+
+
+https://codepen.io/abhishek747/pen/BbWKVa
+
+
+
+2. https://devdevout.com/css/css-cards
+
+https://codepen.io/jepooley/pen/NWYryap 
+
+
+3. https://devsnap.me/css-cards
+
+https://codepen.io/t_afif/pen/PoBQRmj
+https://codepen.io/_rahul/pen/NWXjOXW
+https://codepen.io/Laurie312/pen/PoKrYLg
+https://codepen.io/ItsCrisDiaz/pen/NWgOZjX
+https://codepen.io/carlita712/pen/mNLzye
+https://codepen.io/Maza-designDev/pen/KKdmyGb
+https://codepen.io/jshwrnr/pen/BaRwBZM
+https://codepen.io/Jhonierpc/pen/MWgBJpy
+https://codepen.io/arti2002/pen/LYRxeOG
+https://codepen.io/AdamDipinto/pen/JjPmxPe
+https://codepen.io/LIMESTA/pen/KKPbvpL
+https://codepen.io/luisoms/pen/PoGGRKp
+https://codepen.io/that_boy_curt/pen/mdbvxoW
+https://codepen.io/jepooley/pen/NWYryap
+https://codepen.io/andrewhawkes/pen/RwwOJrO
+https://codepen.io/markelrayes/pen/ZEGVBZm
+https://codepen.io/RemiRuc/pen/PowrNmb
+https://codepen.io/alphardex/pen/ExaZgxp
+https://codepen.io/takaneichinose/pen/xvpqgo
+https://codepen.io/KaioRocha/pen/orpKxq

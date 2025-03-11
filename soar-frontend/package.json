@@ -1,0 +1,92 @@
+{
+  "name": "splunk_soar_ui",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/charts": "^2.0.3",
+    "@ant-design/icons": "^5.0.1",
+    "@juggle/resize-observer": "^3.4.0",
+    "@nivo/bar": "^0.84.0",
+    "@nivo/treemap": "^0.84.0",
+    "@observablehq/plot": "^0.6.13",
+    "@reduxjs/toolkit": "^2.0.1",
+    "@stomp/stompjs": "^7.0.0",
+    "@visx/axis": "^3.8.0",
+    "@visx/group": "^3.3.0",
+    "@visx/legend": "^3.5.0",
+    "@visx/scale": "^3.5.0",
+    "@visx/shape": "^3.5.0",
+    "@visx/tooltip": "^3.3.0",
+    "antd": "^5.12.5",
+    "axios": "^1.4.0",
+    "d3": "^7.8.5",
+    "echarts": "^5.4.3",
+    "echarts-for-react": "^3.0.2",
+    "echarts-liquidfill": "^3.1.0",
+    "moment": "^2.29.4",
+    "react": "^18.2.0",
+    "react-custom-scrollbars-2": "^4.5.0",
+    "react-dom": "^18.2.0",
+    "react-intl": "^5.25.1",
+    "react-redux": "^9.0.4",
+    "react-router-dom": "^6.11.1",
+    "react-scripts": "^5.0.1",
+    "react-spring": "^9.7.3",
+    "recharts": "^2.10.3",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "HTTPS=true SSL_CRT_FILE=private.crt SSL_KEY_FILE=private.key react-scripts --max_old_space_size=16384 start",
+    "build": "react-scripts --max_old_space_size=10528 build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\" --config ./.prettierrc"
+  },
+  "lint-staged": {
+    "*.+(js|jsx)": [
+      "npm run lint:fix",
+      "git add"
+    ],
+    "*.(json|css|md)": [
+      "npm run format",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint:fix && npm run format"
+    }
+  },
+  "engines": {
+    "npm": ">=8.0.0 <9.9.9",
+    "node": ">=18.0.0 <18.18.18"
+  },
+  "enginesStrict": true,
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-private-property-in-object": "^7.23.4",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-detailed-reporter": "^0.9.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1"
+  }
+}

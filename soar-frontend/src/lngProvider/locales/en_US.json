@@ -1,0 +1,11 @@
+{
+  "main": "Main",
+  "main.home": "Home",
+  "main.changelog": "Changelog",
+  "main.status": "Status",
+  "main.status.equipment": "Equipment",
+  "configuration": "Configuration",
+  "asset": "Asset",
+  "jcm": "JCM",
+  "fm": "FM"
+}

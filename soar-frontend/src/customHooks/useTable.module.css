@@ -1,0 +1,7 @@
+.tableRowLight td {
+  background-color: #f3f8fa !important;
+}
+.tableRowDark td {
+  /* background-color: #d5edf7 !important; */
+  background-color: white !important;
+}

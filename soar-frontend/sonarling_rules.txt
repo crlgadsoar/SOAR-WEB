@@ -1,0 +1,40 @@
+/home/lalittolani/.config/Code/User/settings.json
+
+"sonarlint.rules": {
+    "javascript:S125": {
+      "level": "off"
+    },
+    "javascript:S6774": {
+      "level": "off"
+    },
+    "javascript:S3800": {
+      "level": "off"
+    },
+    "css:S125": {
+      "level": "off"
+    },
+    "javascript:S4138": {
+      "level": "off"
+    },
+    "javascript:S3358": {
+      "level": "off"
+    },
+    "javascript:S4158": {
+      "level": "off"
+    },
+    "javascript:S6479": {
+      "level": "off"
+    },
+    "javascript:S107": {
+      "level": "off"
+    },
+    "javascript:S6848": {
+      "level": "off"
+    },
+    "javascript:S1082": {
+      "level": "off"
+    },
+    "javascript:S3776": {
+      "level": "off"
+    }
+  },
