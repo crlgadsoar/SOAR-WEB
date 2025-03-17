@@ -56,14 +56,14 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
     animationEnabled: true,
     theme: theme,
     exportEnabled: exportEnable,
-  //  title: { text: "Severity Levels" },
     data: [
       {
         type: "doughnut",
-        toolTipContent: "{label}: <strong>{y}%</strong>",
+        toolTipContent: "{label}: <strong>{y}</strong>",
         indexLabel: "{label}: {y}",
         dataPoints: [
-          { label: "Critical", y: data.critical || 0, color: "red" },
+          { label: "Critical", y: data.critical || 0, color: "red" },  // ✅ FIXED
+          { label: "Info", y: data.info || 0, color: "blue" },          // ✅ FIXED
           { label: "High", y: data.high || 0, color: "orange" },
           { label: "Medium", y: data.medium || 0, color: "yellow" },
           { label: "Low", y: data.low || 0, color: "green" },
