@@ -39,7 +39,7 @@ const SignIn = () => {
       });
     }
     if (localStorage.getItem("token") && !fromLocation) {
-      navigate("/main/home", {
+      navigate("/home", {
         state: { from: location },
         replace: true,
       });
@@ -129,7 +129,7 @@ const SignIn = () => {
             alt="bck_img"
             draggable="false"
             style={{
-              width: "150px",
+              width: "200px",
               height: "150px",
               marginLeft: "85px",
             }}

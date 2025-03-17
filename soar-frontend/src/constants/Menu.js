@@ -36,7 +36,7 @@ export const MENU_ITEMS = [
     key: LINK_STORE.HOME,
     icon: <MinusCircleOutlined />,
     menuType: MENU_TYPE.NAVIGATE,
-    path: "routes/main/home",
+    path: "routes/home",
   },
   {
     label: "Playbooks",

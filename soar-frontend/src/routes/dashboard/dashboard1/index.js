@@ -73,7 +73,26 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <Row gutter={[16, 16]}>
+      
+      {/* Professional Title */}
+      <h1
+        style={{
+          textAlign: "center",
+          fontSize: "26px",
+          fontWeight: "600",
+          background: "linear-gradient(90deg, #0F2027, #203A43, #2C5364)", // Professional dark blue gradient
+          color: "white",
+          padding: "18px",
+          borderRadius: "8px",
+          boxShadow: "0px 4px 12px rgba(15, 32, 39, 0.5)",
+          textTransform: "uppercase",
+          letterSpacing: "1px",
+        }}
+      >
+        SOAR: Security Orchestration, Automation, and Response
+      </h1>
+
+      <Row gutter={[16, 16]} style={{ marginTop: "20px" }}>
         {/* **Severity Doughnut Chart** */}
         <Col xs={24} md={12}>
           <Card title="Severity" style={{ textAlign: "center" }}>

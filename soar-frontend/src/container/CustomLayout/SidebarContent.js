@@ -274,14 +274,14 @@ const SidebarContent = ({ backgroundColorSidebar }) => {
       )}
       {!collapsed && currWindowWidth > TAB_SIZE && (
         <span className={style["bel-logo"]}>
-          <img
-            alt="company_logo"
-            src={require("../../assets/images/bel_logo_signin.png")}
-            height={25}
-            width={90}
-            draggable="false"
-          />
-        </span>
+        <img
+          alt="company_logo"
+          src={require("../../assets/images/bel_logo_signin.png")}
+          height={25}
+          width={90}  // Change this value
+          draggable="false"
+        />
+      </span>
       )}
       <div
         className={style["profile-container"]}

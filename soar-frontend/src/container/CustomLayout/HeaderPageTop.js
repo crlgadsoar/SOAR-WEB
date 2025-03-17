@@ -232,7 +232,7 @@ const HeaderPage = () => {
   );
 
   const navigateToHomePage = () => {
-    window.location.href = "your_home_page_url_here";
+    window.location.href = "/home";
   };
 
   //className={style['top-menu']}
