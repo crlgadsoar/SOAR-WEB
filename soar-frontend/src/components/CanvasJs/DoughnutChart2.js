@@ -54,7 +54,7 @@ const DoughnutChart2 = ({ theme, exportEnable = "", style, data }) => {
         indexLabel: "{label}: {y}",
         dataPoints: [
           { label: "Mitigated", y: data.mitigated || 0, color: "green" },
-          { label: "Under Investigation", y: data["under investigation"] || 0, color: "purple" },
+          { label: "Under Investigation", y: data["not mitigated"] || 0, color: "purple" },
         ],
       },
     ],

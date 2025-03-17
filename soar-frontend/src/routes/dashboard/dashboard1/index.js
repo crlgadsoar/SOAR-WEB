@@ -8,100 +8,89 @@ import { useSelector } from "react-redux";
 import DoughnutChart from "components/CanvasJs/DoughnutChart";
 import DoughnutChart2 from "components/CanvasJs/DoughnutChart2";
 import { fetchIncidents } from "api/fetchData";
-import DashboardIncidentTable from "./dashboardTable"; // Import the new table
+import DashboardIncidentTable from "./dashboardTable"; // Import the incident table
+import { incidentTypeMapping } from '../../../components/util/mapping';
 
 const Dashboard = () => {
   const { displayMode } = useSelector((state) => state.themeConfig);
   const [incidents, setIncidents] = useState([]);
 
-  // Fetch incidents every 5 seconds (Real-time updates)
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchIncidents();
       setIncidents(data);
     };
 
-    fetchData(); // Initial fetch
-    const interval = setInterval(fetchData, 5000); // Refresh every 5 sec
+    fetchData();
+    const interval = setInterval(fetchData, 5000); // Refresh every 5 seconds
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, []);
 
-  // Process data for charts
-  const severityCounts = {
-    low: 0,
-    medium: 0,
-    high: 0,
-    critical: 0,
-  };
-
-  const statusCounts = {
-    mitigated: 0,
-    "under investigation": 0,
-  };
-
+  // **Initialize Counters**
+  const severityCounts = { info: 0, critical: 0, low: 0, medium: 0, high: 0 };
+  const statusCounts = { mitigated: 0, "not mitigated": 0 };
   const eventCounts = {};
   const weeklyCounts = {};
-
   let resolvedCount = 0;
   let totalIncidents = incidents.length;
 
+  // **Process Data**
   incidents.forEach((incident) => {
-    // Count severity levels
+    // **Count Severity**
     if (incident.severity) {
-      severityCounts[incident.severity.toLowerCase()] =
-        (severityCounts[incident.severity.toLowerCase()] || 0) + 1;
+      const severity = incident.severity.toLowerCase().trim();
+      severityCounts[severity] = (severityCounts[severity] || 0) + 1;
     }
-
-    // Count resolved/unresolved incidents as status
-    if (incident.resolved === "Yes") {
+    
+    // **Count Mitigated vs Not Mitigated**
+    const status = incident.status?.toLowerCase().trim(); // Normalize status
+    if (status === "mitigated") {
       statusCounts.mitigated++;
     } else {
-      statusCounts["under investigation"]++;
+      statusCounts["not mitigated"]++;
     }
 
-    // Count incident types for bar chart
-    eventCounts[incident.incidenttype] =
-      (eventCounts[incident.incidenttype] || 0) + 1;
+    // **Map Incident Types**
+    const eventType = incidentTypeMapping[incident.incidenttype] || `Unknown (${incident.incidenttype})`;
+    eventCounts[eventType] = (eventCounts[eventType] || 0) + 1;
 
-    // Count incidents per day for line chart
+    // **Count Incidents Per Day**
     const date = new Date(incident.datetimestamp).toLocaleDateString();
     weeklyCounts[date] = (weeklyCounts[date] || 0) + 1;
 
-    // Count resolved incidents
-    if (incident.resolved === "Yes") {
+    if (status === "mitigated") {
       resolvedCount++;
     }
   });
 
-  const resolvedPercentage =
-    totalIncidents > 0 ? (resolvedCount / totalIncidents) * 100 : 0;
+  // **Prevent Empty Graphs**
+  if (statusCounts.mitigated === 0 && statusCounts["not mitigated"] === 0) {
+    statusCounts["not mitigated"] = 1; // Prevent empty graph issue
+  }
+
+  const resolvedPercentage = totalIncidents > 0 ? (resolvedCount / totalIncidents) * 100 : 0;
 
   return (
     <div style={{ padding: "20px" }}>
-      {/* First Row - Severity & Status */}
       <Row gutter={[16, 16]}>
+        {/* **Severity Doughnut Chart** */}
         <Col xs={24} md={12}>
           <Card title="Severity" style={{ textAlign: "center" }}>
-            <DoughnutChart
-              data={severityCounts}
-              theme={displayMode === "DARK" ? "dark1" : ""}
-            />
+            <DoughnutChart data={severityCounts} theme={displayMode === "DARK" ? "dark1" : ""} />
           </Card>
         </Col>
 
+        {/* **Status Doughnut Chart (Mitigated vs Not Mitigated)** */}
         <Col xs={24} md={12}>
-          <Card title="Status" style={{ textAlign: "center" }}>
-            <DoughnutChart2
-              data={statusCounts} // Updated statusCounts with resolved mapping
-              theme={displayMode === "DARK" ? "dark1" : ""}
-            />
+          <Card title="Incident Status" style={{ textAlign: "center" }}>
+            <DoughnutChart2 data={statusCounts} theme={displayMode === "DARK" ? "dark1" : ""} />
           </Card>
         </Col>
       </Row>
 
-      {/* Second Row - Top Events & Events This Week */}
       <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+        {/* **Top Events Bar Graph** */}
         <Col xs={24} md={12}>
           <Card title="Top Events" style={{ textAlign: "center" }}>
             <BarGraph
@@ -113,8 +102,9 @@ const Dashboard = () => {
           </Card>
         </Col>
 
+        {/* **Events This Week Line Graph** */}
         <Col xs={24} md={12}>
-          <Card title="Events This Week" style={{ textAlign: "center" }}>
+          <Card title="Event Counts" style={{ textAlign: "center" }}>
             <LineGraph
               data={Object.values(weeklyCounts)}
               xAxisData={Object.keys(weeklyCounts)}
@@ -125,20 +115,16 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Third Row - Liquid Fill Graph (Full Width) */}
+      {/* **Liquid Fill Graph for Resolved Incidents** */}
       <Row style={{ marginTop: "16px" }}>
         <Col span={24}>
           <Card title="Events Closed" style={{ textAlign: "center" }}>
-            <LiquidFillGraph
-              value={[resolvedPercentage]}
-              title="Closed Events"
-              theme={THEME_ENUM.LIGHT}
-            />
+            <LiquidFillGraph value={[resolvedPercentage]} title="Closed Events" theme={THEME_ENUM.LIGHT} />
           </Card>
         </Col>
       </Row>
 
-      {/* Incident Overview Table */}
+      {/* **Incident Table Overview** */}
       <div>
         <h2>Incident Overview</h2>
         <DashboardIncidentTable incidents={incidents} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Table } from "antd";
-import { incidentTypeMapping, sourceMapping, destinationMapping } from '../../../components/util/mapping';
+import { incidentTypeMapping, sourceMapping, destinationMapping } from "../../../components/util/mapping";
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
@@ -12,7 +12,11 @@ const IncidentTable = () => {
       .get("http://localhost:5002/incidents")
       .then((response) => {
         if (Array.isArray(response.data)) {
-          setData(response.data);
+          // Sort by datetimestamp in descending order (latest first)
+          const sortedData = response.data.sort(
+            (a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp)
+          );
+          setData(sortedData);
         } else {
           console.error("Error: API response is not an array", response.data);
         }
@@ -31,12 +35,10 @@ const IncidentTable = () => {
       title: "Incident Type",
       dataIndex: "incidenttype",
       key: "incidenttype",
-      render: (incidentType) => incidentTypeMapping[incidentType] || "Unknown"
+      render: (incidentType) => incidentTypeMapping[incidentType] || "Unknown",
     },
-    { title: "Severity", dataIndex: "severity", key: "severity" },
     { title: "Description", dataIndex: "description", key: "description" },
     { title: "Attack ID", dataIndex: "attack_id", key: "attack_id" },
-
     {
       title: "Event Details",
       dataIndex: "event_details",
@@ -58,13 +60,8 @@ const IncidentTable = () => {
       title: "Event ID List",
       dataIndex: "eventidlist",
       key: "eventidlist",
-      render: (eventIdList) => {
-        if (typeof eventIdList === "string" && eventIdList.trim()) {
-          return eventIdList;
-        } else {
-          return "N/A";
-        }
-      },
+      render: (eventIdList) =>
+        typeof eventIdList === "string" && eventIdList.trim() ? eventIdList : "N/A",
     },
     {
       title: "Source",
@@ -80,7 +77,15 @@ const IncidentTable = () => {
     },
   ];
 
-  return <Table columns={columns} dataSource={data} loading={loading} rowKey="incidentid" />;
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      loading={loading}
+      rowKey="incidentid"
+      pagination={{ pageSize: 10 }} // Ensures pagination is enabled
+    />
+  );
 };
 
 export default IncidentTable;

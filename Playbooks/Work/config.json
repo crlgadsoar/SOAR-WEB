@@ -1,0 +1,22 @@
+{
+    "host_ip": "0.0.0.0",
+    "host_port" : 95,
+    "waf_ip": "10.229.40.3",
+    "waf_port":41234 ,
+    "ndr_ip": "127.0.0.1",
+    "ndr_port": 97,
+    "dam_ip": "127.0.0.1",
+    "dam_port": 98,
+    "ueba_ip": "127.0.0.1",
+    "ueba_port": 99,
+    "db_name": "soar_db",
+    "db_user": "rajat",
+    "db_password":"crlgad@123",
+    "db_host": "localhost",
+    "db_port": "5432",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": "587",
+    "email_address": "",
+    "email_password": "",
+    "soc_email": ""
+}       
