@@ -9,7 +9,7 @@ const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5001/playbooks") // Backend API for playbooks
+      .get("http://localhost:5002/playbooks") // Backend API for playbooks
       .then((response) => {
         if (Array.isArray(response.data)) {
           setData(response.data);

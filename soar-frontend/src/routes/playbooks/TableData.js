@@ -8,7 +8,7 @@ const PlaybookTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5001/playbooks") // Replace with actual API endpoint
+      .get("http://localhost:5002/playbooks") // Replace with actual API endpoint
       .then((response) => {
         if (Array.isArray(response.data)) {
           setData(response.data);

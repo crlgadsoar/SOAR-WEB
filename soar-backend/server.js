@@ -4,7 +4,7 @@ const cors = require("cors"); // Import CORS
 const { Pool } = require("pg");
 
 const app = express();
-const port = 5001;  // Changed from 3000 to 5001
+const port = 5002;  // Changed from 3000 to 5002
 // ✅ Enable CORS
 app.use(cors());
 
@@ -12,7 +12,7 @@ app.use(cors());
 // PostgreSQL Connection
 const pool = new Pool({
   user: "rajat",
-  host: "localhost",
+  host: "10.42.0.69",
   database: "soar_db",
   password: "crlgad@123",
   port: 5432,  // Keep this as 5432 (default for PostgreSQL)

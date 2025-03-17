@@ -9,7 +9,7 @@ const IncidentTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5001/incidents")
+      .get("http://localhost:5002/incidents")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setData(response.data);

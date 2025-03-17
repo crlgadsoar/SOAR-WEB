@@ -18,7 +18,7 @@ const Home = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5001/incidents")
+      .get("http://localhost:5002/incidents")
       .then((response) => {
         setMain(response.data);
       })

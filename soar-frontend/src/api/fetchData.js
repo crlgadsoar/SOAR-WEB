@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5001"; // Ensure backend is running
+const API_BASE_URL = "http://localhost:5002"
+// "; // Ensure backend is running
 
 export const fetchIncidents = async () => {
   try {
