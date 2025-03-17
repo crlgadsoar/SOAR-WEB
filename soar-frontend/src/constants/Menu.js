@@ -52,13 +52,13 @@ export const MENU_ITEMS = [
     menuType: MENU_TYPE.NAVIGATE,
     path: "routes/mitre",
   },
-  {
-    label: "Users",
-    key: LINK_STORE.USERS,
-    icon: <UserOutlined />,
-    menuType: MENU_TYPE.NAVIGATE,
-    path: "routes/user_management/config",
-  },
+  // {
+  //   label: "Users",
+  //   key: LINK_STORE.USERS,
+  //   icon: <UserOutlined />,
+  //   menuType: MENU_TYPE.NAVIGATE,
+  //   path: "routes/user_management/config",
+  // },
   //about is having modal and not a new page for navigation
   {
     label: "About",

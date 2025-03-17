@@ -211,7 +211,7 @@ const Playbooks = () => {
                   marginRight: "5px",
                 }}
               >
-                <Button
+                {/* <Button
                   type="default"
                   onClick={reset}
                   style={{
@@ -222,7 +222,7 @@ const Playbooks = () => {
                   className="openModal"
                 >
                   <ReloadOutlined />
-                </Button>
+                </Button> */}
               </div>
             </Tooltip>
             <Tooltip title={"Add"} color={colorPrimary}>

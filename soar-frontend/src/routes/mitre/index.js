@@ -89,7 +89,7 @@ const Mitre = () => {
                   marginRight: "5px",
                 }}
               >
-                <Button
+                {/* <Button
                   type="default"
                   onClick={reset}
                   style={{
@@ -100,7 +100,7 @@ const Mitre = () => {
                   className="openModal"
                 >
                   <ReloadOutlined />
-                </Button>
+                </Button> */}
               </div>
             </Tooltip>
           </Space>

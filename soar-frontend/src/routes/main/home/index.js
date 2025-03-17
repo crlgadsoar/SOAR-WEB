@@ -102,7 +102,7 @@ const Home = () => {
                   marginRight: "5px",
                 }}
               >
-                <Button
+                {/* <Button
                   type="default"
                   onClick={reset}
                   style={{
@@ -113,7 +113,7 @@ const Home = () => {
                   className="openModal"
                 >
                   <ReloadOutlined />
-                </Button>
+                </Button> */}
               </div>
             </Tooltip>
           </Space>
