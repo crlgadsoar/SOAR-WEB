@@ -22,6 +22,7 @@ const MainApp = () => {
   //console.log('language', language);
   const currentAppLocale = AppLocale[language];
   //console.log('currentAppLocale', currentAppLocale);
+    console.log("🔄 Token in Local Storage:", localStorage.getItem("token"));
 
   //UPDATE NAVIGATION TYPE TO REDUX
   useEffect(() => {

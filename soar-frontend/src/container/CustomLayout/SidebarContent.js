@@ -195,17 +195,19 @@ const SidebarContent = ({ backgroundColorSidebar }) => {
   /**
    * Handles the sign out functionality.
    */
-  const handleSignOut = async (e) => {
+  const handleSignOut = (e) => {
     e.preventDefault();
-    try {
-      await dispatch(signOut({ user_name: authUser.user_name })).unwrap();
-      await dispatch(setDisplayMode("LIGHT")).unwrap();
-      // message.success('Sign Out Successfully');
-    } catch (err) {
-      console.devLog(err);
-    }
+    console.log("Sign Out button clicked!"); // ✅ Debugging log
+  
+    // ✅ Clear authentication data
+    localStorage.removeItem("role");
+    localStorage.removeItem("authUser");
+  
+    // ✅ Redirect to login
+    navigate('/login');
+    window.location.reload(); // Ensures a fresh state
   };
-
+  
   /**
    * Generates the content for a profile section. The JSX element representing the profile section.
    */

@@ -9,18 +9,23 @@ const { Header } = Layout;
 const HeaderPage = () => {
   const navigate = useNavigate();
 
-  const handleSignOut = (e) => {
-    e.preventDefault();
-    console.log("Sign Out button clicked!"); // Debugging step
-
-    // ✅ Clear authentication data
+  const handleSignOut = () => {
+    console.log("Signing out..."); // Debugging step
+  
+    // ✅ Clear all authentication data
+    localStorage.removeItem("token"); // Ensure token is removed
     localStorage.removeItem("role");
     localStorage.removeItem("authUser");
-
-    // ✅ Redirect to login
-    navigate('/login');
-    window.location.reload(); // Ensures a fresh state
+  
+    // ✅ Redirect to login page
+    navigate("/login", { replace: true });
+  
+    // ✅ Optional: If state issues persist, force logout state
+    setTimeout(() => {
+      window.location.reload();
+    }, 100); // Short delay for smoother UX
   };
+  
 
   const profileContent = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -1,181 +1,104 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
-import {
-  App,
-  Form,
-  theme,
-  ConfigProvider,
-  Input,
-  Button,
-  // Button,
-  // Checkbox,
-} from "antd";
-import Loader from "components/Loader";
-import { signIn } from "../appRedux/reducers/Auth";
-import styles from "./SignIn.module.css";
-import backgroundVideo from "../assets/files/railway_bg.mp4";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Form, Input, Button, message } from "antd";
 
 const SignIn = () => {
-  //console.log(' window.innerWidth', window.innerWidth);
-  const { message } = App.useApp();
-  const {
-    token: { colorPrimaryHover },
-  } = theme.useToken();
-
-  const { authUser, loading } = useSelector((state) => state.auth);
-  const location = useLocation();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const fromLocation = location.state?.from?.pathname;
 
-  React.useEffect(() => {
-    console.devLog("SignIn  From Location is ", location.state?.from?.pathname);
-    console.devLog("Inside SignIn Form authUser", authUser);
-    if (authUser) {
-      navigate(fromLocation || "/main/home", {
-        state: { from: location },
-        replace: true,
-      });
+  // Check if user is already logged in
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/home");
     }
-    if (localStorage.getItem("token") && !fromLocation) {
-      navigate("/home", {
-        state: { from: location },
-        replace: true,
-      });
-    }
-  }, [authUser, location, navigate, fromLocation]);
+  }, [navigate]);
 
-  const handleSubmit = async (value) => {
-    //e.preventDefault();
-    try {
-      await dispatch(
-        signIn({
-          username: value.username,
-          password: value.password,
-          version: "V-1.5.6",
-        })
-      ).unwrap();
-      navigate(fromLocation, { replace: true });
-      //message.success('Login Successful');
-    } catch (signInError) {
-      message.error({
-        content: signInError.message,
-        key: "UI",
-        duration: 2,
-      });
+  // Handle login
+  const handleLogin = (values) => {
+    setLoading(true);
+
+    // Fake authentication logic
+    if (values.username === "admin" && values.password === "Admin@12345") {
+      localStorage.setItem("token", "fake-jwt-token"); // Store fake token
+      message.success("Login successful!");
+      navigate("/home");
+    } else {
+      message.error("Invalid username or password.");
     }
+
+    setLoading(false);
   };
 
-  const onFinish = (values) => {
-    console.devLog("onFinish:", values);
-    handleSubmit(values);
-  };
-
-  const onFinishFailed = (errorInfo) => {
-    console.devLog("Failed:", errorInfo);
-  };
-
-  if (localStorage.getItem("token")) {
-    return <Loader />;
-  }
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: theme.defaultAlgorithm,
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #667eea, #764ba2)",
       }}
     >
-      <video
-        id={styles["background-video"]}
-        autoPlay
-        loop
-        muted
-        disablePictureInPicture={true}
-      >
-        <source src={backgroundVideo} type="video/mp4" />
-        {"Sorry, your browser does not support videos"}
-      </video>
       <div
         style={{
-          backgroundColor: colorPrimaryHover,
-        }}
-      ></div>
-      <Form
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        className={styles["form"]}
-        initialValues={{ username: "admin_cikms", password: "Admin@12345" }}
-        style={{
-          height: " 480px",
-          width: " 400px",
-          backgroundColor: " rgba(255,255,255,0.13)",
-          position: "fixed",
-          transform: "translate(-50%,-50%)",
-          top: "50%",
-          left: "50%",
-          borderRadius: " 10px",
-          backdropFilter: " blur(10px)",
-          border: " 2px solid rgba(255,255,255,0.1)",
-          boxShadow: " 0 0 40px rgba(8,7,16,0.6)",
-          padding: " 50px 35px",
-          fontFamily: "Poppins,sans-serif",
-          letterSpacing: "0.5px",
-          outline: "none",
+          width: "350px",
+          padding: "30px",
+          background: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
+          borderRadius: "10px",
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          textAlign: "center",
         }}
       >
-        <div style={{ display: "flex", flexFlow: "column" }}>
-          <img
-            src={require("../assets/images/Bharat-Electronics.png")}
-            alt="bck_img"
-            draggable="false"
-            style={{
-              width: "200px",
-              height: "150px",
-              marginLeft: "85px",
-            }}
-          />
-
-          <div>
-            <h2
+        <h2 style={{ color: "#fff", marginBottom: "20px" }}>Sign In</h2>
+        <Form onFinish={handleLogin} layout="vertical">
+          <Form.Item
+            name="username"
+            rules={[{ required: true, message: "Please enter your username" }]}
+          >
+            <Input
+              placeholder="Username"
               style={{
-                color: "white",
-                textAlign: "center",
-                marginTop: "5px",
-                marginBottom: "15px",
-                fontWeight: "bold",
-                fontFamily: "NoirPro,sans-serif",
-                letterSpacing: "1px",
+                padding: "10px",
+                borderRadius: "5px",
+                border: "none",
               }}
-            >
-              {" "}
-              SPLUNK SOAR
-            </h2>
-          </div>
-        </div>
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="username"
-          rules={[{ required: true, message: "Username is Required" }]}
-        >
-          <Input placeholder="Username" />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[{ required: true, message: "Password is Required" }]}
-        >
-          <Input.Password placeholder="Password" />
-        </Form.Item>
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: "Please enter your password" }]}
+          >
+            <Input.Password
+              placeholder="Password"
+              style={{
+                padding: "10px",
+                borderRadius: "5px",
+                border: "none",
+              }}
+            />
+          </Form.Item>
 
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={loading === "pending"}
-          block
-        >
-          Sign In
-        </Button>
-      </Form>
-    </ConfigProvider>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            block
+            style={{
+              background: "#ff7eb3",
+              border: "none",
+              padding: "10px",
+              borderRadius: "5px",
+              fontSize: "16px",
+              fontWeight: "bold",
+            }}
+          >
+            Sign In
+          </Button>
+        </Form>
+      </div>
+    </div>
   );
 };
 

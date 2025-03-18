@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * A higher-order component that restricts access to certain routes based on the authentication status of the user.
@@ -13,7 +13,7 @@ const RestrictedRoute = ({ children }) => {
   let location = useLocation();
   let navigate = useNavigate();
   //console.devLog('RestrictedRoute From Location is ', location);
-  // const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
   React.useEffect(() => {
     if (!authUser) {
       navigate('/login', {
@@ -28,7 +28,7 @@ const RestrictedRoute = ({ children }) => {
     }
   }, [authUser, location, navigate]);
 
-  return children;
+  return authUser || token ? children : <Navigate to="/login" />;
 };
 
 export default RestrictedRoute;
