@@ -12,7 +12,7 @@ app.use(cors());
 // PostgreSQL Connection
 const pool = new Pool({
   user: "rajat",
-  host: "10.42.0.69",
+  host: "localhost",
   database: "soar_db",
   password: "crlgad@123",
   port: 5432,  // Keep this as 5432 (default for PostgreSQL)

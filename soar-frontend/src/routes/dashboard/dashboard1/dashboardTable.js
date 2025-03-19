@@ -67,8 +67,13 @@ const DashboardIncidentTable = () => {
     },
     { title: "Description", dataIndex: "description", key: "description" },
     { title: "Attack ID", dataIndex: "attack_id", key: "attack_id" },
-    { title: "Playbook ID", dataIndex: "playbookid", key: "playbookid" },
-   
+    {
+      title: "Playbook ID",
+      dataIndex: "playbookid",
+      key: "playbookid",
+      render: (playbookid) => playbookid ? playbookid : "No Playbook Assigned",
+    },
+       
     {
       title: "Status",
       dataIndex: "status",
