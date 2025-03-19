@@ -57,7 +57,7 @@ const DashboardIncidentTable = () => {
   }, []);
 
   const columns = [
-    { title: "Incident ID", dataIndex: "incidentid", key: "incidentid" },
+    { title: "Incident ID", dataIndex: "incidentid", key: "incidentid", fixed: "left" },
     { title: "Date Timestamp", dataIndex: "datetimestamp", key: "datetimestamp" },
     {
       title: "Incident Type",
@@ -73,7 +73,6 @@ const DashboardIncidentTable = () => {
       key: "playbookid",
       render: (playbookid) => playbookid ? playbookid : "No Playbook Assigned",
     },
-       
     {
       title: "Status",
       dataIndex: "status",
@@ -83,13 +82,28 @@ const DashboardIncidentTable = () => {
   ];
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      loading={loading}
-      rowKey="incidentid"
-      pagination={{ pageSize: 10 }}
-    />
+    <div style={{ textAlign: "center", marginTop: "30px" }}>
+      <h2
+        style={{
+          textAlign: "center",
+          fontSize: "22px",
+          fontWeight: "bold",
+          paddingBottom: "10px",
+        }}
+      >
+        Incident Overview
+      </h2>
+
+      <Table
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        rowKey="incidentid"
+        pagination={{ pageSize: 10 }}
+        scroll={{ x: "max-content", y: 400 }} // Enable scroll to freeze headers
+        bordered // Adds a border for clarity
+      />
+    </div>
   );
 };
 

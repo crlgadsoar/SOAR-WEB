@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import DoughnutChart from "components/CanvasJs/DoughnutChart";
 import DoughnutChart2 from "components/CanvasJs/DoughnutChart2";
 import { fetchIncidents } from "api/fetchData";
-import DashboardIncidentTable from "./dashboardTable"; // Import the incident table
+import DashboardIncidentTable from "./dashboardTable";
 import { incidentTypeMapping } from '../../../components/util/mapping';
 
 const Dashboard = () => {
@@ -37,25 +37,21 @@ const Dashboard = () => {
 
   // **Process Data**
   incidents.forEach((incident) => {
-    // **Count Severity**
     if (incident.severity) {
       const severity = incident.severity.toLowerCase().trim();
       severityCounts[severity] = (severityCounts[severity] || 0) + 1;
     }
     
-    // **Count Mitigated vs Not Mitigated**
-    const status = incident.status?.toLowerCase().trim(); // Normalize status
+    const status = incident.status?.toLowerCase().trim();
     if (status === "mitigated") {
       statusCounts.mitigated++;
     } else {
       statusCounts["not mitigated"]++;
     }
 
-    // **Map Incident Types**
     const eventType = incidentTypeMapping[incident.incidenttype] || `Unknown (${incident.incidenttype})`;
     eventCounts[eventType] = (eventCounts[eventType] || 0) + 1;
 
-    // **Count Incidents Per Day**
     const date = new Date(incident.datetimestamp).toLocaleDateString();
     weeklyCounts[date] = (weeklyCounts[date] || 0) + 1;
 
@@ -64,9 +60,8 @@ const Dashboard = () => {
     }
   });
 
-  // **Prevent Empty Graphs**
   if (statusCounts.mitigated === 0 && statusCounts["not mitigated"] === 0) {
-    statusCounts["not mitigated"] = 1; // Prevent empty graph issue
+    statusCounts["not mitigated"] = 1;
   }
 
   const resolvedPercentage = totalIncidents > 0 ? (resolvedCount / totalIncidents) * 100 : 0;
@@ -74,13 +69,13 @@ const Dashboard = () => {
   return (
     <div style={{ padding: "20px" }}>
       
-      {/* Professional Title */}
+      {/* Dashboard Title */}
       <h1
         style={{
           textAlign: "center",
           fontSize: "26px",
           fontWeight: "600",
-          background: "linear-gradient(90deg, #0F2027, #203A43, #2C5364)", // Professional dark blue gradient
+          background: "linear-gradient(90deg, #0F2027, #203A43, #2C5364)",
           color: "white",
           padding: "18px",
           borderRadius: "8px",
@@ -92,26 +87,31 @@ const Dashboard = () => {
         SOAR: Security Orchestration, Automation, and Response
       </h1>
 
+      {/* **First Row: Doughnut Charts + Liquid Fill Graph (Equal Height Cards)** */}
       <Row gutter={[16, 16]} style={{ marginTop: "20px" }}>
-        {/* **Severity Doughnut Chart** */}
-        <Col xs={24} md={12}>
-          <Card title="Severity" style={{ textAlign: "center" }}>
+        <Col xs={24} md={8}>
+          <Card title="Severity" style={{ textAlign: "center", height: "100%" }}>
             <DoughnutChart data={severityCounts} theme={displayMode === "DARK" ? "dark1" : ""} />
           </Card>
         </Col>
 
-        {/* **Status Doughnut Chart (Mitigated vs Not Mitigated)** */}
-        <Col xs={24} md={12}>
-          <Card title="Incident Status" style={{ textAlign: "center" }}>
+        <Col xs={24} md={8}>
+          <Card title="Incident Status" style={{ textAlign: "center", height: "100%" }}>
             <DoughnutChart2 data={statusCounts} theme={displayMode === "DARK" ? "dark1" : ""} />
+          </Card>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Card title="Events Closed" style={{ textAlign: "center", height: "100%" }}>
+            <LiquidFillGraph value={[resolvedPercentage]} title="Closed Events" theme={THEME_ENUM.LIGHT} />
           </Card>
         </Col>
       </Row>
 
+      {/* **Second Row: Bar Graph & Line Graph (Equal Height Cards)** */}
       <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
-        {/* **Top Events Bar Graph** */}
         <Col xs={24} md={12}>
-          <Card title="Top Events" style={{ textAlign: "center" }}>
+          <Card title="Top Events" style={{ textAlign: "center", height: "100%" }}>
             <BarGraph
               data={Object.values(eventCounts)}
               xAxisData={Object.keys(eventCounts)}
@@ -121,9 +121,8 @@ const Dashboard = () => {
           </Card>
         </Col>
 
-        {/* **Events This Week Line Graph** */}
         <Col xs={24} md={12}>
-          <Card title="Event Counts" style={{ textAlign: "center" }}>
+          <Card title="Event Counts" style={{ textAlign: "center", height: "100%" }}>
             <LineGraph
               data={Object.values(weeklyCounts)}
               xAxisData={Object.keys(weeklyCounts)}
@@ -134,18 +133,8 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* **Liquid Fill Graph for Resolved Incidents** */}
-      <Row style={{ marginTop: "16px" }}>
-        <Col span={24}>
-          <Card title="Events Closed" style={{ textAlign: "center" }}>
-            <LiquidFillGraph value={[resolvedPercentage]} title="Closed Events" theme={THEME_ENUM.LIGHT} />
-          </Card>
-        </Col>
-      </Row>
-
       {/* **Incident Table Overview** */}
-      <div>
-        <h2>Incident Overview</h2>
+      <div style={{ marginTop: "16px" }}>
         <DashboardIncidentTable incidents={incidents} />
       </div>
     </div>

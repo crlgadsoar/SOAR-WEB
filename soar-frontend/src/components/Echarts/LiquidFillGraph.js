@@ -4,11 +4,7 @@ import 'echarts-liquidfill';
 
 const LiquidFillGraph = ({ value, title, style, theme }) => {
   const options = {
-    toolbox: {
-      feature: {
-        saveAsImage: {},
-      },
-    },
+   
     series: [
       {
         type: 'liquidFill',

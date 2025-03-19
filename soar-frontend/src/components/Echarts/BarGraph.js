@@ -7,11 +7,7 @@ const BarGraph = ({ data, xAxisData, yAxisName, style, theme }) => {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
     },
-    toolbox: {
-      feature: {
-        saveAsImage: {},
-      },
-    },
+    
     xAxis: {
       type: 'category',
       data: xAxisData,
