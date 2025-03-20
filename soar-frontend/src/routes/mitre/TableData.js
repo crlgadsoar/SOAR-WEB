@@ -1,4 +1,5 @@
-const TableData = [
+import attack_map from "./attack_map";
+let TableData = [
   {
     key: "1",
     reconnaissance: "Active Scanning",
@@ -170,4 +171,29 @@ const TableData = [
     impact: "Inhibit System Recovery",
   },
 ];
+// Create a lookup dictionary for quick access to MITRE IDs
+const attackLookup = attack_map.reduce((acc, item) => {
+  acc[item.attack] = item.mitreid;
+  return acc;
+}, {});
+
+// Function to transform the TableData
+const transformTableData = (tableData) => {
+  return tableData.map((entry) => {
+    let newEntry = { key: entry.key };
+
+    Object.keys(entry).forEach((field) => {
+      if (field !== "key") {
+        newEntry[field] = {
+          name: entry[field],
+          attack_id: attackLookup[entry[field]] || "Unknown", // Assign "Unknown" if not found
+        };
+      }
+    });
+
+    return newEntry;
+  });
+};
+TableData = transformTableData(TableData);
+console.log("Table Data **************************************", TableData)
 export default TableData;
