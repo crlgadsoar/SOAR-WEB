@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table } from "antd";
+import { Table, Tag } from "antd";
 import axios from "axios";
 import { incidentTypeMapping } from "../../../components/util/mapping";
 
@@ -57,27 +57,61 @@ const DashboardIncidentTable = () => {
   }, []);
 
   const columns = [
-    { title: "Incident ID", dataIndex: "incidentid", key: "incidentid", fixed: "left" },
-    { title: "Date Timestamp", dataIndex: "datetimestamp", key: "datetimestamp" },
+    {
+      title: "Incident ID",
+      dataIndex: "incidentid",
+      key: "incidentid",
+      fixed: "left",
+      align: "center", // Center-align header & content
+    },
+    {
+      title: "Timestamp",
+      dataIndex: "datetimestamp",
+      key: "datetimestamp",
+      align: "center",
+    },
     {
       title: "Incident Type",
       dataIndex: "incidenttype",
       key: "incidenttype",
+      align: "center",
       render: (incidentType) => incidentTypeMapping[incidentType] || "Unknown",
     },
-    { title: "Description", dataIndex: "description", key: "description" },
-    { title: "Attack ID", dataIndex: "attack_id", key: "attack_id" },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      align: "center",
+    },
+    {
+      title: "Attack ID",
+      dataIndex: "attack_id",
+      key: "attack_id",
+      align: "center",
+    },
     {
       title: "Playbook ID",
       dataIndex: "playbookid",
       key: "playbookid",
-      render: (playbookid) => playbookid ? playbookid : "No Playbook Assigned",
+      align: "center",
+      render: (playbookid) => (playbookid ? playbookid : "No Playbook Assigned"),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => (status ? status : "Under Investigation"),
+      align: "center",
+      render: (status) => {
+        let color = "red"; // Default color
+        let text = "Under Investigation";
+
+        if (status && status.toLowerCase() === "mitigated") {
+          color = "green";
+          text = "Mitigated";
+        }
+
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
   ];
 

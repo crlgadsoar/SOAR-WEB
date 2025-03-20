@@ -1,50 +1,3 @@
-// import React from "react";
-// import CanvasJSReact from "./canvasjs.react";
-
-// // const CanvasJS = CanvasJSReact.CanvasJS;
-// const CanvasJSChart = CanvasJSReact.CanvasJSChart;
-
-// const DoughnutChart = ({ title = "", theme, exportEnable = "", style }) => {
-//   const containerProps = style;
-//   const options = {
-//     animationEnabled: true,
-//     theme: theme,
-//     exportEnabled: exportEnable,
-//     title: { text: title },
-//     // subtitles: [
-//     //   {
-//     //     text: "71% Positive",
-//     //     verticalAlign: "center",
-//     //     fontSize: 12,
-//     //     dockInsidePlotArea: true,
-//     //   },
-//     // ],
-//     data: [
-//       {
-//         type: "doughnut",
-//         // showInLegend: true,
-//         legendText: "{label}",
-//         toolTipContent: "{label}: <strong>{y}%</strong>",
-//         indexLabel: "{label}: {y}",
-//         // indexLabelPlacement: 'inside',
-//         dataPoints: [
-//           { label: "Critical", y: 10 },
-//           { label: "High", y: 20 },
-//           { label: "Medium", y: 30 },
-//           { label: "Low", y: 40 },
-//           // { label: "Neutral", y: 7 },
-//         ],
-//       },
-//     ],
-//   };
-//   return (
-//     <div>
-//       <CanvasJSChart options={options} containerProps={containerProps} />
-//     </div>
-//   );
-// };
-
-// export default DoughnutChart;
 import React from "react";
 import CanvasJSReact from "./canvasjs.react";
 
@@ -56,17 +9,26 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
     animationEnabled: true,
     theme: theme,
     exportEnabled: exportEnable,
+    legend: {
+      verticalAlign: "bottom", // ✅ Proper legend below chart
+      horizontalAlign: "center",
+      fontSize: 14,
+    },
     data: [
       {
         type: "doughnut",
         toolTipContent: "{label}: <strong>{y}</strong>",
-        indexLabel: "{label}: {y}",
+        indexLabel: "{label}: {y}", // ✅ Shows correct labels on chart
+        indexLabelPlacement: "outside",
+        indexLabelFontSize: 12,
+        showInLegend: true, // ✅ Enables legend
+        legendText: "{label}", // ✅ Ensures correct legend text
         dataPoints: [
-          { label: "Critical", y: data.critical || 0, color: "red" },  // ✅ FIXED
-          { label: "Info", y: data.info || 0, color: "blue" },          // ✅ FIXED
-          { label: "High", y: data.high || 0, color: "orange" },
-          { label: "Medium", y: data.medium || 0, color: "yellow" },
-          { label: "Low", y: data.low || 0, color: "green" },
+          { label: "Critical", y: data?.critical || 0, color: "red" },
+          { label: "Info", y: data?.info || 0, color: "blue" },
+          { label: "High", y: data?.high || 0, color: "orange" },
+          { label: "Medium", y: data?.medium || 0, color: "yellow" },
+          { label: "Low", y: data?.low || 0, color: "green" },
         ],
       },
     ],

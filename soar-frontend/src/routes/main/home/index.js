@@ -91,34 +91,39 @@ const Home = () => {
 
   return (
     <>
-      <Card
-        title="SIEM Input Data"
-        extra={
-          <Space>
-            <Tooltip title="Reset" color="blue">
-              <div
-                style={{
-                  float: "left",
-                  marginRight: "5px",
-                }}
-              >
-                {/* <Button
-                  type="default"
-                  onClick={reset}
-                  style={{
-                    borderColor: "#1677ff",
-                    background: displayMode === "LIGHT" ? "white" : "#1677ff",
-                    color: displayMode === "DARK" ? "white" : "#1677ff",
-                  }}
-                  className="openModal"
-                >
-                  <ReloadOutlined />
-                </Button> */}
-              </div>
-            </Tooltip>
-          </Space>
-        }
-      >
+     <Card
+  title={
+    <div style={{ textAlign: "center", width: "100%" }}>
+      <span style={{ fontWeight: "bold" }}>SIEM Input Data</span>
+    </div>
+  }
+  extra={
+    <Space>
+      <Tooltip title="Reset" color="blue">
+        <div
+          style={{
+            float: "left",
+            marginRight: "5px",
+          }}
+        >
+          {/* <Button
+            type="default"
+            onClick={reset}
+            style={{
+              borderColor: "#1677ff",
+              background: displayMode === "LIGHT" ? "white" : "#1677ff",
+              color: displayMode === "DARK" ? "white" : "#1677ff",
+            }}
+            className="openModal"
+          >
+            <ReloadOutlined />
+          </Button> */}
+        </div>
+      </Tooltip>
+    </Space>
+  }
+>
+
         <CrudTable
           openModalHandler={openModalHandler}
           ref={childRef}
