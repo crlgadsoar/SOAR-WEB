@@ -12,7 +12,9 @@ const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
       .get("http://localhost:5002/playbooks") // Backend API for playbooks
       .then((response) => {
         if (Array.isArray(response.data)) {
-          setData(response.data);
+          // Sorting data by playbook_id in ascending order
+          const sortedData = response.data.sort((a, b) => a.playbook_id - b.playbook_id);
+          setData(sortedData);
         } else {
           console.error("Error: API response is not an array", response.data);
         }
@@ -29,8 +31,18 @@ const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
   }, [data]);
 
   const columns = [
-    { title: "Playbook ID", dataIndex: "playbook_id", key: "playbook_id" },
-    { title: "Playbook Name", dataIndex: "playbook_name", key: "playbook_name" },
+    { 
+      title: "Playbook ID", 
+      dataIndex: "playbook_id", 
+      key: "playbook_id",
+      sorter: (a, b) => a.playbook_id - b.playbook_id, // Enables column sorting
+      defaultSortOrder: "ascend", // Default to ascending order
+    },
+    { 
+      title: "Playbook Name", 
+      dataIndex: "playbook_name", 
+      key: "playbook_name" 
+    },
     {
       title: "Action",
       key: "action",
