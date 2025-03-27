@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table } from "antd";
+import { Table, Tag, Modal, Input, Button } from "antd";
 import { incidentTypeMapping, sourceMapping, destinationMapping } from "../../../components/util/mapping";
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState("");
+  const [currentIncidentId, setCurrentIncidentId] = useState(null);
+  const [statusComment, setStatusComment] = useState(""); // New state for status comment
 
   useEffect(() => {
     axios
@@ -27,6 +31,32 @@ const IncidentTable = () => {
         setLoading(false);
       });
   }, []);
+
+  const handleStatusClick = (incidentId, status) => {
+    setCurrentIncidentId(incidentId);
+    setCurrentStatus(status);
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    axios
+      .post("http://localhost:5002/update_incident_status_comment", {
+        incidentid: currentIncidentId,
+        status_comment: statusComment, // Include status_comment in the API request
+      })
+      .then((response) => {
+        console.log("Status updated:", response.data);
+        setIsModalVisible(false);
+        // Optionally, refresh the data or update the specific row
+      })
+      .catch((error) => {
+        console.error("Error updating status:", error);
+      });
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
 
   const columns = [
     {
@@ -57,7 +87,7 @@ const IncidentTable = () => {
       key: "description",
       width: 250,
       align: "center",
-      ellipsis: false, // ❌ DISABLES TRUNCATION
+      ellipsis: false,
     },
     {
       title: "Attack ID",
@@ -98,34 +128,75 @@ const IncidentTable = () => {
         typeof eventIdList === "string" && eventIdList.trim() ? eventIdList : "N/A",
     },
     {
-      title: "Source",
-      dataIndex: "source",
-      key: "source",
-      width: 120,
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       align: "center",
-      render: (source) => sourceMapping[source] || "Unknown",
-    },
-    {
-      title: "Destination",
-      dataIndex: "destination",
-      key: "destination",
-      width: 120,
-      align: "center",
-      render: (destination) => destinationMapping[destination] || "Unknown",
+      render: (status, record) => {
+        let color = "red"; // Default color
+        let text = "Under Investigation";
+
+        if (status && status.toLowerCase() === "mitigated") {
+          color = "green";
+          text = "Mitigated";
+        }
+
+        if (status && status.toLowerCase() === "manually mitigated") {
+          color = "blue";
+          text = "Manually Mitigated";
+        }
+
+        return (
+          <Tag
+            color={color}
+            onClick={() => text === "Under Investigation" && handleStatusClick(record.incidentid, status)}
+            style={{ cursor: text === "Under Investigation" ? "pointer" : "default" }}
+          >
+            {text}
+          </Tag>
+        );
+      },
     },
   ];
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      loading={loading}
-      rowKey="incidentid"
-      pagination={{ pageSize: 10 }}
-      scroll={{ x: "max-content", y: 900 }} // ✅ Enables scrolling without cutting text
-      sticky // ✅ Keeps headers fixed
-      bordered // ✅ Adds borders
-    />
+    <div style={{ textAlign: "center", marginTop: "30px" }}>
+      <h2
+        style={{
+          textAlign: "center",
+          fontSize: "22px",
+          fontWeight: "bold",
+          paddingBottom: "10px",
+        }}
+      >
+        Incident Overview
+      </h2>
+
+      <Table
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        rowKey="incidentid"
+        pagination={{ pageSize: 10 }}
+        scroll={{ x: "max-content", y: 900 }} // ✅ Enables scrolling without cutting text
+        sticky // ✅ Keeps headers fixed
+        bordered // ✅ Adds borders
+      />
+
+      <Modal
+        title="Update Status"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <Input
+          value={statusComment}
+          onChange={(e) => setStatusComment(e.target.value)}
+          placeholder="Enter status comment"
+          style={{ marginTop: "10px" }}
+        />
+      </Modal>
+    </div>
   );
 };
 
