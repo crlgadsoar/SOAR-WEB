@@ -125,7 +125,7 @@ const DashboardIncidentTable = () => {
           paddingBottom: "10px",
         }}
       >
-        Incident Overview
+        Mitigated Incidents
       </h2>
 
       <Table
