@@ -5,11 +5,13 @@ import { incidentTypeMapping, sourceMapping, destinationMapping } from "../../..
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); // State for filtered data
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentStatus, setCurrentStatus] = useState("");
   const [currentIncidentId, setCurrentIncidentId] = useState(null);
   const [statusComment, setStatusComment] = useState(""); // New state for status comment
+  const [searchText, setSearchText] = useState(""); // State for search input
 
   useEffect(() => {
     axios
@@ -21,6 +23,7 @@ const IncidentTable = () => {
             (a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp)
           );
           setData(sortedData);
+          setFilteredData(sortedData); // Initialize filtered data
         } else {
           console.error("Error: API response is not an array", response.data);
         }
@@ -31,6 +34,15 @@ const IncidentTable = () => {
         setLoading(false);
       });
   }, []);
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+    const filtered = data.filter((item) =>
+      item.incidentid.toString().toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredData(filtered);
+  };
 
   const handleStatusClick = (incidentId, status) => {
     setCurrentIncidentId(incidentId);
@@ -172,9 +184,17 @@ const IncidentTable = () => {
         Incident Overview
       </h2>
 
+      {/* Search Input */}
+      <Input
+        placeholder="Search by Incident ID"
+        value={searchText}
+        onChange={handleSearch}
+        style={{ marginBottom: "20px", width: "300px" }}
+      />
+
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData} // Use filtered data for the table
         loading={loading}
         rowKey="incidentid"
         pagination={{ pageSize: 10 }}
