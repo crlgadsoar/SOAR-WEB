@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   // **Initialize Counters**
   const severityCounts = { info: 0, critical: 0, low: 0, medium: 0, high: 0 };
-  const statusCounts = { mitigated: 0, "not mitigated": 0 };
+  const statusCounts = { mitigated: 0, "not mitigated": 0, "mitigated_manually" : 0};
   const eventCounts = {};
   const weeklyCounts = {};
   let resolvedCount = 0;
@@ -45,7 +45,9 @@ const Dashboard = () => {
     const status = incident.status?.toLowerCase().trim();
     if (status === "mitigated") {
       statusCounts.mitigated++;
-    } else {
+    } else if (status === "mitigated manually") {
+      statusCounts["mitigated_manually"]++;
+    }else {
       statusCounts["not mitigated"]++;
     }
 

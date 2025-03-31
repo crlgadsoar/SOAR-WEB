@@ -3,6 +3,7 @@ import { CopyrightCircleTwoTone } from '@ant-design/icons';
 import { Layout } from 'antd';
 import style from './index.module.css';
 import { useSelector } from 'react-redux';
+import ChatBot from "../../components/ChatBot/ChatBot";
 const { Footer } = Layout;
 /**
  * Renders the footer component for the page.
@@ -22,6 +23,7 @@ const FooterPage = () => {
     >
       CRL Copyright <CopyrightCircleTwoTone /> Reserved (Bharat Electronics
       Limited,Sahibabad)
+      <ChatBot />
     </Footer>
   );
 };
