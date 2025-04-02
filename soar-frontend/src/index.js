@@ -5,6 +5,7 @@ import MainApp from "./container/MainApp";
 import reportWebVitals from "./reportWebVitals";
 import { store } from "./appRedux/store";
 import { Provider } from "react-redux";
+import "bootstrap/dist/css/bootstrap.min.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 window.console.devLog = (...args) => {
   return process.env.NODE_ENV === "development"
