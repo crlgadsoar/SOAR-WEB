@@ -16,21 +16,32 @@ const IncidentTable = () => {
   const [viewComment, setViewComment] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:5002/incidents")
-      .then(response => {
-        if (Array.isArray(response.data)) {
-          const sortedData = response.data.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
-          setData(sortedData);
-          setFilteredData(sortedData);
-        } else {
-          console.error("Error: API response is not an array", response.data);
-        }
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      });
+    const fetchData = () => {
+      axios.get("http://localhost:5002/incidents")
+        .then(response => {
+          if (Array.isArray(response.data)) {
+            const sortedData = response.data.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
+            setData(sortedData);
+            setFilteredData(sortedData);
+          } else {
+            console.error("Error: API response is not an array", response.data);
+          }
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          setLoading(false);
+        });
+    };
+
+    // Fetch data initially
+    fetchData();
+
+    // Set up interval to refresh data every 5 seconds
+    const intervalId = setInterval(fetchData, 5000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleSearch = (e) => {
@@ -64,14 +75,12 @@ const IncidentTable = () => {
   function getAttackByMitreID(mitreid) {
     const entry = attack_map.find(item => item.mitreid === mitreid);
     return entry ? entry.attack : null;
-}
+  }
 
   const columns = [
-    { title: "Incident ID", dataIndex: "incidentid", key: "incidentid", align: "center" },{ title: "Timestamp", dataIndex: "datetimestamp", key: "datetimestamp", align: "center" },
-    
-    // { title: "Incident Type", width: 150, dataIndex: "incidenttype", key: "incidenttype", align: "center", render: (type) => incidentTypeMapping[type] || "Unknown" },
-      { title: "Attack Type", width: 150, dataIndex: "attack_id", key: "attack_id", align: "center", render: (type) => getAttackByMitreID(type) || "Unknown" },
-
+    { title: "Incident ID", dataIndex: "incidentid", key: "incidentid", align: "center" },
+    { title: "Timestamp", dataIndex: "datetimestamp", key: "datetimestamp", align: "center" },
+    { title: "Attack Type", width: 150, dataIndex: "attack_id", key: "attack_id", align: "center", render: (type) => getAttackByMitreID(type) || "Unknown" },
     { title: "Description", dataIndex: "description", key: "description", align: "center" },
     { title: "Attack ID", dataIndex: "attack_id", key: "attack_id", align: "center" },
     {
@@ -109,16 +118,13 @@ const IncidentTable = () => {
         } else if (record.attack_id.startsWith("T1217")) {
           color = "green";
           text = "Mitigated && Login IP Blocked";
-        }
-          else if (record.attack_id.startsWith("T1070", 0)){
-            color = "green";
-            text = "Mitigated && Web IP Blocked";
-        }
-          else if (record.attack_id.startsWith("T1055.008",0)){
-            color = "green";
-            text = "Mitigated && IP Blocked";
-          }
-          else if (status?.toLowerCase() === "mitigated") {
+        } else if (record.attack_id.startsWith("T1070", 0)) {
+          color = "green";
+          text = "Mitigated && Web IP Blocked";
+        } else if (record.attack_id.startsWith("T1055.008", 0)) {
+          color = "green";
+          text = "Mitigated && IP Blocked";
+        } else if (status?.toLowerCase() === "mitigated") {
           color = "green";
           text = "Mitigated";
         } else if (status?.toLowerCase() === "manually mitigated") {
