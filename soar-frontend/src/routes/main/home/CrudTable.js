@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Table, Tag, Modal, Input } from "antd";
+import { Table, Tag, Modal, Input, notification } from "antd";
 import { incidentTypeMapping } from "../../../components/util/mapping";
 import attack_map from "routes/mitre/attack_map";
 
@@ -15,12 +15,29 @@ const IncidentTable = () => {
   const [viewCommentModalVisible, setViewCommentModalVisible] = useState(false);
   const [viewComment, setViewComment] = useState("");
 
+  const previousDataRef = useRef([]); // To store the previous data
+
   useEffect(() => {
     const fetchData = () => {
       axios.get("http://localhost:5002/incidents")
         .then(response => {
           if (Array.isArray(response.data)) {
             const sortedData = response.data.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
+            
+            // Compare with previous data to detect new entries
+            const previousData = previousDataRef.current;
+            if (previousData.length > 0 && sortedData.length > previousData.length) {
+              const newEntries = sortedData.slice(0, sortedData.length - previousData.length);
+              newEntries.forEach(entry => {
+                notification.info({
+                  message: "New Incident Added",
+                  description: `Incident ID: ${entry.incidentid} has been added.`,
+                  placement: "topRight",
+                });
+              });
+            }
+
+            previousDataRef.current = sortedData; // Update the previous data reference
             setData(sortedData);
             setFilteredData(sortedData);
           } else {
