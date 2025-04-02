@@ -27,7 +27,7 @@ const SignIn = () => {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         message.success("Login successful!");
-        navigate("/home");
+        navigate("/dashboard");
       } else {
         message.error(data.message || "Invalid credentials");
       }
