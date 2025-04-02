@@ -22,14 +22,18 @@ const Dashboard = () => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 5000); // Refresh every 5 seconds
-
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
   // **Initialize Counters**
   const severityCounts = { info: 0, critical: 0, low: 0, medium: 0, high: 0 };
-  const statusCounts = { mitigated: 0, "not mitigated": 0, "mitigated_manually" : 0};
+  const statusCounts = { 
+    mitigated: 0, 
+    "not mitigated": 0, 
+    "mitigated_manually": 0, 
+    "under investigation": 0 
+  };
   const eventCounts = {};
   const weeklyCounts = {};
   let resolvedCount = 0;
@@ -45,9 +49,11 @@ const Dashboard = () => {
     const status = incident.status?.toLowerCase().trim();
     if (status === "mitigated") {
       statusCounts.mitigated++;
-    } else if (status === "mitigated manually") {
+    } else if (status === "manually mitigated") {
       statusCounts["mitigated_manually"]++;
-    }else {
+    } else if (status.includes("investigation")) {
+      statusCounts["under investigation"]++;
+    } else {
       statusCounts["not mitigated"]++;
     }
 
@@ -70,8 +76,6 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      
-      {/* Dashboard Title */}
       <h1
         style={{
           textAlign: "center",
@@ -89,7 +93,6 @@ const Dashboard = () => {
         SOAR: Security Orchestration, Automation, and Response
       </h1>
 
-      {/* **First Row: Doughnut Charts + Liquid Fill Graph (Equal Height Cards)** */}
       <Row gutter={[16, 16]} style={{ marginTop: "20px" }}>
         <Col xs={24} md={8}>
           <Card title="Severity" style={{ textAlign: "center", height: "100%" }}>
@@ -110,7 +113,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* **Second Row: Bar Graph & Line Graph (Equal Height Cards)** */}
       <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
         <Col xs={24} md={12}>
           <Card title="Top Events" style={{ textAlign: "center", height: "100%" }}>
@@ -135,7 +137,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* **Incident Table Overview** */}
       <div style={{ marginTop: "16px" }}>
         <DashboardIncidentTable incidents={incidents} />
       </div>
