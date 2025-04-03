@@ -31,41 +31,7 @@ const Mitre = () => {
   };
 
   const modalComponentRender = () => {
-    switch (modalComponent) {
-      case "ADD":
-        return (
-          <InputForm
-            title="Add Playbook"
-            visible={modalVisible}
-            buttonSpin={buttonSpin}
-            onSubmit={onSubmit}
-            onCancel={() => {
-              setModalVisible(false);
-              setModalComponent(null);
-            }}
-            type="ADD"
-          />
-        );
-
-      case "EDIT":
-        return (
-          <InputForm
-            title={"Edit Playbook details"}
-            visible={modalVisible}
-            buttonSpin={buttonSpin}
-            onSubmit={onSubmit}
-            onCancel={() => {
-              setModalVisible(false);
-              setModalComponent(null);
-            }}
-            staffId={data.staffId}
-            type="EDIT"
-            initialValues={{ ...rowDetail }}
-          />
-        );
-      default:
-        return null;
-    }
+   
   };
 
   const {

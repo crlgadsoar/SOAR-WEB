@@ -1,0 +1,35 @@
+/* Make all columns the same width */
+.ant-table-thead th,
+.ant-table-tbody td {
+  width: 10%; /* Adjust as needed */
+  text-align: center;
+}
+
+/* Make sure the background fills the entire cell */
+.table-cell-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Ensure text fits well with a smaller font */
+.table-cell {
+  width: 100%;
+  height: 100%;
+  font-weight: bold;
+  font-size: 12px; /* Adjusted smaller font */
+  padding: 4px; /* Reduced padding */
+  border-radius: 6px;
+  text-align: center;
+  box-sizing: border-box;
+  color: white;
+}
+
+/* Optional: Fix row height */
+.custom-row td {
+  height: 50px !important;
+  padding: 0 !important;
+}

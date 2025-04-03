@@ -3,6 +3,8 @@ import axios from "axios";
 import { Table, Tag, Modal, Input } from "antd";
 import { incidentTypeMapping } from "../../../components/util/mapping";
 import attack_map from "routes/mitre/attack_map";
+import { useLocation } from "react-router-dom";
+import "./IncidentTable.css";
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
@@ -14,6 +16,8 @@ const IncidentTable = () => {
   const [searchText, setSearchText] = useState("");
   const [viewCommentModalVisible, setViewCommentModalVisible] = useState(false);
   const [viewComment, setViewComment] = useState("");
+
+  
 
   useEffect(() => {
     axios.get("http://localhost:5002/incidents")
@@ -162,7 +166,9 @@ const IncidentTable = () => {
         scroll={{ x: "max-content", y: 900 }}
         sticky
         bordered
+        rowClassName={() => "default-row"} // No row color change on click
       />
+
       <Modal title="Update Status" visible={isModalVisible} onOk={handleOk} onCancel={() => setIsModalVisible(false)}>
         <Input value={statusComment} onChange={(e) => setStatusComment(e.target.value)} placeholder="Enter status comment" style={{ marginTop: "10px" }} />
       </Modal>
@@ -173,4 +179,4 @@ const IncidentTable = () => {
   );
 };
 
-export default IncidentTable;
+export default IncidentTable;  
