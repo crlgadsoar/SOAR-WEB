@@ -5,9 +5,6 @@ import { useSelector } from "react-redux";
 import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-// Configure axios to include cookies in all requests
-axios.defaults.withCredentials = true;
-
 const Home = () => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalComponent, setModalComponent] = React.useState(null);
@@ -24,6 +21,8 @@ const Home = () => {
       .get("http://localhost:5002/incidents")
       .then((response) => {
         setMain(response.data);
+        console.log("Response Headers:", response.headers);
+        console.log("Response Cookies:", document.cookie); // ✅ Display cookies
       })
       .catch((error) => {
         console.log(error);
