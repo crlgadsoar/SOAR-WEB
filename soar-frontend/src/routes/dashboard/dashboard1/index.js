@@ -51,7 +51,7 @@ const Dashboard = () => {
       statusCounts.mitigated++;
     } else if (status === "manually mitigated") {
       statusCounts["mitigated_manually"]++;
-    } else if (status.includes("investigation")) {
+    } else if (status ==="under investigation") {
       statusCounts["under investigation"]++;
     } else {
       statusCounts["not mitigated"]++;
