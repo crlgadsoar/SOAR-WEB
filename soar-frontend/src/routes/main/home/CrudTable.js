@@ -5,6 +5,8 @@ import { incidentTypeMapping } from "../../../components/util/mapping";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
 import "./IncidentTable.css";
+import { BellOutlined } from "@ant-design/icons";
+
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
@@ -91,13 +93,49 @@ const IncidentTable = () => {
     });
   };
 
+  const handleIncidentClick = (incidentid) => {
+    axios.post("http://localhost:5002/incidents/mark_old", { incidentid })
+      .then(() => {
+        setData(prevData =>
+          prevData.map(item =>
+            item.incidentid === incidentid ? { ...item, isnew: false } : item
+          )
+        );
+        setFilteredData(prevData =>
+          prevData.map(item =>
+            item.incidentid === incidentid ? { ...item, isnew: false } : item
+          )
+        );
+      })
+      .catch(error => {
+        console.error("Error updating isnew status:", error);
+      });
+  };  
+
   function getAttackByMitreID(mitreid) {
     const entry = attack_map.find(item => item.mitreid === mitreid);
     return entry ? entry.attack : null;
   }
 
   const columns = [
-    { title: "Incident ID", dataIndex: "incidentid", key: "incidentid", align: "center" },
+    {
+      title: "Incident ID",
+      dataIndex: "incidentid",
+      key: "incidentid",
+      align: "center",
+      render: (incidentid, record) => (
+        <div
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          onClick={() => handleIncidentClick(incidentid)}
+        >
+          {incidentid}
+          {record.isnew && (
+            <BellOutlined style={{ color: "red", marginLeft: 8 }} />
+          )}
+        </div>
+      ),
+    },
+    
     { title: "Timestamp", dataIndex: "datetimestamp", key: "datetimestamp", align: "center" },
     { title: "Attack Type", width: 150, dataIndex: "attack_id", key: "attack_id", align: "center", render: (type) => getAttackByMitreID(type) || "Unknown" },
     { title: "Description", dataIndex: "description", key: "description", align: "center" },
@@ -187,8 +225,12 @@ const IncidentTable = () => {
         scroll={{ x: "max-content", y: 900 }}
         sticky
         bordered
-        rowClassName={() => "default-row"} // No row color change on click
+        rowClassName={() => "default-row"}
+        onRow={(record) => ({
+          onClick: () => handleIncidentClick(record.incidentid), // Mark the incident as "old" when the row is clicked
+        })}
       />
+
 
       <Modal title="Update Status" visible={isModalVisible} onOk={handleOk} onCancel={() => setIsModalVisible(false)}>
         <Input value={statusComment} onChange={(e) => setStatusComment(e.target.value)} placeholder="Enter status comment" style={{ marginTop: "10px" }} />
@@ -201,3 +243,5 @@ const IncidentTable = () => {
 };
 
 export default IncidentTable;  
+
+
