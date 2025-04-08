@@ -5,6 +5,9 @@ import { BellOutlined } from "@ant-design/icons";
 import { incidentTypeMapping } from "../../../components/util/mapping";
 import attack_map from "routes/mitre/attack_map";
 import "./IncidentTable.css";
+import { Steps } from "antd";
+const { Step } = Steps;
+
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
@@ -16,6 +19,9 @@ const IncidentTable = () => {
   const [searchText, setSearchText] = useState("");
   const [viewCommentModalVisible, setViewCommentModalVisible] = useState(false);
   const [viewComment, setViewComment] = useState("");
+  const [flowModalVisible, setFlowModalVisible] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState(null);
+
 
   const previousDataRef = useRef([]);
 
@@ -271,9 +277,80 @@ const IncidentTable = () => {
         bordered
         rowClassName={() => "default-row"}
         onRow={(record) => ({
-          onClick: () => handleIncidentClick(record.incidentid),
+          onClick: () => {
+            handleIncidentClick(record.incidentid); // Keep this to mark isnew
+            setSelectedIncident(record);
+            setFlowModalVisible(true);
+          },
         })}
+         
       />
+      <Modal
+  visible={flowModalVisible}
+  onCancel={() => setFlowModalVisible(false)}
+  footer={null}
+>
+
+
+
+{selectedIncident && (
+  <div style={{ padding: '20px', textAlign: 'center' }}>
+    <h2 style={{ textTransform: 'uppercase', marginBottom: '20px' }}>
+      Incident Flow
+    </h2>
+
+    <Steps
+      direction="vertical"
+      current={2}
+      style={{ margin: '0 auto', maxWidth: '600px' }}
+    >
+      <Step
+        title={<span style={{ fontSize: '18px' }}>Incident Detected</span>}
+        description={<span style={{ fontSize: '16px' }}>{`ID: ${selectedIncident.incidentid}`}</span>}
+      />
+
+      <Step
+        title={<span style={{ fontSize: '18px' }}>Playbook Triggered</span>}
+        description={<span style={{ fontSize: '16px' }}>{`Playbook ID: ${selectedIncident.playbookid || 'N/A'}`}</span>}
+      />
+
+      <Step
+        title={<span style={{ fontSize: '18px' }}>Output</span>}
+        description={
+          <span
+            style={{
+              fontSize: '16px',
+              color: (() => {
+                const output =
+                  selectedIncident.attack_id?.startsWith("T1499") ||
+                  selectedIncident.attack_id?.startsWith("T1217") ||
+                  selectedIncident.attack_id?.startsWith("T1070") ||
+                  selectedIncident.attack_id?.startsWith("T1055.008");
+
+                return output ? 'green' : 'firebrick';
+              })(),
+              fontWeight: 'bold',
+            }}
+          >
+            {selectedIncident.attack_id?.startsWith("T1499")
+              ? "Network IP Blocked"
+              : selectedIncident.attack_id?.startsWith("T1217")
+              ? "Login IP Blocked"
+              : selectedIncident.attack_id?.startsWith("T1070")
+              ? "Web IP Blocked"
+              : selectedIncident.attack_id?.startsWith("T1055.008")
+              ? "IP Blocked"
+              : selectedIncident.status || "Under Investigation"}
+          </span>
+        }
+      />
+    </Steps>
+  </div>
+)}
+
+ 
+  
+</Modal>
 
       <Modal
         title="Update Status"
