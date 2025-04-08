@@ -88,6 +88,26 @@ const IncidentTable = () => {
       setIsModalVisible(false);
     }).catch(error => {
       console.error("Error updating status:", error);
+
+  const handleIncidentClick = (incidentid) => {
+    axios.post("http://localhost:5002/incidents/mark_old", { incidentid })
+      .then(() => {
+        setData(prevData =>
+          prevData.map(item =>
+            item.incidentid === incidentid ? { ...item, isnew: false } : item
+          )
+        );
+        setFilteredData(prevData =>
+          prevData.map(item =>
+            item.incidentid === incidentid ? { ...item, isnew: false } : item
+          )
+        );
+      })
+      .catch(error => {
+        console.error("Error updating isnew status:", error);
+      });
+  };  
+
     });
   };
 
@@ -144,6 +164,17 @@ const IncidentTable = () => {
       dataIndex: "incidentid",
       key: "incidentid",
       align: "center",
+      render: (incidentid, record) => (
+        <div
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          onClick={() => handleIncidentClick(incidentid)}
+        >
+          {incidentid}
+          {record.isnew && (
+            <BellOutlined style={{ color: "red", marginLeft: 8 }} />
+          )}
+        </div>
+      ),
     },
     {
       title: "Timestamp",
