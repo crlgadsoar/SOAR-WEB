@@ -7,6 +7,7 @@ import {
   UserOutlined,
   DatabaseOutlined,
   MinusCircleOutlined,
+  ApiOutlined
 } from "@ant-design/icons";
 import { LINK_STORE } from "./Link";
 //import IntlMessages from 'util/IntlMessages';
@@ -60,6 +61,13 @@ export const MENU_ITEMS = [
   //   path: "routes/user_management/config",
   // },
   //about is having modal and not a new page for navigation
+  {
+    label: "Integrations",
+    key: LINK_STORE.INTEGRATIONS,
+    icon: <ApiOutlined />,
+    menuType: MENU_TYPE.NAVIGATE,
+    path: "routes/integrations",
+  },
   {
     label: "About",
     key: LINK_STORE.ABOUT,

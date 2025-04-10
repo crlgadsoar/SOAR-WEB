@@ -1,0 +1,21 @@
+.integrations-container {
+    padding: 20px;
+}
+
+.integrations-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.integration-card {
+    height: 300px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.integration-logo {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+}

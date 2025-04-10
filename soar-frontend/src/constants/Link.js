@@ -7,4 +7,5 @@ export const LINK_STORE = {
   USERS: "user_management/config",
   PROFILE: "/user_management/profile",
   CHANGE_PASSWORD_USER_MANAGEMENT: "/user_management/change_password",
+  INTEGRATIONS: "/integrations",
 };

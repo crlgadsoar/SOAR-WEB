@@ -11,6 +11,7 @@ import Playbooks from "routes/playbooks";
 import Users from "routes/user_management/config";
 import Mitre from "routes/mitre";
 import Login from "routes/auth/Login";  // Import the Login page
+import Integrations from "routes/integrations";
 
 
 const Home = React.lazy(() => import("routes/main/home"));
@@ -19,6 +20,8 @@ const Profile = React.lazy(() => import("routes/user_management/profile"));
 const Configuration = React.lazy(() => import("routes/playbooks"));
 const Dashboard1 = React.lazy(() => import("routes/dashboard/dashboard1"));
 const Dashboard5 = React.lazy(() => import("routes/dashboard/dashboard5"));
+const Dashboard6 = React.lazy(() => import("routes/main/home"));
+
 
 /**
  * Renders the project router component, which sets up the routing configuration for the application.
@@ -65,6 +68,10 @@ const ProjectRouter = () => {
         {
           path: LINK_STORE.DASHBOARD5,
           element: <Dashboard5 />,
+        },
+        {
+          path: LINK_STORE.INTEGRATIONS,
+          element: <Integrations />,
         },
       ],
     },
