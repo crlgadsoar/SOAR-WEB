@@ -15,7 +15,9 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
     setShowModal(true);
 
     axios
-      .get(`http://localhost:5002/incidents/status?status=${encodeURIComponent(status)}`)
+      .get(`http://localhost:5002/incidents/status?status=${encodeURIComponent(status)}`, {
+        withCredentials: true, // Ensures cookies are sent
+      })
       .then((response) => {
         setIncidents(response.data);
       })

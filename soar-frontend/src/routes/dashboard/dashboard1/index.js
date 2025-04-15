@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import DoughnutChart from "components/CanvasJs/DoughnutChart";
 import DoughnutChart2 from "components/CanvasJs/DoughnutChart2";
-import { fetchIncidents } from "api/fetchData";
+import { fetchIncidents } from "api/api";
 import DashboardIncidentTable from "./dashboardTable";
 import { incidentTypeMapping } from '../../../components/util/mapping';
 

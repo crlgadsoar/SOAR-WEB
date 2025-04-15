@@ -8,7 +8,9 @@ const IncidentTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5002/incidents")
+      .get("http://localhost:5002/incidents", {
+        withCredentials: true, // Ensures cookies are sent
+      })
       .then((response) => {
         if (Array.isArray(response.data)) {
           setData(response.data);
