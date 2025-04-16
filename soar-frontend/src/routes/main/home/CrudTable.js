@@ -428,9 +428,10 @@ const columns = [
     Manually Mitigate
   </Button>
 
-  <Button type="primary" onClick={() => handleAIMitigation(currentIncidentId)}>
-    Mitigate using AI
+  <Button className="generate-button" onClick={() => handleAIMitigation(currentIncidentId)}>
+  <span>Mitigate using AI ✨</span>
   </Button>
+
 </div>
 
   {predictedActions[currentIncidentId] && (
