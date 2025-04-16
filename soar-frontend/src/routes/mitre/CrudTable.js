@@ -3,6 +3,7 @@ import { Table } from "antd";
 import axios from "axios";
 import TableData from "./TableData";
 import "./CrudTable.css";
+import { fetchAttackCount } from "api/api";
 
 const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
   const [data, setData] = useState([]);
@@ -10,16 +11,6 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
   const [attackCounts, setAttackCounts] = useState({});
   const isComponentMounted = useRef(true);
   const [tableKey, setTableKey] = useState(0);
-
-  const fetchAttackCount = async (attackId) => {
-    try {
-      const response = await axios.get(`http://localhost:5002/attack_id_count?attack_id=${attackId}`);
-      return response.data.count;
-    } catch (error) {
-      console.error(`Error fetching count for ${attackId}:`, error);
-      return null;
-    }
-  };
 
   const getData = useCallback(async () => {
     setLoading(true);

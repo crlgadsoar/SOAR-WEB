@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
-import { fetchIncidents } from "api/api";
+import { fetchIncidents, updateIncidentStatusComment } from "api/api";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
 import { BellOutlined } from "@ant-design/icons";
@@ -104,10 +104,7 @@ const IncidentTable = () => {
   };
 
   const handleOk = () => {
-    axios.post("http://localhost:5002/update_incident_status_comment", {
-      incidentid: currentIncidentId,
-      status_comment: statusComment,
-    }).then(() => {
+    updateIncidentStatusComment(currentIncidentId, statusComment).then(() => {
       setIsModalVisible(false);
     }).catch(error => {
       console.error("Error updating status:", error);
