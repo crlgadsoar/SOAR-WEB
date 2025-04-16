@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Table, Tag, Modal, Input, notification } from "antd";
-import { BellOutlined } from "@ant-design/icons";
+import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
 import { fetchIncidents } from "api/api";
 import attack_map from "routes/mitre/attack_map";
+import { useLocation } from "react-router-dom";
+import { BellOutlined } from "@ant-design/icons";
 import "./IncidentTable.css";
 import { Steps } from "antd";
 const { Step } = Steps;
@@ -20,9 +21,10 @@ const IncidentTable = () => {
   const [searchText, setSearchText] = useState("");
   const [viewCommentModalVisible, setViewCommentModalVisible] = useState(false);
   const [viewComment, setViewComment] = useState("");
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [predictedActions, setPredictedActions] = useState({});
   const [flowModalVisible, setFlowModalVisible] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState(null);
-
 
   const previousDataRef = useRef([]);
 
@@ -65,15 +67,35 @@ const IncidentTable = () => {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchText(value);
-    const filtered = data.filter(item =>
-      item.incidentid.toString().toLowerCase().includes(value.toLowerCase())
-    );
+    const filtered = data.filter(item => item.incidentid.toString().toLowerCase().includes(value.toLowerCase()));
     setFilteredData(filtered);
   };
 
   const handleStatusClick = (incidentId) => {
     setCurrentIncidentId(incidentId);
-    setIsModalVisible(true);
+    setActionModalVisible(true);
+  };
+  
+  const handleAIMitigation = async (incidentid) => {
+    try {
+      const res = await fetch("http://localhost:5002/mitigate_using_ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ incident_id: incidentid }),
+      });
+      
+      const data = await res.json();
+      if (data.predicted_action) {
+        setPredictedActions(prev => ({ ...prev, [incidentid]: data.predicted_action }));
+      } else {
+        alert("Prediction failed or incident not found");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error during prediction");
+    }
   };
 
   const handleViewComment = (comment) => {
@@ -89,101 +111,81 @@ const IncidentTable = () => {
       setIsModalVisible(false);
     }).catch(error => {
       console.error("Error updating status:", error);
-
-  const handleIncidentClick = (incidentid) => {
-    axios.post("http://localhost:5002/incidents/mark_old", { incidentid })
-      .then(() => {
-        setData(prevData =>
-          prevData.map(item =>
-            item.incidentid === incidentid ? { ...item, isnew: false } : item
-          )
-        );
-        setFilteredData(prevData =>
-          prevData.map(item =>
-            item.incidentid === incidentid ? { ...item, isnew: false } : item
-          )
-        );
-      })
-      .catch(error => {
-        console.error("Error updating isnew status:", error);
-      });
-  };  
-
     });
   };
-
+    
   const handleIncidentClick = (incidentid) => {
     axios.post("http://localhost:5002/incidents/mark_old", { incidentid })
       .then(() => {
-        setData(prevData =>
+          setData(prevData =>
           prevData.map(item =>
+          item.incidentid === incidentid ? { ...item, isnew: false } : item
+          ));
+          setFilteredData(prevData =>
+            prevData.map(item =>
             item.incidentid === incidentid ? { ...item, isnew: false } : item
-          )
-        );
-        setFilteredData(prevData =>
-          prevData.map(item =>
-            item.incidentid === incidentid ? { ...item, isnew: false } : item
-          )
-        );
-      })
-      .catch(error => {
-        console.error("Error updating isnew status:", error);
-      });
-  };
+            ));
+          })
+          .catch(error => {
+            console.error("Error updating isnew status:", error);
+          });
+      };  
 
   function getAttackByMitreID(mitreid) {
     const entry = attack_map.find(item => item.mitreid === mitreid);
     return entry ? entry.attack : "Unknown";
-  }
+}
 
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => confirm()}
-          style={{ marginBottom: 8, display: 'block' }}
-        />
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <a onClick={() => confirm()} style={{ marginRight: 8 }}>Search</a>
-          <a onClick={() => clearFilters()}>Reset</a>
-        </div>
+
+const getColumnSearchProps = (dataIndex) => ({
+  filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+    <div style={{ padding: 8 }}>
+      <Input
+        placeholder={`Search ${dataIndex}`}
+        value={selectedKeys[0]}
+        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+        onPressEnter={() => confirm()}
+        style={{ marginBottom: 8, display: 'block' }}
+      />
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <a onClick={() => confirm()} style={{ marginRight: 8 }}>Search</a>
+        <a onClick={() => clearFilters()}>Reset</a>
+      </div>
+    </div>
+  ),
+  filterIcon: (filtered) => (
+    <span role="img" aria-label="search" style={{ color: filtered ? "#1890ff" : undefined }}>🔍</span>
+  ),
+  onFilter: (value, record) =>
+    record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
+});
+
+const columns = [
+  {
+    title: "Incident ID",
+    dataIndex: "incidentid",
+    key: "incidentid",
+    align: "center",
+    render: (incidentid, record) => (
+      <div
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+        onClick={() => handleIncidentClick(incidentid)}
+      >
+        {incidentid}
+        {record.isnew && (
+          <BellOutlined style={{ color: "red", marginLeft: 8 }} />
+        )}
       </div>
     ),
-    filterIcon: (filtered) => (
-      <span role="img" aria-label="search" style={{ color: filtered ? "#1890ff" : undefined }}>🔍</span>
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
-  });
-
-  const columns = [
-    {
-      title: "Incident ID",
-      dataIndex: "incidentid",
-      key: "incidentid",
-      align: "center",
-      render: (incidentid, record) => (
-        <div
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-          onClick={() => handleIncidentClick(incidentid)}
-        >
-          {incidentid}
-          {record.isnew && (
-            <BellOutlined style={{ color: "red", marginLeft: 8 }} />
-          )}
-        </div>
-      ),
-    },
-    {
+  }
+    , {
       title: "Timestamp",
       dataIndex: "datetimestamp",
       key: "datetimestamp",
       align: "center",
       sorter: (a, b) => new Date(a.datetimestamp) - new Date(b.datetimestamp),
     },
+
     {
       title: "Attack Type",
       dataIndex: "attack_id",
@@ -195,6 +197,8 @@ const IncidentTable = () => {
       onFilter: (value, record) => getAttackByMitreID(record.attack_id) === value,
       render: (type) => getAttackByMitreID(type),
     },
+    
+    // { title: "Incident Type", width: 150, dataIndex: "incidenttype", key: "incidenttype", align: "center", render: (type) => incidentTypeMapping[type] || "Unknown" },
     {
       title: "Description",
       dataIndex: "description",
@@ -208,6 +212,7 @@ const IncidentTable = () => {
       align: "center",
       sorter: (a, b) => a.attack_id.localeCompare(b.attack_id),
     },
+    
     {
       title: "Event Details",
       dataIndex: "event_details",
@@ -228,6 +233,7 @@ const IncidentTable = () => {
           "N/A"
         ),
     },
+
     {
       title: "Status",
       dataIndex: "status",
@@ -269,7 +275,7 @@ const IncidentTable = () => {
           color = "blue";
           text = "Manually Mitigated";
         }
-  
+
         return (
           <Tag
             color={color}
@@ -288,7 +294,6 @@ const IncidentTable = () => {
       },
     },
   ];
-  
 
   return (
     <div style={{ textAlign: "center", marginTop: "30px" }}>
@@ -299,25 +304,26 @@ const IncidentTable = () => {
         style={{ marginBottom: "20px", width: "300px" }}
       />
       <Table
-        columns={columns}
-        dataSource={filteredData}
-        loading={loading}
-        rowKey="incidentid"
-        pagination={{ pageSize: 10 }}
-        scroll={{ x: "max-content", y: 900 }}
-        sticky
-        bordered
-        rowClassName={() => "default-row"}
+  columns={columns}
+  dataSource={filteredData}
+  loading={loading}
+  rowKey="incidentid"
+  pagination={{ pageSize: 10 }}
+  scroll={{ x: "max-content", y: 900 }}
+  sticky
+  bordered
+  rowClassName={() => "default-row"}
         onRow={(record) => ({
           onClick: () => {
             handleIncidentClick(record.incidentid); // Keep this to mark isnew
             setSelectedIncident(record);
             setFlowModalVisible(true);
           },
-        })}
-         
-      />
-      <Modal
+  })}
+/>
+   
+
+<Modal
   visible={flowModalVisible}
   onCancel={() => setFlowModalVisible(false)}
   footer={null}
@@ -406,6 +412,34 @@ const IncidentTable = () => {
       >
         <p>{viewComment || "No comment available"}</p>
       </Modal>
+
+
+      <Modal
+  title="Choose Mitigation Option"
+  visible={actionModalVisible}
+  onCancel={() => setActionModalVisible(false)}
+  footer={null}
+>
+  <p>How would you like to mitigate this incident?</p>
+  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+  <Button type="default" onClick={() => {
+    setActionModalVisible(false);
+    setIsModalVisible(true); // open existing comment modal
+  }}>
+    Manually Mitigate
+  </Button>
+
+  <Button type="primary" onClick={() => handleAIMitigation(currentIncidentId)}>
+    Mitigate using AI
+  </Button>
+</div>
+
+  {predictedActions[currentIncidentId] && (
+    <p style={{ marginTop: "20px" }}>
+      <strong>Predicted Action:</strong> {predictedActions[currentIncidentId]}
+    </p>
+  )}
+</Modal>
     </div>
   );
 };
