@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Table, Space } from "antd";
 import axios from "axios";
 import EditDeleteAction from "components/EditDeleteAction";
+import { fetchPlaybooks } from "api/api";
 
 const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5002/playbooks") // Backend API for playbooks
+    fetchPlaybooks()
       .then((response) => {
         if (Array.isArray(response.data)) {
           // Sorting data by playbook_id in ascending order

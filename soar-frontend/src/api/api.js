@@ -21,8 +21,10 @@ export const fetchIncidents = async () => {
 
 export const fetchPlaybooks = async () => {
   try {
-    const response = await axios.get(API_BASE_URL+"/playbooks");
-    return response.data;
+    const response = await axios.get(API_BASE_URL+"/playbooks", {
+      withCredentials: true, // Ensures cookies (including session token) are sent
+    });
+    return response;
   } catch (error) {
     console.error("Error fetching playbooks:", error);
     return [];
