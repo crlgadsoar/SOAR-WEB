@@ -18,7 +18,9 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
 
     // Fetch incidents from the API
     axios
-      .get(`http://localhost:5002/incidents/severity?severity=${severity}`)
+      .get(`http://localhost:5002/incidents/severity?severity=${severity}`, {
+        withCredentials: true, // Ensures cookies are sent
+      })
       .then((response) => {
         console.log("Fetched Incidents:", response.data);
         setIncidents(response.data); // Store incidents in state

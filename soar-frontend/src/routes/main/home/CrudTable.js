@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
+import { fetchIncidents, updateIncidentStatusComment } from "api/api";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
 import { BellOutlined } from "@ant-design/icons";
@@ -29,10 +30,10 @@ const IncidentTable = () => {
 
   useEffect(() => {
     const fetchData = () => {
-      axios.get("http://localhost:5002/incidents")
+      fetchIncidents()
         .then(response => {
-          if (Array.isArray(response.data)) {
-            const sortedData = response.data.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
+          if (Array.isArray(response)) {
+            const sortedData = response.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
             const previousData = previousDataRef.current;
             if (previousData.length > 0 && sortedData.length > previousData.length) {
               const newEntries = sortedData.slice(0, sortedData.length - previousData.length);
@@ -48,7 +49,7 @@ const IncidentTable = () => {
             setData(sortedData);
             setFilteredData(sortedData);
           } else {
-            console.error("API response is not an array", response.data);
+            console.error("API response is not an array", response);
           }
           setLoading(false);
         })
@@ -103,10 +104,7 @@ const IncidentTable = () => {
   };
 
   const handleOk = () => {
-    axios.post("http://localhost:5002/update_incident_status_comment", {
-      incidentid: currentIncidentId,
-      status_comment: statusComment,
-    }).then(() => {
+    updateIncidentStatusComment(currentIncidentId, statusComment).then(() => {
       setIsModalVisible(false);
     }).catch(error => {
       console.error("Error updating status:", error);

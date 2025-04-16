@@ -16,19 +16,6 @@ const Home = () => {
     textAlign: "center",
   };
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:5002/incidents")
-      .then((response) => {
-        setMain(response.data);
-        console.log("Response Headers:", response.headers);
-        console.log("Response Cookies:", document.cookie); // ✅ Display cookies
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []); // Add an empty dependency array to avoid repeated calls
-
   const openModalHandler = (value, row) => {
     console.log(row);
     setModalComponent(value);

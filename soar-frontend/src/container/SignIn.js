@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
 import backgroundImage from "../assets/images/background.jpg";
+import { login } from "api/api";
 
 const SignIn = () => {
   const [loading, setLoading] = useState(false);
@@ -17,15 +18,9 @@ const SignIn = () => {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5002/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const response = await login(values);
 
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
+      if (response.statusText) {
         message.success("Login successful!");
         navigate("/dashboard");
       } else {

@@ -4,11 +4,11 @@ import { Card, Row, Col } from "antd";
 import "./style.css"; // Import the CSS file
 
 const integrations = [
-  { title: "WAF", description: "Web Application Firewall Integration" },
-  { title: "NDR", description: "Network Detection and Response Integration" },
-  { title: "UEBA", description: "User and Entity Behavior Analytics Integration" },
-  { title: "SIEM", description: "Security Information and Event Management Integration" },
-  { title: "ThreatErase", description: "Threat Eradication Integration" },
+  { title: "WAF", description: "Web Application Firewall" },
+  { title: "NDR", description: "Network Detection and Response" },
+  { title: "UEBA", description: "User and Entity Behavior Analytics" },
+  { title: "SIEM", description: "Security Information and Event Management" },
+  { title: "ThreatErase", description: "Threat Eradication" },
 ];
 
 const Integrations = () => {
