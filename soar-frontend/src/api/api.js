@@ -68,3 +68,17 @@ export const updateIncidentStatusComment = async (incidentId, comment) => {
     return null;
   }
 }
+
+export const predictFromChat = async (message) => {
+  try {
+    const response = await axios.post(API_BASE_URL+"/predict_from_chat", {
+      message: message
+    }, {
+      withCredentials: true,
+    });
+    return response;
+  } catch (error) {
+    console.error("Error predicting from chat:", error);
+    return null;
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./ChatBot.css";
 import chatbotIcon from "../../assets/images/chatbot.png"; // Adjust the path as needed
+import { predictFromChat } from "api/api";
 
 const ChatBot = () => {
   console.log("ChatBot component is rendering"); // Debug log
@@ -12,35 +13,27 @@ const ChatBot = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim()) {
-      setMessages([...messages, { text: input, sender: "user" }]);
+      const userMessage = input;
+      setMessages([...messages, { text: userMessage, sender: "user" }]);
       setInput("");
-      // Simulate AI response
-    //   const responses = [
-    //     "This is an AI response.",
-    //     "How can I assist you today?",
-    //     "I'm here to help!",
-    //     "Can you please elaborate?",
-    //     "Let me think about that..."
-    //   ];
-      const responses = [
-        "This seems to be a DOS attack. You may block IP.",
-        "My intuition tells me this is a phishing attack. Alert the user.",
-        "This could be a malware attack. Remove vulnerable software.",
-        "Perhaps, This is a ransomware attack. Notify the team.",
-        "This looks like a SQL injection attack. Update the DB privileges.",
-        "This might be a XSS attack. Take necessary actions."
-      ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { text: randomResponse, sender: "bot" },
-        ]);
-      }, 1000);
+  
+      try {
+        const data = (await predictFromChat(userMessage)).data;
+        if (data) {
+          const botReply = data.prediction; // Expected: string
+          setMessages((prev) => [...prev, { text: botReply, sender: "bot" }]);
+        } else {
+          setMessages((prev) => [...prev, { text: "Error: " + data.error, sender: "bot" }]);
+        }
+      } catch (err) {
+        console.error(err);
+        setMessages((prev) => [...prev, { text: "Something went wrong.", sender: "bot" }]);
+      }
     }
   };
+  
 
   return (
     <>
