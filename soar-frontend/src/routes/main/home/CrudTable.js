@@ -34,17 +34,6 @@ const IncidentTable = () => {
         .then(response => {
           if (Array.isArray(response)) {
             const sortedData = response.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
-            const previousData = previousDataRef.current;
-            if (previousData.length > 0 && sortedData.length > previousData.length) {
-              const newEntries = sortedData.slice(0, sortedData.length - previousData.length);
-              newEntries.forEach(entry => {
-                notification.info({
-                  message: "New Incident Added",
-                  description: `Incident ID: ${entry.incidentid} has been added.`,
-                  placement: "topRight",
-                });
-              });
-            }
             previousDataRef.current = sortedData;
             setData(sortedData);
             setFilteredData(sortedData);
