@@ -254,13 +254,13 @@ const HeaderPage = () => {
       {/* COMPANY LOGO  */}
       <div>
         <img
-          src={require("../../assets/images/Bharat-Electronics.png")}
+          src={require("../../assets/images/Bharat-Electronics3.png")}
           alt=""
           width={"50px"}
-          height={"60px"}
+          height={"30px"}
           style={{
             marginLeft: "5px",
-            filter: displayMode === "DARK" ? "invert(100%)" : undefined,
+            // filter: displayMode === "DARK" ? "invert(100%)" : undefined,
           }}
           draggable="false"
           onClick={navigateToHomePage}

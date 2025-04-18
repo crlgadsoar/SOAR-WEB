@@ -1,15 +1,13 @@
 .default-row {
-    background-color: white;
-  }
-  
-  .clicked-row {
-    background-color: white;
-  }
-  
-  .default-row {
-    transition: background-color 0.3s ease-in-out;
-  }
-  .default-row:hover {
-    background-color: #fafafa;
-  }
-  
+  background-color: white;
+  color: black; /* Default text color for light mode */
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+
+.dark-mode-row {
+  background-color: #1e1e1e; /* Dark background for dark mode */
+  color: white; /* Text color for dark mode */
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
