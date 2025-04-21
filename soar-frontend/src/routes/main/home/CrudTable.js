@@ -203,7 +203,7 @@ const columns = [
       align: "center",
     },
     {
-      title: "Attack ID",
+      title: "Mitre ID",
       dataIndex: "attack_id",
       key: "attack_id",
       align: "center",
@@ -252,6 +252,8 @@ const columns = [
       render: (status, record) => {
         let color = "red";
         let text = "Under Investigation";
+
+        if(record.attack_id){
   
         if (record.attack_id.startsWith("T1499")) {
           color = "green";
@@ -272,6 +274,7 @@ const columns = [
           color = "blue";
           text = "Manually Mitigated";
         }
+        }
 
         return (
           <Tag
@@ -290,6 +293,14 @@ const columns = [
         );
       },
     },
+
+    {
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+      align: "center",
+    },
+
   ];
 
   return (

@@ -72,7 +72,7 @@ const SignIn = () => {
       <h1
     style={{
       color: "#fff",
-      fontSize: "58px",
+      fontSize: "40px",
       fontWeight: "bold",
       position: "absolute",
       top: "20%", // Adjust vertical position
@@ -81,7 +81,7 @@ const SignIn = () => {
       textShadow: "2px 2px 10px rgba(0, 0, 0, 0.5)", // Adds a shadow for better visibility
     }}
     >
-      SOAR
+      Security Orchestration Automation Response
     </h1>
 
       <div

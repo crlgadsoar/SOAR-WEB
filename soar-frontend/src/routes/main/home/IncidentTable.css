@@ -1,15 +1,51 @@
 .default-row {
-    background-color: white;
+  background-color: white;
+  color: black; /* Default text color for light mode */
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.dark-mode-row {
+  background-color: #1e1e1e; /* Dark background for dark mode */
+  color: white; /* Text color for dark mode */
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+  
+  .generate-button {
+    background: linear-gradient(to right, #ff4d4f, #ff7a45, #ffec3d, #73d13d, #40a9ff, #9254de);
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 999px;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
   }
   
-  .clicked-row {
-    background-color: white;
+  .generate-button::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background: #1e1e50;
+    border-radius: 999px;
+    z-index: 1;
   }
   
-  .default-row {
-    transition: background-color 0.3s ease-in-out;
+  .generate-button span {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .default-row:hover {
-    background-color: #fafafa;
+  
+  .generate-button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
   }
   

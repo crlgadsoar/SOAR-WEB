@@ -87,6 +87,7 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
                     <th>Incident ID</th>
                     <th>Severity</th>
                     <th>Description</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -95,6 +96,7 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
                       <td>{incident.incidentid}</td>
                       <td>{incident.severity}</td>
                       <td>{incident.description}</td>
+                      <td>{incident.status}</td>
                     </tr>
                   ))}
                 </tbody>
