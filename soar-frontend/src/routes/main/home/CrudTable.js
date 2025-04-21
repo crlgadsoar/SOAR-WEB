@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
-import { fetchIncidents, updateIncidentStatusComment } from "api/api";
+import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment } from "api/api";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
 import { BellOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux"; // Import useSelector to access displayMode
 import "./IncidentTable.css";
 import { Steps } from "antd";
 const { Step } = Steps;
@@ -25,8 +26,10 @@ const IncidentTable = () => {
   const [predictedActions, setPredictedActions] = useState({});
   const [flowModalVisible, setFlowModalVisible] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState(null);
+  const [hoveredRowKey, setHoveredRowKey] = useState(null); // Track the hovered row
 
   const previousDataRef = useRef([]);
+  const { displayMode } = useSelector((state) => state.themeConfig); // Get displayMode from Redux
 
   useEffect(() => {
     const fetchData = () => {
@@ -34,17 +37,6 @@ const IncidentTable = () => {
         .then(response => {
           if (Array.isArray(response)) {
             const sortedData = response.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
-            const previousData = previousDataRef.current;
-            if (previousData.length > 0 && sortedData.length > previousData.length) {
-              const newEntries = sortedData.slice(0, sortedData.length - previousData.length);
-              newEntries.forEach(entry => {
-                notification.info({
-                  message: "New Incident Added",
-                  description: `Incident ID: ${entry.incidentid} has been added.`,
-                  placement: "topRight",
-                });
-              });
-            }
             previousDataRef.current = sortedData;
             setData(sortedData);
             setFilteredData(sortedData);
@@ -78,15 +70,7 @@ const IncidentTable = () => {
   
   const handleAIMitigation = async (incidentid) => {
     try {
-      const res = await fetch("http://localhost:5002/mitigate_using_ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ incident_id: incidentid }),
-      });
-      
-      const data = await res.json();
+      const data = (await mitigateUsingAI(incidentid)).data;
       if (data.predicted_action) {
         setPredictedActions(prev => ({ ...prev, [incidentid]: data.predicted_action }));
       } else {
@@ -312,24 +296,39 @@ const columns = [
         style={{ marginBottom: "20px", width: "300px" }}
       />
       <Table
-  columns={columns}
-  dataSource={filteredData}
-  loading={loading}
-  rowKey="incidentid"
-  pagination={{ pageSize: 10 }}
-  scroll={{ x: "max-content", y: 900 }}
-  sticky
-  bordered
-  rowClassName={() => "default-row"}
+        columns={columns}
+        dataSource={filteredData}
+        loading={loading}
+        rowKey="incidentid"
+        pagination={{ pageSize: 10 }}
+        scroll={{ x: "max-content", y: 900 }}
+        sticky
+        bordered
+        rowClassName={(record) => {
+          if (displayMode === "DARK") {
+            return hoveredRowKey === record.incidentid ? "hovered-row" : "dark-mode-row";
+          }
+          return "default-row"; // Light mode uses default-row styles
+        }}
         onRow={(record) => ({
+          onMouseEnter: () => {
+            if (displayMode === "DARK") {
+              setHoveredRowKey(record.incidentid); // Set hovered row key only in dark mode
+            }
+          },
+          onMouseLeave: () => {
+            if (displayMode === "DARK") {
+              setHoveredRowKey(null); // Reset hovered row key only in dark mode
+            }
+          },
           onClick: () => {
-            handleIncidentClick(record.incidentid); // Keep this to mark isnew
+            // handleIncidentClick(record.incidentid); // Keep this to mark isnew
             setSelectedIncident(record);
             setFlowModalVisible(true);
+            handleIncidentClick(record.incidentid); // Handle row click
           },
-  })}
-/>
-   
+        })}
+      />
 
 <Modal
   visible={flowModalVisible}

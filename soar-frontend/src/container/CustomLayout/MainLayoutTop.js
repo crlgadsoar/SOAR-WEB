@@ -10,6 +10,7 @@ import { MOBILE_SIZE } from 'constants';
 //import { TAB_SIZE } from 'constants';
 import HeaderPageTop from './HeaderPageTop';
 import PageContentTop from './PageContentTop';
+import NotificationListener from 'components/Notification/NotificationListener';
 // import FloatingButton from 'components/FloatingButton';
 
 /**
@@ -23,6 +24,7 @@ const MainLayout = () => {
 
   return (
     <div className={style['full-page']}>
+      <NotificationListener />
       <Layout>
         <HeaderPageTop />
         <PageContentTop />
