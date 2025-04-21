@@ -108,3 +108,25 @@ export const fetchPlaybookDetails = async (playbookId) => {
     return null;
   }
 }
+
+export const fetchApps = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/integrations/getApps`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching apps:", error);
+    throw error;
+  }
+};
+
+export const fetchAppActions = async (appId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/integrations/getAppActions`, {
+      params: { appId },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching app actions:", error);
+    throw error;
+  }
+};
