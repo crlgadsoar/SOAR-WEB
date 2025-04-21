@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Spin, Modal, List } from "antd";
+import { Card, Row, Col, Spin, Modal, Table } from "antd";
+import { PlusOutlined } from "@ant-design/icons"; // Import PlusOutlined icon
 import { fetchApps, fetchAppActions } from "../../api/api";
 import "./style.css"; // Import the CSS file
 
@@ -10,6 +11,19 @@ const Integrations = () => {
   const [appActions, setAppActions] = useState([]);
   const [actionsLoading, setActionsLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const columns = [
+    {
+      title: "Action Name",
+      dataIndex: "action_name",
+      key: "action_name",
+    },
+    {
+      title: "API Endpoint",
+      dataIndex: "action_api",
+      key: "action_api",
+    },
+  ];
 
   useEffect(() => {
     const loadApps = async () => {
@@ -41,6 +55,11 @@ const Integrations = () => {
     }
   };
 
+  const handleCreateAppClick = () => {
+    // Logic to handle creating a new app
+    console.log("Create New App clicked");
+  };
+
   if (loading) {
     return <Spin size="large" className="loading-spinner" />;
   }
@@ -49,6 +68,22 @@ const Integrations = () => {
     <div className="integrations-container">
       <h1 className="integrations-title">Integrations</h1>
       <Row gutter={[16, 16]}>
+        {/* Tile for creating a new app */}
+        <Col xs={24} sm={12} md={8} lg={6}>
+          <Card
+            bordered={true}
+            hoverable
+            className="integration-card create-app-card"
+            onClick={handleCreateAppClick}
+          >
+            <div style={{ textAlign: "center", fontSize: "24px", color: "#1890ff" }}>
+              <p style={{ marginTop: "10px", fontWeight: "bold" }}>Create New App</p>
+              <PlusOutlined style={{ fontSize: "48px" }} />
+            </div>
+          </Card>
+        </Col>
+
+        {/* Existing app tiles */}
         {apps.map((app) => (
           <Col xs={24} sm={12} md={8} lg={6} key={app.id}>
             <Card
@@ -74,13 +109,11 @@ const Integrations = () => {
         {actionsLoading ? (
           <Spin size="large" />
         ) : (
-          <List
+          <Table
+            columns={columns}
             dataSource={appActions}
-            renderItem={(action) => (
-              <List.Item>
-                <strong>{action.action_name}</strong>: {action.action_api}
-              </List.Item>
-            )}
+            rowKey="id" // Use a unique key for each row
+            pagination={false} // Disable pagination for simplicity
           />
         )}
       </Modal>
