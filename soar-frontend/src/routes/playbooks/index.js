@@ -6,6 +6,7 @@ import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
 import { instance } from "util/connection/axios";
 import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
+import { fetchPlaybookDetails } from "api/api";
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,12 +26,11 @@ const Playbooks = () => {
     setModalVisible(true);
     setData(row);
 
-    if (row?.playbook_id) {
-      instance
-        .get(`http://localhost:5002/playbooks/details/${row.playbook_id}`)
-        .then((res) => setRowDetail(res.data))
-        .catch((err) => console.error("Error fetching playbook details:", err));
-    }
+    // if (row?.playbook_id) {
+      fetchPlaybookDetails(row.playbook_id)
+      .then((res) => setRowDetail(res.data))
+      .catch((err) => console.error("Error fetching playbook details:", err));
+    // }
   };
 
   const modalComponentRender = () => {

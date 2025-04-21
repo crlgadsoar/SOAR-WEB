@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:5002"; // Backend base URL
+export const API_BASE_URL = "http://localhost:5000"; // Backend base URL
 
 // export const axios = axios.create({
 //   baseURL: "http://localhost:5002", // Backend base URL
@@ -93,6 +93,18 @@ export const mitigateUsingAI = async (message) => {
     return response;
   } catch (error) {
     console.error("Error predicting from chat:", error);
+    return null;
+  }
+}
+
+export const fetchPlaybookDetails = async (playbookId) => {
+  try {
+    const response = await axios.get(API_BASE_URL+`/playbooks/details/${playbookId}`, {
+      withCredentials: true,
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching playbook details:", error);
     return null;
   }
 }
