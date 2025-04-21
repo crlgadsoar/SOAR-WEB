@@ -311,6 +311,9 @@ const columns = [
             }
           },
           onClick: () => {
+            // handleIncidentClick(record.incidentid); // Keep this to mark isnew
+            setSelectedIncident(record);
+            setFlowModalVisible(true);
             handleIncidentClick(record.incidentid); // Handle row click
           },
         })}
