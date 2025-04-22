@@ -144,3 +144,13 @@ export const importAppsToDatabase = async (apps) => {
     throw error;
   }
 };
+
+export const deleteApp = async (appId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/integrations/delete_app/${appId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete app:", error);
+    throw error;
+  }
+};

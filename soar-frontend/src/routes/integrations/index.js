@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message } from "antd";
-import { PlusOutlined, UploadOutlined, DownloadOutlined } from "@ant-design/icons";
-import { fetchApps, fetchAppActions, importAppsToDatabase } from "../../api/api";
+import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm } from "antd";
+import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { fetchApps, fetchAppActions, importAppsToDatabase, deleteApp } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -124,10 +124,21 @@ const Integrations = () => {
         message.success("Apps imported successfully!");
       } catch (error) {
         console.error("Failed to import apps:", error);
-        message.error("Failed to import apps. Invalid JSON format or server error.");
+        message.error("Failed to import apps. Invalid file format or server error.");
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleDeleteApp = async (appId) => {
+    try {
+      await deleteApp(appId); // Call the delete API
+      setApps((prevApps) => prevApps.filter((app) => app.id !== appId)); // Remove the app from the state
+      message.success("App deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete app:", error);
+      message.error("Failed to delete app. Please try again.");
+    }
   };
 
   if (loading) {
@@ -156,7 +167,7 @@ const Integrations = () => {
         >
           <Button
             type="primary"
-            icon={<UploadOutlined />}
+            icon={<DownloadOutlined />}
             style={{ margin: "2px" }}
           >
             Import
@@ -185,9 +196,28 @@ const Integrations = () => {
               bordered={true}
               hoverable
               className="integration-card"
-              onClick={() => handleCardClick(app)}
+              onClick={() => handleCardClick(app)} // This should only trigger when clicking on the card itself
             >
               <p>{app.description}</p>
+              <div
+                onClick={(e) => e.stopPropagation()} // Prevent triggering the card click for the entire Popconfirm
+              >
+                <Popconfirm
+                  title="Are you sure you want to delete this app?"
+                  onConfirm={() => handleDeleteApp(app.id)} // No need to stop propagation here since it's handled by the wrapper
+                  onCancel={() => {}} // No need to stop propagation here since it's handled by the wrapper
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    style={{ position: "absolute", bottom: "10px", right: "10px" }}
+                  >
+                  </Button>
+                </Popconfirm>
+              </div>
             </Card>
           </Col>
         ))}
