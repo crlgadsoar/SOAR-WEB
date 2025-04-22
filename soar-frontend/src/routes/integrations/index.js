@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined } from "@ant-design/icons";
-import { fetchApps, fetchAppActions } from "../../api/api";
+import { fetchApps, fetchAppActions, importAppsToDatabase } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -109,6 +109,27 @@ const Integrations = () => {
     }
   };
 
+  const handleImportApps = (file) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const importedApps = JSON.parse(e.target.result); // Parse the JSON file
+
+        // Call the API to import apps into the database
+        await importAppsToDatabase(importedApps);
+
+        // Update the local state with the imported apps
+        const data = await fetchApps();
+        setApps(data);
+        message.success("Apps imported successfully!");
+      } catch (error) {
+        console.error("Failed to import apps:", error);
+        message.error("Failed to import apps. Invalid JSON format or server error.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   if (loading) {
     return <Spin size="large" className="loading-spinner" />;
   }
@@ -121,10 +142,26 @@ const Integrations = () => {
           type="primary"
           icon={<UploadOutlined />}
           onClick={() => setExportModalVisible(true)}
-          style={{ marginLeft: "auto" }}
+          style={{ margin: "2px" }}
         >
-          Export Apps
+          Export
         </Button>
+        <Upload
+          accept=".json"
+          showUploadList={false}
+          beforeUpload={(file) => {
+            handleImportApps(file);
+            return false; // Prevent automatic upload
+          }}
+        >
+          <Button
+            type="primary"
+            icon={<UploadOutlined />}
+            style={{ margin: "2px" }}
+          >
+            Import
+          </Button>
+        </Upload>
       </div>
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8} lg={6}>

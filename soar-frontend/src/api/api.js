@@ -130,3 +130,17 @@ export const fetchAppActions = async (appId) => {
     throw error;
   }
 };
+
+export const importAppsToDatabase = async (apps) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/integrations/import_apps`, apps, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to import apps to the database:", error);
+    throw error;
+  }
+};
