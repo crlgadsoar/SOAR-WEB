@@ -147,32 +147,30 @@ const Integrations = () => {
 
   return (
     <div className="integrations-container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h1 className="integrations-title page-title" style={{ textAlign: "center", flex: 1 }}>Integrations</h1>
-        <Button
-          type="primary"
-          icon={<UploadOutlined />}
-          onClick={() => setExportModalVisible(true)}
-          style={{ margin: "2px" }}
-        >
-          Export
-        </Button>
-        <Upload
-          accept=".json"
-          showUploadList={false}
-          beforeUpload={(file) => {
-            handleImportApps(file);
-            return false; // Prevent automatic upload
-          }}
-        >
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "20px", position: "relative" }}>
+        <h1 className="integrations-title page-title" style={{ textAlign: "center", margin: 0 }}>Integrations</h1>
+        <div style={{ position: "absolute", right: 0, display: "flex", gap: "5px" }}>
           <Button
             type="primary"
-            icon={<DownloadOutlined />}
-            style={{ margin: "2px" }}
-          >
-            Import
+            icon={<UploadOutlined />}
+            onClick={() => setExportModalVisible(true)}>
+            Export
           </Button>
-        </Upload>
+          <Upload
+            accept=".json"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              handleImportApps(file);
+              return false; // Prevent automatic upload
+            }}
+          >
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}>
+              Import
+            </Button>
+          </Upload>
+        </div>
       </div>
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} md={8} lg={6}>

@@ -19,3 +19,18 @@
     height: 120px;
     margin: 20px auto;
 }
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.header-buttons {
+    position: absolute;
+    right: 0;
+    display: flex;
+    gap: 10px;
+}
