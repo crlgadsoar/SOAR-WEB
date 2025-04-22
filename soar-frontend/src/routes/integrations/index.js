@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Card, Row, Col, Spin, Modal, Table } from "antd";
-import { PlusOutlined } from "@ant-design/icons"; // Import PlusOutlined icon
+import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message } from "antd";
+import { PlusOutlined, UploadOutlined, DownloadOutlined } from "@ant-design/icons";
 import { fetchApps, fetchAppActions } from "../../api/api";
-import "./style.css"; // Import the CSS file
+import "./style.css";
 
 const Integrations = () => {
   const [apps, setApps] = useState([]);
@@ -11,6 +11,8 @@ const Integrations = () => {
   const [appActions, setAppActions] = useState([]);
   const [actionsLoading, setActionsLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedApps, setSelectedApps] = useState([]);
+  const [exportModalVisible, setExportModalVisible] = useState(false);
 
   const columns = [
     {
@@ -56,8 +58,55 @@ const Integrations = () => {
   };
 
   const handleCreateAppClick = () => {
-    // Logic to handle creating a new app
     console.log("Create New App clicked");
+  };
+
+  const handleAppSelection = (appId, checked) => {
+    if (checked) {
+      setSelectedApps((prevSelected) => [...prevSelected, appId]);
+    } else {
+      setSelectedApps((prevSelected) => prevSelected.filter((id) => id !== appId));
+    }
+  };
+
+  const handleExportSelectedApps = async () => {
+    if (selectedApps.length === 0) {
+      message.warning("No apps selected for export.");
+      return;
+    }
+
+    try {
+      const appsToExport = await Promise.all(
+        selectedApps.map(async (appId) => {
+          const app = apps.find((app) => app.id === appId);
+          const actions = await fetchAppActions(appId);
+          return { ...app, actions };
+        })
+      );
+
+      const jsonData = JSON.stringify(appsToExport, null, 2);
+
+      // Use the File System Access API to prompt the user for a file location
+      const options = {
+        types: [
+          {
+            description: "JSON Files",
+            accept: { "application/json": [".json"] },
+          },
+        ],
+      };
+
+      const handle = await window.showSaveFilePicker(options);
+      const writable = await handle.createWritable();
+      await writable.write(jsonData);
+      await writable.close();
+
+      message.success("Selected apps exported successfully!");
+      setExportModalVisible(false);
+    } catch (error) {
+      console.error("Failed to export selected apps:", error);
+      message.error("Failed to export selected apps.");
+    }
   };
 
   if (loading) {
@@ -66,9 +115,18 @@ const Integrations = () => {
 
   return (
     <div className="integrations-container">
-      <h1 className="integrations-title">Integrations</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <h1 className="integrations-title page-title" style={{ textAlign: "center", flex: 1 }}>Integrations</h1>
+        <Button
+          type="primary"
+          icon={<UploadOutlined />}
+          onClick={() => setExportModalVisible(true)}
+          style={{ marginLeft: "auto" }}
+        >
+          Export Apps
+        </Button>
+      </div>
       <Row gutter={[16, 16]}>
-        {/* Tile for creating a new app */}
         <Col xs={24} sm={12} md={8} lg={6}>
           <Card
             bordered={true}
@@ -83,7 +141,6 @@ const Integrations = () => {
           </Card>
         </Col>
 
-        {/* Existing app tiles */}
         {apps.map((app) => (
           <Col xs={24} sm={12} md={8} lg={6} key={app.id}>
             <Card
@@ -99,7 +156,6 @@ const Integrations = () => {
         ))}
       </Row>
 
-      {/* Modal to display app actions */}
       <Modal
         title={selectedApp?.title || "App Actions"}
         visible={modalVisible}
@@ -112,10 +168,67 @@ const Integrations = () => {
           <Table
             columns={columns}
             dataSource={appActions}
-            rowKey="id" // Use a unique key for each row
-            pagination={false} // Disable pagination for simplicity
+            rowKey="id"
+            pagination={false}
           />
         )}
+      </Modal>
+
+      <Modal
+        title="Select Apps to Export"
+        visible={exportModalVisible}
+        onCancel={() => setExportModalVisible(false)}
+        footer={[
+          <Button key="export" type="primary" onClick={handleExportSelectedApps}>
+            Export Selected Apps
+          </Button>,
+        ]}
+      >
+        <Table
+          dataSource={apps}
+          rowKey="id"
+          pagination={false}
+          columns={[
+            {
+              title: (
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    if (checked) {
+                      setSelectedApps(apps.map((app) => app.id));
+                    } else {
+                      setSelectedApps([]);
+                    }
+                  }}
+                  checked={selectedApps.length === apps.length && apps.length > 0}
+                />
+              ),
+              dataIndex: "select",
+              width: 10, // Set the width of the checkbox column to 10
+              align: "center",
+              render: (_, record) => (
+                <input
+                  type="checkbox"
+                  onChange={(e) => handleAppSelection(record.id, e.target.checked)}
+                  checked={selectedApps.includes(record.id)}
+                />
+              ),
+            },
+            {
+              title: "App Name",
+              dataIndex: "title",
+              key: "title",
+              align: "center",
+            },
+            {
+              title: "Description",
+              dataIndex: "description",
+              key: "description",
+              align: "center",
+            },
+          ]}
+        />
       </Modal>
     </div>
   );
