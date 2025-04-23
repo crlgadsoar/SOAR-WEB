@@ -21,7 +21,7 @@ export const fetchIncidents = async () => {
 
 export const fetchPlaybooks = async () => {
   try {
-    const response = await axios.get(API_BASE_URL+"/playbooks", {
+    const response = await axios.get(API_BASE_URL + "/playbooks", {
       withCredentials: true,
     });
     return response;
@@ -45,7 +45,7 @@ export const login = async (creds) => {
 
 export const fetchAttackCount = async (attackId) => {
   try {
-    const response = await axios.get(API_BASE_URL+`/attack_id_count?attack_id=${attackId}`, {
+    const response = await axios.get(API_BASE_URL + `/attack_id_count?attack_id=${attackId}`, {
       withCredentials: true,
     });
     return response.data.count;
@@ -57,7 +57,7 @@ export const fetchAttackCount = async (attackId) => {
 
 export const updateIncidentStatusComment = async (incidentId, comment) => {
   try {
-    axios.post(API_BASE_URL+"/update_incident_status_comment", {
+    axios.post(API_BASE_URL + "/update_incident_status_comment", {
       incidentid: incidentId,
       status_comment: comment,
     }, {
@@ -71,7 +71,7 @@ export const updateIncidentStatusComment = async (incidentId, comment) => {
 
 export const predictFromChat = async (message) => {
   try {
-    const response = await axios.post(API_BASE_URL+"/predict_from_chat", {
+    const response = await axios.post(API_BASE_URL + "/predict_from_chat", {
       message: message
     }, {
       withCredentials: true,
@@ -85,7 +85,7 @@ export const predictFromChat = async (message) => {
 
 export const mitigateUsingAI = async (message) => {
   try {
-    const response = await axios.post(API_BASE_URL+"/mitigate_using_ai", {
+    const response = await axios.post(API_BASE_URL + "/mitigate_using_ai", {
       incident_id: message
     }, {
       withCredentials: true,
@@ -99,7 +99,7 @@ export const mitigateUsingAI = async (message) => {
 
 export const fetchPlaybookDetails = async (playbookId) => {
   try {
-    const response = await axios.get(API_BASE_URL+`/playbooks/details/${playbookId}`, {
+    const response = await axios.get(API_BASE_URL + `/playbooks/details/${playbookId}`, {
       withCredentials: true,
     });
     return response;
@@ -154,3 +154,17 @@ export const deleteApp = async (appId) => {
     throw error;
   }
 };
+
+export const createApp = async (formData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/integrations/create_app`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Failed to create app:", error);
+    throw error;
+  }
+}
