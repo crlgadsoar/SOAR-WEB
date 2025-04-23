@@ -167,4 +167,18 @@ export const createApp = async (formData) => {
     console.error("Failed to create app:", error);
     throw error;
   }
-}
+};
+
+export const updateApp = async (appId, formData) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/api/integrations/updateApp/${appId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Failed to update app:", error);
+    throw error;
+  }
+};

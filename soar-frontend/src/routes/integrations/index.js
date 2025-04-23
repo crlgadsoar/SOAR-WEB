@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm, Form, Input, Select } from "antd";
-import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined } from "@ant-design/icons";
-import { fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp } from "../../api/api";
+import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -20,6 +20,9 @@ const Integrations = () => {
     logo: "",
   });
   const [logoType, setLogoType] = useState("file");
+  const [isEditMode, setIsEditMode] = useState(false); // Track if the modal is in edit mode
+
+  const [form] = Form.useForm(); // Create a form instance
 
   const columns = [
     {
@@ -164,15 +167,58 @@ const Integrations = () => {
     }
 
     try {
-      const response = await createApp(formData); // Call the API to create the app
-      console.log("App created successfully:", response.data);
+      if (isEditMode) {
+        // Update the existing app
+        const response = await updateApp(selectedApp.id, formData); // Call the API to update the app
+        console.log("App updated successfully:", response.data);
+        setApps((prevApps) =>
+          prevApps.map((app) =>
+            app.id === selectedApp.id ? { ...app, ...response.data } : app
+          )
+        );
+        message.success("App updated successfully!");
+      } else {
+        // Create a new app
+        const response = await createApp(formData); // Call the API to create the app
+        console.log("App created successfully:", response.data);
+        message.success("App created successfully!");
+      }
       setCreateAppModalVisible(false);
-      loadApps(); // Refresh the apps list
-      message.success("App created successfully!");
+      loadApps();
     } catch (error) {
-      console.error("Failed to create app:", error);
-      message.error("Failed to create app. Please try again.");
+      console.error("Failed to save app:", error);
+      message.error("Failed to save app. Please try again.");
     }
+  };
+
+  const handleEditApp = (app) => {
+    setNewAppData({
+      name: app.title,
+      description: app.description,
+      logo: app.logo,
+    });
+    setLogoType(app.logo ? (app.logo.startsWith("http") ? "url" : "file") : "file"); // Determine if the logo is a URL or file
+    setSelectedApp(app); // Set the selected app for editing
+    setIsEditMode(true); // Set the modal to edit mode
+    setCreateAppModalVisible(true); // Open the modal
+
+    // Set the form fields with the app data
+    form.setFieldsValue({
+      name: app.title,
+      description: app.description,
+    });
+  };
+
+  const handleCancel = () => {
+    setNewAppData({
+      name: "",
+      description: "",
+      logo: "",
+    });
+    setLogoType("file");
+    setIsEditMode(false); // Reset edit mode
+    setCreateAppModalVisible(false);
+    form.resetFields(); // Reset the form fields
   };
 
   if (loading) {
@@ -212,7 +258,10 @@ const Integrations = () => {
             bordered={true}
             hoverable
             className="integration-card create-app-card"
-            onClick={() => setCreateAppModalVisible(true)}
+            onClick={() => {
+              setIsEditMode(false); // Set the modal to create mode
+              setCreateAppModalVisible(true);
+            }}
           >
             <div style={{ textAlign: "center", fontSize: "24px", color: "#1890ff" }}>
               <p style={{ marginTop: "10px", fontWeight: "bold" }}>Create New App</p>
@@ -232,12 +281,11 @@ const Integrations = () => {
             >
               <p>{app.description}</p>
               <div
-                onClick={(e) => e.stopPropagation()} // Prevent triggering the card click for the entire Popconfirm
+                onClick={(e) => e.stopPropagation()} // Prevent triggering the card click
               >
                 <Popconfirm
                   title="Are you sure you want to delete this app?"
-                  onConfirm={() => handleDeleteApp(app.id)} // No need to stop propagation here since it's handled by the wrapper
-                  onCancel={() => {}} // No need to stop propagation here since it's handled by the wrapper
+                  onConfirm={() => handleDeleteApp(app.id)}
                   okText="Yes"
                   cancelText="No"
                 >
@@ -249,6 +297,16 @@ const Integrations = () => {
                   >
                   </Button>
                 </Popconfirm>
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  style={{ position: "absolute", bottom: "10px", right: "50px" }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering the card click
+                    handleEditApp(app); // Open the modal with app details
+                  }}
+                >
+                </Button>
               </div>
             </Card>
           </Col>
@@ -331,14 +389,18 @@ const Integrations = () => {
       </Modal>
 
       <Modal
-        title="Create New App"
+        title={isEditMode ? "Edit App" : "Create New App"}
         visible={createAppModalVisible}
-        onCancel={() => setCreateAppModalVisible(false)}
-        onOk={handleCreateApp} // Call the function to send data to the backend
-        okText="Create"
+        onCancel={handleCancel}
+        onOk={() => form.submit()} // Submit the form
+        okText={isEditMode ? "Save Changes" : "Create"}
         cancelText="Cancel"
       >
-        <Form layout="vertical">
+        <Form
+          form={form} // Link the form instance
+          layout="vertical"
+          onFinish={handleCreateApp} // Handle form submission
+        >
           {/* Name Field */}
           <Form.Item
             label="Name"
@@ -347,7 +409,6 @@ const Integrations = () => {
           >
             <Input
               placeholder="Enter app name"
-              value={newAppData.name}
               onChange={(e) => handleNewAppChange("name", e.target.value)}
             />
           </Form.Item>
@@ -361,7 +422,6 @@ const Integrations = () => {
             <Input.TextArea
               placeholder="Enter app description"
               rows={4}
-              value={newAppData.description}
               onChange={(e) => handleNewAppChange("description", e.target.value)}
             />
           </Form.Item>
@@ -385,7 +445,6 @@ const Integrations = () => {
                 accept="image/*"
                 showUploadList={false}
                 beforeUpload={(file) => {
-                  // Store the file in the state
                   handleNewAppChange("logo", file); // Save the file object in the state
                   return false; // Prevent automatic upload
                 }}
