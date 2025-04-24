@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm, Form, Input, Select } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp, addAppAction, updateAppAction } from "../../api/api";
+import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp, addAppAction, updateAppAction, deleteAppAction } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -314,6 +314,26 @@ const Integrations = () => {
     }
   };
 
+  const handleDeleteAction = async () => {
+    try {
+      await deleteAppAction(selectedApp.id, selectedAction.id); // Call the API to delete the action
+      console.log("Action deleted successfully");
+
+      // Update the appActions state to remove the deleted action
+      setAppActions((prevActions) =>
+        prevActions.filter((action) => action.id !== selectedAction.id)
+      );
+
+      message.success("Action deleted successfully!");
+      setAddActionModalVisible(false); // Close the modal
+      setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the state
+      setIsEditActionMode(false); // Reset edit mode
+    } catch (error) {
+      console.error("Failed to delete action:", error);
+      message.error("Failed to delete action. Please try again.");
+    }
+  };
+
   if (loading) {
     return <Spin size="large" className="loading-spinner" />;
   }
@@ -594,6 +614,26 @@ const Integrations = () => {
         onOk={() => actionForm.submit()} // Submit the form
         okText={isEditActionMode ? "Save Changes" : "Add"} // Dynamic button text
         cancelText="Cancel"
+        footer={[
+          isEditActionMode && (
+            <Popconfirm
+              title="Are you sure you want to delete this action?"
+              onConfirm={handleDeleteAction} // Call the delete function
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button danger type="primary">
+                Delete
+              </Button>
+            </Popconfirm>
+          ),
+          <Button key="cancel" onClick={() => setAddActionModalVisible(false)}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => actionForm.submit()}>
+            {isEditActionMode ? "Save Changes" : "Add"}
+          </Button>,
+        ]}
       >
         <Form
           form={actionForm} // Link the form instance

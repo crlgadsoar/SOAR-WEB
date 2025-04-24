@@ -202,3 +202,13 @@ export const updateAppAction = async (appId, actionId, actionData) => {
     throw error;
   }
 };
+
+export const deleteAppAction = async (appId, actionId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/integrations/${appId}/${actionId}/deleteAction`);
+    return response;
+  } catch (error) {
+    console.error("Failed to delete action:", error);
+    throw error;
+  }
+};
