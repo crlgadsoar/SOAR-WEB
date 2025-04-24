@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm, Form, Input, Select } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp, addAppAction } from "../../api/api";
+import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp, addAppAction, updateAppAction } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -27,8 +27,12 @@ const Integrations = () => {
     action_api: "",
     http_method: "GET", // Default HTTP method
   });
+  const [editActionModalVisible, setEditActionModalVisible] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [isEditActionMode, setIsEditActionMode] = useState(false); // Track if the modal is in edit mode
 
   const [form] = Form.useForm(); // Create a form instance
+  const [actionForm] = Form.useForm(); // Create a form instance
 
   const columns = [
     {
@@ -237,20 +241,76 @@ const Integrations = () => {
     form.resetFields(); // Reset the form fields
   };
 
-  const handleAddAction = async () => {
+  const handleAddAction = async (values) => {
     try {
-      const response = await addAppAction(selectedApp.id, newActionData); // Call the API to add the action
-      console.log("Action added successfully:", response.data);
+      if (isEditActionMode) {
+        // Update the existing action
+        const response = await updateAppAction(selectedApp.id, selectedAction.id, values); // Call the API to update the action
+        console.log("Action updated successfully:", response.data);
 
-      // Update the appActions state with the new action
-      setAppActions((prevActions) => [...prevActions, response.data]);
+        // Update the appActions state with the updated action
+        setAppActions((prevActions) =>
+          prevActions.map((action) =>
+            action.id === selectedAction.id ? { ...action, ...response.data } : action
+          )
+        );
 
-      message.success("Action added successfully!");
+        message.success("Action updated successfully!");
+      } else {
+        // Add a new action
+        const response = await addAppAction(selectedApp.id, values); // Call the API to add the action
+        console.log("Action added successfully:", response.data);
+
+        // Update the appActions state with the new action
+        setAppActions((prevActions) => [...prevActions, response.data]);
+
+        message.success("Action added successfully!");
+      }
+
       setAddActionModalVisible(false); // Close the modal
+      setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the state
+      setIsEditActionMode(false); // Reset edit mode
+      actionForm.resetFields(); // Reset the form fields
+    } catch (error) {
+      console.error("Failed to save action:", error);
+      message.error("Failed to save action. Please try again.");
+    }
+  };
+
+  const handleEditAction = (action) => {
+    setSelectedAction(action); // Set the selected action
+    setNewActionData({
+      action_name: action.action_name,
+      action_api: action.action_api,
+      http_method: action.http_method,
+    }); // Update the state (optional, for consistency)
+    actionForm.setFieldsValue({
+      action_name: action.action_name,
+      action_api: action.action_api,
+      http_method: action.http_method,
+    }); // Populate the form fields
+    setIsEditActionMode(true); // Set the modal to edit mode
+    setAddActionModalVisible(true); // Open the modal
+  };
+
+  const handleUpdateAction = async () => {
+    try {
+      const response = await updateAppAction(selectedApp.id, selectedAction.id, newActionData); // Call the API to update the action
+      console.log("Action updated successfully:", response.data);
+
+      // Update the appActions state with the updated action
+      setAppActions((prevActions) =>
+        prevActions.map((action) =>
+          action.id === selectedAction.id ? { ...action, ...response.data } : action
+        )
+      );
+
+      message.success("Action updated successfully!");
+      setEditActionModalVisible(false); // Close the modal
       setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the form
     } catch (error) {
-      console.error("Failed to add action:", error);
-      message.error("Failed to add action. Please try again.");
+      console.error("Failed to update action:", error);
+      message.error("Failed to update action. Please try again.");
     }
   };
 
@@ -381,6 +441,10 @@ const Integrations = () => {
             dataSource={appActions}
             rowKey="id"
             pagination={false}
+            onRow={(record) => ({
+              onClick: () => handleEditAction(record), // Open the edit modal when a row is clicked
+            })}
+            rowClassName={() => "action-row"} // Apply the custom CSS class
           />
         )}
       </Modal>
@@ -519,63 +583,43 @@ const Integrations = () => {
       </Modal>
 
       <Modal
-        title="Add Action"
+        title={isEditActionMode ? "Edit Action" : "Add Action"} // Dynamic title
         visible={addActionModalVisible}
         onCancel={() => {
           setAddActionModalVisible(false);
-          setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the form
+          setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the state
+          setIsEditActionMode(false); // Reset edit mode
+          actionForm.resetFields(); // Reset the form fields
         }}
-        onOk={handleAddAction} // Handle form submission
-        okText="Add"
+        onOk={() => actionForm.submit()} // Submit the form
+        okText={isEditActionMode ? "Save Changes" : "Add"} // Dynamic button text
         cancelText="Cancel"
       >
-        <Form layout="vertical">
+        <Form
+          form={actionForm} // Link the form instance
+          layout="vertical"
+          onFinish={handleAddAction} // Handle form submission
+        >
           <Form.Item
             label="Action Name"
             name="action_name"
             rules={[{ required: true, message: "Please enter the action name!" }]}
           >
-            <Input
-              placeholder="Enter action name"
-              value={newActionData.action_name}
-              onChange={(e) =>
-                setNewActionData((prev) => ({
-                  ...prev,
-                  action_name: e.target.value,
-                }))
-              }
-            />
+            <Input placeholder="Enter action name" />
           </Form.Item>
           <Form.Item
             label="API Endpoint"
             name="action_api"
             rules={[{ required: true, message: "Please enter the API endpoint!" }]}
           >
-            <Input
-              placeholder="Enter API endpoint"
-              value={newActionData.action_api}
-              onChange={(e) =>
-                setNewActionData((prev) => ({
-                  ...prev,
-                  action_api: e.target.value,
-                }))
-              }
-            />
+            <Input placeholder="Enter API endpoint" />
           </Form.Item>
           <Form.Item
             label="HTTP Method"
             name="http_method"
             rules={[{ required: true, message: "Please select an HTTP method!" }]}
           >
-            <Select
-              value={newActionData.http_method}
-              onChange={(value) =>
-                setNewActionData((prev) => ({
-                  ...prev,
-                  http_method: value,
-                }))
-              }
-            >
+            <Select>
               <Select.Option value="GET">GET</Select.Option>
               <Select.Option value="POST">POST</Select.Option>
               <Select.Option value="PUT">PUT</Select.Option>

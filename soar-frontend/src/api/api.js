@@ -185,10 +185,20 @@ export const updateApp = async (appId, formData) => {
 
 export const addAppAction = async (appId, actionData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/integrations/${appId}/addActions/`, actionData);
+    const response = await axios.post(`${API_BASE_URL}/api/integrations/${appId}/addAction/`, actionData);
     return response;
   } catch (error) {
     console.error("Failed to add action:", error);
+    throw error;
+  }
+};
+
+export const updateAppAction = async (appId, actionId, actionData) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/api/integrations/${appId}/editAction/${actionId}`, actionData);
+    return response;
+  } catch (error) {
+    console.error("Failed to update action:", error);
     throw error;
   }
 };
