@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm, Form, Input, Select } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp } from "../../api/api";
+import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -163,7 +163,11 @@ const Integrations = () => {
         formData.append("logo_file", newAppData.logo); // Append the file
       }
     } else if (logoType === "url") {
-      formData.append("logo", newAppData.logo); // Append the URL
+      let value = newAppData.logo;
+      if (!value.startsWith("http")) {
+        value = `https://${value}`;
+      }
+      formData.append("logo", value); // Append the URL
     }
 
     try {
@@ -282,7 +286,7 @@ const Integrations = () => {
               <p>{app.description}</p>
               {app.logo && (
                 <img
-                  src={app.logo}
+                  src={app.logo.startsWith("http") ? app.logo : `${API_BASE_URL}/${app.logo}`}
                   alt={`${app.title} logo`}
                   style={{
                     width: "100%",
