@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm, Form, Input, Select } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp } from "../../api/api";
+import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp, addAppAction } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -21,6 +21,12 @@ const Integrations = () => {
   });
   const [logoType, setLogoType] = useState("file");
   const [isEditMode, setIsEditMode] = useState(false); // Track if the modal is in edit mode
+  const [addActionModalVisible, setAddActionModalVisible] = useState(false); // State for Add Action modal
+  const [newActionData, setNewActionData] = useState({
+    action_name: "",
+    action_api: "",
+    http_method: "GET", // Default HTTP method
+  });
 
   const [form] = Form.useForm(); // Create a form instance
 
@@ -34,6 +40,12 @@ const Integrations = () => {
       title: "API Endpoint",
       dataIndex: "action_api",
       key: "action_api",
+    },
+    {
+      title: "HTTP Method", // New column for HTTP method
+      dataIndex: "http_method",
+      key: "http_method",
+      align: "center", // Optional: Align the content to the center
     },
   ];
 
@@ -225,6 +237,23 @@ const Integrations = () => {
     form.resetFields(); // Reset the form fields
   };
 
+  const handleAddAction = async () => {
+    try {
+      const response = await addAppAction(selectedApp.id, newActionData); // Call the API to add the action
+      console.log("Action added successfully:", response.data);
+
+      // Update the appActions state with the new action
+      setAppActions((prevActions) => [...prevActions, response.data]);
+
+      message.success("Action added successfully!");
+      setAddActionModalVisible(false); // Close the modal
+      setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the form
+    } catch (error) {
+      console.error("Failed to add action:", error);
+      message.error("Failed to add action. Please try again.");
+    }
+  };
+
   if (loading) {
     return <Spin size="large" className="loading-spinner" />;
   }
@@ -334,7 +363,15 @@ const Integrations = () => {
         title={selectedApp?.title || "App Actions"}
         visible={modalVisible}
         onCancel={() => setModalVisible(false)}
-        footer={null}
+        footer={[
+          <Button
+            key="add-action"
+            type="primary"
+            onClick={() => setAddActionModalVisible(true)} // Open the Add Action modal
+          >
+            Add Action
+          </Button>,
+        ]}
       >
         {actionsLoading ? (
           <Spin size="large" />
@@ -477,6 +514,73 @@ const Integrations = () => {
                 onChange={(e) => handleNewAppChange("logo", e.target.value)}
               />
             )}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Add Action"
+        visible={addActionModalVisible}
+        onCancel={() => {
+          setAddActionModalVisible(false);
+          setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the form
+        }}
+        onOk={handleAddAction} // Handle form submission
+        okText="Add"
+        cancelText="Cancel"
+      >
+        <Form layout="vertical">
+          <Form.Item
+            label="Action Name"
+            name="action_name"
+            rules={[{ required: true, message: "Please enter the action name!" }]}
+          >
+            <Input
+              placeholder="Enter action name"
+              value={newActionData.action_name}
+              onChange={(e) =>
+                setNewActionData((prev) => ({
+                  ...prev,
+                  action_name: e.target.value,
+                }))
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label="API Endpoint"
+            name="action_api"
+            rules={[{ required: true, message: "Please enter the API endpoint!" }]}
+          >
+            <Input
+              placeholder="Enter API endpoint"
+              value={newActionData.action_api}
+              onChange={(e) =>
+                setNewActionData((prev) => ({
+                  ...prev,
+                  action_api: e.target.value,
+                }))
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label="HTTP Method"
+            name="http_method"
+            rules={[{ required: true, message: "Please select an HTTP method!" }]}
+          >
+            <Select
+              value={newActionData.http_method}
+              onChange={(value) =>
+                setNewActionData((prev) => ({
+                  ...prev,
+                  http_method: value,
+                }))
+              }
+            >
+              <Select.Option value="GET">GET</Select.Option>
+              <Select.Option value="POST">POST</Select.Option>
+              <Select.Option value="PUT">PUT</Select.Option>
+              <Select.Option value="DELETE">DELETE</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

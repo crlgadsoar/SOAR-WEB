@@ -182,3 +182,13 @@ export const updateApp = async (appId, formData) => {
     throw error;
   }
 };
+
+export const addAppAction = async (appId, actionData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/integrations/${appId}/addActions/`, actionData);
+    return response;
+  } catch (error) {
+    console.error("Failed to add action:", error);
+    throw error;
+  }
+};
