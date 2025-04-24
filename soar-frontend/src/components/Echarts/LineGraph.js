@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactEcharts from "echarts-for-react";
+import "./LineGraph.css"; // 💡 Don't forget to import CSS
 
 const LineGraph = ({ data, xAxisData, yAxisName, style, theme }) => {
+  const [showZoom, setShowZoom] = useState(false);
+
   const options = {
     tooltip: {
       trigger: "axis",
@@ -11,8 +14,8 @@ const LineGraph = ({ data, xAxisData, yAxisName, style, theme }) => {
       type: "category",
       data: xAxisData,
       axisLabel: {
-        rotate: 40, // ✅ Rotates labels to prevent overlap
-        interval: 0, // ✅ Shows all labels
+        rotate: 40,
+        interval: 0,
         fontSize: 10,
         color: "#000",
       },
@@ -20,8 +23,8 @@ const LineGraph = ({ data, xAxisData, yAxisName, style, theme }) => {
     yAxis: {
       type: "value",
       name: yAxisName,
-      nameLocation: "center", // ✅ Centers the label
-      nameGap: 55, // ✅ Moves label left without overlap
+      nameLocation: "center",
+      nameGap: 55,
       nameTextStyle: {
         fontSize: 12,
         color: "#000",
@@ -29,9 +32,27 @@ const LineGraph = ({ data, xAxisData, yAxisName, style, theme }) => {
       },
     },
     grid: {
-      left: 70, // ✅ Ensures space for Y-axis label
+      left: 70,
       right: 20,
     },
+    dataZoom: [
+      {
+        type: "slider",
+        start: 0,
+        end: (10 / xAxisData.length) * 100,
+        show: showZoom, // 🔥 Toggle slider visibility
+        handleStyle: {
+          opacity: 0.8,
+        },
+        emphasis: {
+          handleStyle: {
+            opacity: 1,
+          },
+        },
+        fillerColor: "rgba(24, 144, 255, 0.2)",
+        backgroundColor: "transparent",
+      },
+    ],
     series: [
       {
         type: "line",
@@ -56,7 +77,16 @@ const LineGraph = ({ data, xAxisData, yAxisName, style, theme }) => {
     ],
   };
 
-  return <ReactEcharts option={options} style={style} theme={theme} />;
+  return (
+    <div
+      className="hover-zoom-container"
+      onMouseEnter={() => setShowZoom(true)}
+      onMouseLeave={() => setShowZoom(false)}
+    >
+      <ReactEcharts option={options} style={style} theme={theme} />
+    </div>
+  );
 };
 
 export default LineGraph;
+
