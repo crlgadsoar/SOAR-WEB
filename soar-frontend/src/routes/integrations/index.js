@@ -280,6 +280,19 @@ const Integrations = () => {
               onClick={() => handleCardClick(app)} // This should only trigger when clicking on the card itself
             >
               <p>{app.description}</p>
+              {app.logo && (
+                <img
+                  src={app.logo}
+                  alt={`${app.title} logo`}
+                  style={{
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "contain",
+                    marginTop: "10px",
+                    borderRadius: 50
+                  }}
+                />
+              )}
               <div
                 onClick={(e) => e.stopPropagation()} // Prevent triggering the card click
               >
