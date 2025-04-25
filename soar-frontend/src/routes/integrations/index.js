@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Spin, Modal, Table, Button, Upload, message, Popconfirm, Form, Input, Select } from "antd";
 import { PlusOutlined, UploadOutlined, DownloadOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp } from "../../api/api";
+import { API_BASE_URL, fetchApps, fetchAppActions, importAppsToDatabase, deleteApp, createApp, updateApp, addAppAction, updateAppAction, deleteAppAction } from "../../api/api";
 import "./style.css";
 
 const Integrations = () => {
@@ -21,8 +21,18 @@ const Integrations = () => {
   });
   const [logoType, setLogoType] = useState("file");
   const [isEditMode, setIsEditMode] = useState(false); // Track if the modal is in edit mode
+  const [addActionModalVisible, setAddActionModalVisible] = useState(false); // State for Add Action modal
+  const [newActionData, setNewActionData] = useState({
+    action_name: "",
+    action_api: "",
+    http_method: "GET", // Default HTTP method
+  });
+  const [editActionModalVisible, setEditActionModalVisible] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [isEditActionMode, setIsEditActionMode] = useState(false); // Track if the modal is in edit mode
 
   const [form] = Form.useForm(); // Create a form instance
+  const [actionForm] = Form.useForm(); // Create a form instance
 
   const columns = [
     {
@@ -34,6 +44,12 @@ const Integrations = () => {
       title: "API Endpoint",
       dataIndex: "action_api",
       key: "action_api",
+    },
+    {
+      title: "HTTP Method", // New column for HTTP method
+      dataIndex: "http_method",
+      key: "http_method",
+      align: "center", // Optional: Align the content to the center
     },
   ];
 
@@ -163,7 +179,11 @@ const Integrations = () => {
         formData.append("logo_file", newAppData.logo); // Append the file
       }
     } else if (logoType === "url") {
-      formData.append("logo", newAppData.logo); // Append the URL
+      let value = newAppData.logo;
+      if (!value.startsWith("http")) {
+        value = `https://${value}`;
+      }
+      formData.append("logo", value); // Append the URL
     }
 
     try {
@@ -219,6 +239,99 @@ const Integrations = () => {
     setIsEditMode(false); // Reset edit mode
     setCreateAppModalVisible(false);
     form.resetFields(); // Reset the form fields
+  };
+
+  const handleAddAction = async (values) => {
+    try {
+      if (isEditActionMode) {
+        // Update the existing action
+        const response = await updateAppAction(selectedApp.id, selectedAction.id, values); // Call the API to update the action
+        console.log("Action updated successfully:", response.data);
+
+        // Update the appActions state with the updated action
+        setAppActions((prevActions) =>
+          prevActions.map((action) =>
+            action.id === selectedAction.id ? { ...action, ...response.data } : action
+          )
+        );
+
+        message.success("Action updated successfully!");
+      } else {
+        // Add a new action
+        const response = await addAppAction(selectedApp.id, values); // Call the API to add the action
+        console.log("Action added successfully:", response.data);
+
+        // Update the appActions state with the new action
+        setAppActions((prevActions) => [...prevActions, response.data]);
+
+        message.success("Action added successfully!");
+      }
+
+      setAddActionModalVisible(false); // Close the modal
+      setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the state
+      setIsEditActionMode(false); // Reset edit mode
+      actionForm.resetFields(); // Reset the form fields
+    } catch (error) {
+      console.error("Failed to save action:", error);
+      message.error("Failed to save action. Please try again.");
+    }
+  };
+
+  const handleEditAction = (action) => {
+    setSelectedAction(action); // Set the selected action
+    setNewActionData({
+      action_name: action.action_name,
+      action_api: action.action_api,
+      http_method: action.http_method,
+    }); // Update the state (optional, for consistency)
+    actionForm.setFieldsValue({
+      action_name: action.action_name,
+      action_api: action.action_api,
+      http_method: action.http_method,
+    }); // Populate the form fields
+    setIsEditActionMode(true); // Set the modal to edit mode
+    setAddActionModalVisible(true); // Open the modal
+  };
+
+  const handleUpdateAction = async () => {
+    try {
+      const response = await updateAppAction(selectedApp.id, selectedAction.id, newActionData); // Call the API to update the action
+      console.log("Action updated successfully:", response.data);
+
+      // Update the appActions state with the updated action
+      setAppActions((prevActions) =>
+        prevActions.map((action) =>
+          action.id === selectedAction.id ? { ...action, ...response.data } : action
+        )
+      );
+
+      message.success("Action updated successfully!");
+      setEditActionModalVisible(false); // Close the modal
+      setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the form
+    } catch (error) {
+      console.error("Failed to update action:", error);
+      message.error("Failed to update action. Please try again.");
+    }
+  };
+
+  const handleDeleteAction = async () => {
+    try {
+      await deleteAppAction(selectedApp.id, selectedAction.id); // Call the API to delete the action
+      console.log("Action deleted successfully");
+
+      // Update the appActions state to remove the deleted action
+      setAppActions((prevActions) =>
+        prevActions.filter((action) => action.id !== selectedAction.id)
+      );
+
+      message.success("Action deleted successfully!");
+      setAddActionModalVisible(false); // Close the modal
+      setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the state
+      setIsEditActionMode(false); // Reset edit mode
+    } catch (error) {
+      console.error("Failed to delete action:", error);
+      message.error("Failed to delete action. Please try again.");
+    }
   };
 
   if (loading) {
@@ -280,6 +393,19 @@ const Integrations = () => {
               onClick={() => handleCardClick(app)} // This should only trigger when clicking on the card itself
             >
               <p>{app.description}</p>
+              {app.logo && (
+                <img
+                  src={app.logo.startsWith("http") ? app.logo : `${API_BASE_URL}/${app.logo}`}
+                  alt={`${app.title} logo`}
+                  style={{
+                    width: "100%",
+                    height: "150px",
+                    objectFit: "contain",
+                    marginTop: "10px",
+                    borderRadius: 50
+                  }}
+                />
+              )}
               <div
                 onClick={(e) => e.stopPropagation()} // Prevent triggering the card click
               >
@@ -317,7 +443,15 @@ const Integrations = () => {
         title={selectedApp?.title || "App Actions"}
         visible={modalVisible}
         onCancel={() => setModalVisible(false)}
-        footer={null}
+        footer={[
+          <Button
+            key="add-action"
+            type="primary"
+            onClick={() => setAddActionModalVisible(true)} // Open the Add Action modal
+          >
+            Add Action
+          </Button>,
+        ]}
       >
         {actionsLoading ? (
           <Spin size="large" />
@@ -327,6 +461,10 @@ const Integrations = () => {
             dataSource={appActions}
             rowKey="id"
             pagination={false}
+            onRow={(record) => ({
+              onClick: () => handleEditAction(record), // Open the edit modal when a row is clicked
+            })}
+            rowClassName={() => "action-row"} // Apply the custom CSS class
           />
         )}
       </Modal>
@@ -460,6 +598,73 @@ const Integrations = () => {
                 onChange={(e) => handleNewAppChange("logo", e.target.value)}
               />
             )}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={isEditActionMode ? "Edit Action" : "Add Action"} // Dynamic title
+        visible={addActionModalVisible}
+        onCancel={() => {
+          setAddActionModalVisible(false);
+          setNewActionData({ action_name: "", action_api: "", http_method: "GET" }); // Reset the state
+          setIsEditActionMode(false); // Reset edit mode
+          actionForm.resetFields(); // Reset the form fields
+        }}
+        onOk={() => actionForm.submit()} // Submit the form
+        okText={isEditActionMode ? "Save Changes" : "Add"} // Dynamic button text
+        cancelText="Cancel"
+        footer={[
+          isEditActionMode && (
+            <Popconfirm
+              title="Are you sure you want to delete this action?"
+              onConfirm={handleDeleteAction} // Call the delete function
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button danger type="primary">
+                Delete
+              </Button>
+            </Popconfirm>
+          ),
+          <Button key="cancel" onClick={() => setAddActionModalVisible(false)}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => actionForm.submit()}>
+            {isEditActionMode ? "Save Changes" : "Add"}
+          </Button>,
+        ]}
+      >
+        <Form
+          form={actionForm} // Link the form instance
+          layout="vertical"
+          onFinish={handleAddAction} // Handle form submission
+        >
+          <Form.Item
+            label="Action Name"
+            name="action_name"
+            rules={[{ required: true, message: "Please enter the action name!" }]}
+          >
+            <Input placeholder="Enter action name" />
+          </Form.Item>
+          <Form.Item
+            label="API Endpoint"
+            name="action_api"
+            rules={[{ required: true, message: "Please enter the API endpoint!" }]}
+          >
+            <Input placeholder="Enter API endpoint" />
+          </Form.Item>
+          <Form.Item
+            label="HTTP Method"
+            name="http_method"
+            rules={[{ required: true, message: "Please select an HTTP method!" }]}
+          >
+            <Select>
+              <Select.Option value="GET">GET</Select.Option>
+              <Select.Option value="POST">POST</Select.Option>
+              <Select.Option value="PUT">PUT</Select.Option>
+              <Select.Option value="DELETE">DELETE</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

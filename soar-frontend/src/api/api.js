@@ -183,6 +183,36 @@ export const updateApp = async (appId, formData) => {
   }
 };
 
+export const addAppAction = async (appId, actionData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/integrations/${appId}/addAction/`, actionData);
+    return response;
+  } catch (error) {
+    console.error("Failed to add action:", error);
+    throw error;
+  }
+};
+
+export const updateAppAction = async (appId, actionId, actionData) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/api/integrations/${appId}/editAction/${actionId}`, actionData);
+    return response;
+  } catch (error) {
+    console.error("Failed to update action:", error);
+    throw error;
+  }
+};
+
+export const deleteAppAction = async (appId, actionId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/integrations/${appId}/${actionId}/deleteAction`);
+    return response;
+  } catch (error) {
+    console.error("Failed to delete action:", error);
+    throw error;
+  }
+};
+
 /* Add new playbook API */
 export const addPlaybook = async (playbookData) => {
   try {
