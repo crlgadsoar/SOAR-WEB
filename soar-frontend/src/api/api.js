@@ -182,3 +182,37 @@ export const updateApp = async (appId, formData) => {
     throw error;
   }
 };
+
+/* Add new playbook API */
+export const addPlaybook = async (playbookData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/add_playbook`, playbookData, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error adding playbook:", error.response?.data || error.message);
+    return null;
+  }
+};
+
+/* Delete playbook API */
+export const deletePlaybook = async (playbookId) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/delete_playbook`, {
+      playbook_id: playbookId
+    }, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error deleting playbook:", error.response?.data || error.message);
+    return null;
+  }
+};
