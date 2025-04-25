@@ -390,6 +390,7 @@ const Integrations = () => {
               bordered={true}
               hoverable
               className="integration-card"
+              onClick={() => handleCardClick(app)} // This should only trigger when clicking on the card itself
             // This should only trigger when clicking on the card itself
             >
               <p>{app.description}</p>
