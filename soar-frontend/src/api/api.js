@@ -23,9 +23,13 @@ export const signUp = async (values) => {
   }
 };
 
-export const fetchIncidents = async () => {
+export const fetchIncidents = async (params = {}) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/incidents`, {
+    // Construct query parameters if provided
+    const query = new URLSearchParams(params).toString();
+    const url = query ? `${API_BASE_URL}/incidents?${query}` : `${API_BASE_URL}/incidents`;
+
+    const response = await axios.get(url, {
       withCredentials: true,
     });
     return response.data;
