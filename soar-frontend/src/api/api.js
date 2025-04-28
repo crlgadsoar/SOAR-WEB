@@ -276,3 +276,13 @@ export const fetchActions = async (utility) => {
     return []; // Return an empty list in case of an error
   }
 };
+
+export const markIncidentAsOld = async (incidentid) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/incidents/mark_old`, { incidentid });
+    return response.data; // Return the response data for further use
+  } catch (error) {
+    console.error("Error updating isnew status:", error);
+    throw error; // Re-throw the error to handle it in the calling function
+  }
+};
