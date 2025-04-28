@@ -212,3 +212,47 @@ export const deleteAppAction = async (appId, actionId) => {
     throw error;
   }
 };
+
+/* Add new playbook API */
+export const addPlaybook = async (playbookData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/add_playbook`, playbookData, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error adding playbook:", error.response?.data || error.message);
+    return null;
+  }
+};
+
+/* Delete playbook API */
+export const deletePlaybook = async (playbookId) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/delete_playbook`, {
+      playbook_id: playbookId
+    }, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error("Error deleting playbook:", error.response?.data || error.message);
+    return null;
+  }
+};
+
+export const fetchActions = async (utility) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/actions?utility=${utility}`);
+    return response.data.actions; // Returns the actions list
+  } catch (error) {
+    console.error("Error fetching actions:", error);
+    return []; // Return an empty list in case of an error
+  }
+};

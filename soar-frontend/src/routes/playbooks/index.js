@@ -6,7 +6,10 @@ import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
 import { instance } from "util/connection/axios";
 import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
-import { fetchPlaybookDetails } from "api/api";
+import { fetchPlaybookDetails, addPlaybook } from "api/api";
+import AddPlaybook from "./AddPlaybook";
+import { message } from "antd";
+
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,18 +29,60 @@ const Playbooks = () => {
     setModalVisible(true);
     setData(row);
 
-    // if (row?.playbook_id) {
+    if (row?.playbook_id) {
       fetchPlaybookDetails(row.playbook_id)
-      .then((res) => setRowDetail(res.data))
-      .catch((err) => console.error("Error fetching playbook details:", err));
-    // }
+        .then((res) => {
+          const fullData = {
+            ...row,
+            ...res.data, // in case API gives more data like 'source', 'utility' etc
+          };
+          setRowDetail(fullData);
+        })
+        .catch((err) => console.error("Error fetching playbook details:", err));
+    }    
   };
 
   const modalComponentRender = () => {
-    if (modalComponent === "ADD" || modalComponent === "EDIT") {
+    if (modalComponent === "ADD") {
+      return (
+        <AddPlaybook
+          visible={modalVisible}
+          onCancel={() => {
+            setModalVisible(false);
+            setModalComponent(null);
+          }}
+          onSubmit={(flowData) => {
+            setButtonSpin(true);
+            const payload = {
+              source: flowData.source,
+              utility: flowData.utility,
+              action: flowData.action,
+              format: flowData.format,
+              ip: flowData.ip,
+              port: flowData.port,
+              playbook_id: flowData.playbookId,  // ✅ fixed to match form field
+              playbook_name: flowData.playbookname,
+              mitreIds: flowData.mitreIds,
+            };            
+  
+            addPlaybook(payload) // ✅ using your API helper function
+            .then(() => {
+            childRef.current.reloadDataHandle();
+            setModalVisible(false);
+            setModalComponent(null);
+            message.success("Playbook Added");
+            })
+            .catch(console.error)
+            .finally(() => setButtonSpin(false));
+          }}
+        />
+      );
+    }
+  
+    if (modalComponent === "EDIT") {
       return (
         <InputForm
-          title={modalComponent === "ADD" ? "Add Playbook" : "Playbook Details"}
+          title="Playbook Details"
           visible={modalVisible}
           buttonSpin={buttonSpin}
           onSubmit={onSubmit}
@@ -46,12 +91,13 @@ const Playbooks = () => {
             setModalComponent(null);
           }}
           type={modalComponent}
-          initialValues={modalComponent === "EDIT" ? { ...rowDetail } : undefined}
+          initialValues={rowDetail}
         />
-      ); 
-    } 
-    return null; 
-  };
+      );
+    }
+  
+    return null;
+  };  
 
   const onSubmit = (values) => {
     setButtonSpin(true);
@@ -85,12 +131,15 @@ const Playbooks = () => {
    
   const deleteData = (row) => {
     instance
-      .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_DEL_USER, row)
+      .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_DEL_USER, {
+        playbook_id: row.playbook_id, // ✅ this is correct
+      })
       .then(() => childRef.current.reloadDataHandle())
       .catch(console.error)
       .finally(() => setButtonSpin(false));
   };
-
+  
+  console.log(modalComponent, modalVisible)
   return (
     <>
       <Card

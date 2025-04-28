@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
+// CrudTable.js
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Table, Space } from "antd";
-import axios from "axios";
 import EditDeleteAction from "components/EditDeleteAction";
-import { fetchPlaybooks } from "api/api";
+import { fetchPlaybooks, deletePlaybook } from "api/api";
+import { message } from "antd";
 
-const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
+const PlaybookCrudTable = ({ openModalHandler }, ref) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true);
     fetchPlaybooks()
       .then((response) => {
         if (Array.isArray(response.data)) {
-          // Sorting data by playbook_id in ascending order
           const sortedData = response.data.sort((a, b) => a.playbook_id - b.playbook_id);
           setData(sortedData);
         } else {
@@ -24,24 +25,40 @@ const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
         console.error("Error fetching playbook data:", error);
         setLoading(false);
       });
-  }, []);
+  };
 
   useEffect(() => {
-    console.log("Playbook Data:", data);
-  }, [data]);
+    loadData();
+  }, []);
+
+  const handleDelete = async (playbookId) => {
+    console.log("Deleting playbook with ID:", playbookId);
+    const result = await deletePlaybook(playbookId);
+    if (result?.status === 200) {
+      message.success("Playbook deleted!");
+      setData((prevData) => prevData.filter((p) => p.playbook_id !== playbookId));
+    } else {
+      alert("Failed to delete playbook.");
+    }
+  };
+
+  // ✅ Expose reload method to parent using ref
+  useImperativeHandle(ref, () => ({
+    reloadDataHandle: loadData,
+  }));
 
   const columns = [
-    { 
-      title: "Playbook ID", 
-      dataIndex: "playbook_id", 
+    {
+      title: "Playbook ID",
+      dataIndex: "playbook_id",
       key: "playbook_id",
-      sorter: (a, b) => a.playbook_id - b.playbook_id, // Enables column sorting
-      defaultSortOrder: "ascend", // Default to ascending order
+      sorter: (a, b) => a.playbook_id - b.playbook_id,
+      defaultSortOrder: "ascend",
     },
-    { 
-      title: "Playbook Name", 
-      dataIndex: "playbook_name", 
-      key: "playbook_name" 
+    {
+      title: "Playbook Name",
+      dataIndex: "playbook_name",
+      key: "playbook_name",
     },
     {
       title: "Action",
@@ -51,7 +68,7 @@ const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
           <EditDeleteAction
             editModalHandler={openModalHandler}
             row={row}
-            deleteData={deleteData}
+            deleteData={() => handleDelete(row.playbook_id)}
           />
         </Space>
       ),
@@ -61,4 +78,5 @@ const PlaybookCrudTable = ({ openModalHandler, deleteData }) => {
   return <Table columns={columns} dataSource={data} loading={loading} rowKey="playbook_id" />;
 };
 
-export default PlaybookCrudTable;
+// ✅ Export wrapped with forwardRef
+export default forwardRef(PlaybookCrudTable);
