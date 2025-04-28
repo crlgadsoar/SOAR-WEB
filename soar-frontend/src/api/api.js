@@ -246,3 +246,13 @@ export const deletePlaybook = async (playbookId) => {
     return null;
   }
 };
+
+export const fetchActions = async (utility) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/actions?utility=${utility}`);
+    return response.data.actions; // Returns the actions list
+  } catch (error) {
+    console.error("Error fetching actions:", error);
+    return []; // Return an empty list in case of an error
+  }
+};
