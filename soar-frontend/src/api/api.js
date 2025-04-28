@@ -1,11 +1,27 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:5000"; // Backend base URL
+export const API_BASE_URL = "http://localhost:5000"; 
 
-// export const axios = axios.create({
-//   baseURL: "http://localhost:5002", // Backend base URL
-//   withCredentials: true, // Send cookies with requests
-// });
+
+export const signUp = async (values) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      return { success: true, message: "Registration successful! Please log in." };
+    } else {
+      return { success: false, message: data.message || "Registration failed" };
+    }
+  } catch (error) {
+    console.error("Error during sign-up:", error);
+    return { success: false, message: "Server error. Please try again." };
+  }
+};
 
 export const fetchIncidents = async () => {
   try {
