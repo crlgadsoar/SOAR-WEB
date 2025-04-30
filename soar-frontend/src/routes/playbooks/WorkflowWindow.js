@@ -74,6 +74,7 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
                       alignItems: "center",
                       height: "50px",
                       padding: "0 10px",
+                      marginRight: "10px",
                     }}
                   >
                     <div
