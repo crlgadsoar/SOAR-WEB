@@ -1,162 +1,88 @@
-import React, { useState, useRef } from "react";
-import { Card, Space, Tooltip, Button, theme } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { Card, Space, Tooltip, Button, theme, message, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
-import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
-import { instance } from "util/connection/axios";
-import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
-import { fetchPlaybookDetails, addPlaybook } from "api/api";
 import AddPlaybook from "./AddPlaybook";
-import { message } from "antd";
-
+import WorkflowWindow from "./WorkflowWindow"; // Import the WorkflowWindow component
+import { fetchApps } from "../../api/api"; // Import the fetchApps API
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalComponent, setModalComponent] = useState(null);
-  const [rowDetail, setRowDetail] = useState(null);
-  const [data, setData] = useState(null);
-  const [buttonSpin, setButtonSpin] = useState(false);
+  const [workflowModalVisible, setWorkflowModalVisible] = useState(false); // State for workflow modal
+  const [apps, setApps] = useState([]); // State for apps
+  const [loadingApps, setLoadingApps] = useState(true); // State for loading apps
   const childRef = useRef(null);
-  const { displayMode } = useSelector((state) => state.themeConfig);
-  const { authUser } = useSelector(({ auth }) => auth);
   const {
     token: { colorPrimary },
   } = theme.useToken();
 
-  const openModalHandler = (value, row) => {
-    setModalComponent(value);
-    setModalVisible(true);
-    setData(row);
+  // Fetch apps when the component is mounted
+  useEffect(() => {
+    const fetchAvailableApps = async () => {
+      try {
+        const appsData = await fetchApps(); // Fetch apps using the API
+        setApps(appsData); // Set the fetched apps
+      } catch (error) {
+        console.error("Failed to fetch apps:", error);
+        message.error("Failed to load apps. Please try again.");
+      } finally {
+        setLoadingApps(false); // Stop the loading spinner
+      }
+    };
 
-    if (row?.playbook_id) {
-      fetchPlaybookDetails(row.playbook_id)
-        .then((res) => {
-          const fullData = {
-            ...row,
-            ...res.data, // in case API gives more data like 'source', 'utility' etc
-          };
-          setRowDetail(fullData);
-        })
-        .catch((err) => console.error("Error fetching playbook details:", err));
-    }    
-  };
+    fetchAvailableApps();
+  }, []);
 
-  const modalComponentRender = () => {
-    if (modalComponent === "ADD") {
-      return (
-        <AddPlaybook
-          visible={modalVisible}
-          onCancel={() => {
-            setModalVisible(false);
-            setModalComponent(null);
-          }}
-          onSubmit={(flowData) => {
-            setButtonSpin(true);
-            const payload = {
-              source: flowData.source,
-              utility: flowData.utility,
-              action: flowData.action,
-              format: flowData.format,
-              ip: flowData.ip,
-              port: flowData.port,
-              playbook_id: flowData.playbookId,  // ✅ fixed to match form field
-              playbook_name: flowData.playbookname,
-              mitreIds: flowData.mitreIds,
-            };            
-  
-            addPlaybook(payload) // ✅ using your API helper function
-            .then(() => {
-            childRef.current.reloadDataHandle();
-            setModalVisible(false);
-            setModalComponent(null);
-            message.success("Playbook Added");
-            })
-            .catch(console.error)
-            .finally(() => setButtonSpin(false));
-          }}
-        />
-      );
-    }
-  
-    if (modalComponent === "EDIT") {
-      return (
-        <InputForm
-          title="Playbook Details"
-          visible={modalVisible}
-          buttonSpin={buttonSpin}
-          onSubmit={onSubmit}
-          onCancel={() => {
-            setModalVisible(false);
-            setModalComponent(null);
-          }}
-          type={modalComponent}
-          initialValues={rowDetail}
-        />
-      );
-    }
-  
-    return null;
-  };  
-
-  const onSubmit = (values) => {
-    setButtonSpin(true);
-    let parsedValue = { ...values };
-
-    Object.keys(parsedValue).forEach((key) => {
-      if (parsedValue[key] === undefined) parsedValue[key] = null;
-    });
-
-    if (values.action === "ADD") {
-      parsedValue = { ...values, createdBy: authUser.username, createdOn: "-1" };
-      instance
-        .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_ADD_USER, parsedValue)
-        .then(() => {
-          childRef.current.reloadDataHandle();
-          setModalVisible(false);
-        })
-        .catch(console.error)
-        .finally(() => setButtonSpin(false));
-    } else if (values.action === "EDIT") {
-      instance
-        .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_SUBMIT_EDIT_USER, parsedValue)
-        .then(() => {
-          childRef.current.reloadDataHandle();
-          setModalVisible(false);
-        })
-        .catch(console.error)
-        .finally(() => setButtonSpin(false));
-    }
-  };
-   
-  const deleteData = (row) => {
-    instance
-      .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_DEL_USER, {
-        playbook_id: row.playbook_id, // ✅ this is correct
-      })
-      .then(() => childRef.current.reloadDataHandle())
-      .catch(console.error)
-      .finally(() => setButtonSpin(false));
-  };
-  
-  console.log(modalComponent, modalVisible)
   return (
     <>
       <Card
         title="List of Playbooks"
         extra={
           <Space>
-            <Tooltip title="Add" color={colorPrimary}>
-              <Button type="primary" style={{ color: "white", borderColor: colorPrimary }} onClick={() => openModalHandler("ADD")}>
+            <Tooltip title="Add Playbook" color={colorPrimary}>
+              <Button
+                type="primary"
+                style={{ color: "white", borderColor: colorPrimary }}
+                onClick={() => setModalVisible(true)}
+              >
                 <PlusOutlined style={{ fontSize: "15px" }} />
+              </Button>
+            </Tooltip>
+            <Tooltip title="Add Workflow" color={colorPrimary}>
+              <Button
+                type="primary"
+                style={{ color: "white", borderColor: colorPrimary }}
+                onClick={() => setWorkflowModalVisible(true)} // Open the workflow modal
+              >
+                <PlusOutlined style={{ fontSize: "15px" }} />
+                Add Workflow
               </Button>
             </Tooltip>
           </Space>
         }
       >
-        <CrudTable openModalHandler={openModalHandler} ref={childRef} deleteData={deleteData} />
+        <CrudTable ref={childRef} />
       </Card>
-      {modalComponentRender()}
+
+      {/* Add Playbook Modal */}
+      {modalVisible && (
+        <AddPlaybook
+          visible={modalVisible}
+          onCancel={() => setModalVisible(false)}
+        />
+      )}
+
+      {/* Workflow Window */}
+      {loadingApps ? (
+        <Spin size="large" />
+      ) : (
+        <WorkflowWindow
+          visible={workflowModalVisible}
+          onCancel={() => setWorkflowModalVisible(false)} // Close the workflow modal
+          apps={apps} // Pass the fetched apps
+        />
+      )}
     </>
   );
 };
