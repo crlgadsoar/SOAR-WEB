@@ -40,15 +40,20 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
         {!isCollapsed && (
           <div
             style={{
-              width: "250px",
+              width: "300px",
               borderRight: "1px solid #f0f0f0",
-              paddingRight: "20px",
+              paddingRight: "5px",
             }}
           >
             <h3>Available Apps</h3>
             <Space
               direction="vertical"
-              style={{ width: "100%", height: "100%", overflowY: "auto" }}
+              style={{ width: "100%", 
+                height: "100%", 
+                overflowY: "auto",
+                scrollbarWidth: "thin",
+                msOverflowStyle: "none",
+              }}
             >
               {apps.map((app) => (
                 <Tooltip title={app.description} placement="right" key={app.id}>
