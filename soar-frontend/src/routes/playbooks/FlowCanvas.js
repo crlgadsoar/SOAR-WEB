@@ -9,35 +9,101 @@ import {
   addEdge,
   MarkerType,
   ReactFlowProvider,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+
+// Custom Node with Delete Button (cross at top right)
+const DeletableNode = ({ id, data, selected }) => {
+  const onDelete = (e) => {
+    e.stopPropagation();
+    if (data.onDelete) data.onDelete(id);
+  };
+
+  return (
+    <div
+      style={{
+        border: selected ? '2px solid #1890ff' : '1px solid #d9d9d9',
+        borderRadius: 6,
+        background: "#fff",
+        padding: "10px 16px",
+        minWidth: 120,
+        minHeight: 40,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 2px 8px #f0f1f2",
+        fontWeight: 500,
+        position: "relative",
+      }}
+    >
+      <span>{data.label}</span>
+      <button
+        style={{
+          position: "absolute",
+          top: -8,
+          right: -8,
+          background: "#ff4d4f",
+          color: "#fff",
+          border: "none",
+          borderRadius: "50%",
+          cursor: "pointer",
+          width: 20,
+          height: 20,
+          lineHeight: "16px",
+          padding: 0,
+          fontWeight: "bold",
+          fontSize: 14,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+        onClick={onDelete}
+        title="Delete Node"
+      >
+        ×
+      </button>
+      <Handle type="target" position={Position.Top} />
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  );
+};
+
+const nodeTypes = {
+  deletable: DeletableNode,
+};
 
 const FlowCanvasInner = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
+  // Node delete handler
+  const handleDeleteNode = useCallback(
+    (id) => setNodes((nds) => nds.filter((n) => n.id !== id)),
+    [setNodes]
+  );
+
   useEffect(() => {
     if (reactFlowInstance) {
-      // Center of viewport in screen coordinates
       const centerScreen = {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
       };
-
-      // Convert screen coordinates to flow coordinates
       const centerFlow = reactFlowInstance.screenToFlowPosition(centerScreen);
 
       const initialNode = {
         id: '1',
-        data: { label: 'SIEM Incident' },
+        data: { label: 'SIEM Incident', onDelete: handleDeleteNode },
         position: centerFlow,
         draggable: true,
+        type: 'deletable',
       };
 
       setNodes([initialNode]);
     }
-  }, [reactFlowInstance, setNodes]);
+  }, [reactFlowInstance, setNodes, handleDeleteNode]);
 
   const onInit = (instance) => {
     setReactFlowInstance(instance);
@@ -54,15 +120,15 @@ const FlowCanvasInner = () => {
 
       const newNode = {
         id: `${app.id}-${nodes.length}`,
-        data: { label: app.title },
+        data: { label: app.title, onDelete: handleDeleteNode },
         position,
         draggable: true,
-        type: 'default',
+        type: 'deletable',
       };
 
       setNodes((nds) => [...nds, newNode]);
     },
-    [nodes, setNodes, reactFlowInstance]
+    [nodes, setNodes, reactFlowInstance, handleDeleteNode]
   );
 
   const onConnect = useCallback(
@@ -91,6 +157,7 @@ const FlowCanvasInner = () => {
       onDragOver={(event) => event.preventDefault()}
       onInit={onInit}
       fitView
+      nodeTypes={nodeTypes}
     >
       <Controls />
       <MiniMap />
