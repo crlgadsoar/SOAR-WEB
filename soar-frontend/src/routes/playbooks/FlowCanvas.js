@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -7,27 +7,47 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
-  useReactFlow,
+  MarkerType,
   ReactFlowProvider,
-  MarkerType
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 const FlowCanvasInner = () => {
-  const initialNodes = []  
-  const initialEdges = [];
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  useEffect(() => {
+    if (reactFlowInstance) {
+      // Center of viewport in screen coordinates
+      const centerScreen = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      };
 
-  const { screenToFlowPosition } = useReactFlow();
+      // Convert screen coordinates to flow coordinates
+      const centerFlow = reactFlowInstance.screenToFlowPosition(centerScreen);
+
+      const initialNode = {
+        id: '1',
+        data: { label: 'SIEM Incident' },
+        position: centerFlow,
+        draggable: true,
+      };
+
+      setNodes([initialNode]);
+    }
+  }, [reactFlowInstance, setNodes]);
+
+  const onInit = (instance) => {
+    setReactFlowInstance(instance);
+  };
 
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
       const app = JSON.parse(event.dataTransfer.getData('app'));
-
-      const position = screenToFlowPosition({
+      const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
@@ -36,13 +56,13 @@ const FlowCanvasInner = () => {
         id: `${app.id}-${nodes.length}`,
         data: { label: app.title },
         position,
-        type: 'default',
         draggable: true,
+        type: 'default',
       };
 
       setNodes((nds) => [...nds, newNode]);
     },
-    [nodes, setNodes, screenToFlowPosition]
+    [nodes, setNodes, reactFlowInstance]
   );
 
   const onConnect = useCallback(
@@ -60,7 +80,6 @@ const FlowCanvasInner = () => {
     [setEdges]
   );
 
-
   return (
     <ReactFlow
       nodes={nodes}
@@ -70,7 +89,8 @@ const FlowCanvasInner = () => {
       onConnect={onConnect}
       onDrop={onDrop}
       onDragOver={(event) => event.preventDefault()}
-      // style={{ width: '100%', height: '100%' }}
+      onInit={onInit}
+      fitView
     >
       <Controls />
       <MiniMap />
