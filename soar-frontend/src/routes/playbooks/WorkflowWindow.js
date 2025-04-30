@@ -26,17 +26,18 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
           onClick={() => {
             message.success("Workflow saved successfully!");
             onCancel();
-          }}
+            }}
+          >
+            Save Workflow
+          </Button>,
+          ]}
+          centered
+          style={{ margin: "auto" }}
+          bodyStyle={{ height: "80vh", padding: 0 }}
+          width="100%"
         >
-          Save Workflow
-        </Button>,
-      ]}
-      style={{ top: 0 }}
-      bodyStyle={{ height: "100vh", padding: 0 }}
-      width="100%"
-    >
-      <div style={{ display: "flex", height: "100%" }}>
-        {/* Left: Apps List */}
+          <div style={{ display: "flex", height: "100%" }}>
+          {/* Left: Apps List */}
         {!isCollapsed && (
           <div
             style={{
