@@ -1,14 +1,33 @@
 // WorkflowWindow.js
 import React, { useState } from "react";
-import { Modal, Button, Card, Space, message, Tooltip, Avatar } from "antd";
+import { Modal, Button, Card, Space, message, Tooltip, Avatar, Input } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import FlowCanvas from "./FlowCanvas"; // New file for the canvas
+import FlowCanvasMain from "./FlowCanvas"; 
+import { saveWorkflow } from "../../api/api"
 
 const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
+  const [workflowName, setWorkflowName] = useState("");
   const [selectedApp, setSelectedApp] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+
+  const handleSaveWorkflow = async () => {
+    try {
+      const workflow = {
+        name: workflowName,
+        nodes,
+        edges,
+        created_at: new Date().toISOString(),
+      };
+      console.log("Saving workflow:", workflow);
+      await saveWorkflow(workflow);
+      message.success("Workflow saved successfully!");
+      onCancel();
+    } catch (error) {
+      message.error("Failed to save workflow.");
+    }
+  };
 
   return (
     <Modal
@@ -17,27 +36,32 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
       onCancel={onCancel}
       maskClosable={false}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Cancel
-        </Button>,
-        <Button
-          key="save"
-          type="primary"
-          onClick={() => {
-            message.success("Workflow saved successfully!");
-            onCancel();
-            }}
+        <div key="name-input" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flex: 1 }}>
+          <Input
+            placeholder="Workflow Name"
+            value={workflowName}
+            onChange={e => setWorkflowName(e.target.value)}
+            style={{ marginRight: 16, width: 200 }}
+          />
+          <Button onClick={onCancel} style={{ marginRight: 8 }}>
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleSaveWorkflow}
+            disabled={!workflowName.trim()} // Disable save button if workflow name is empty
           >
             Save Workflow
-          </Button>,
-          ]}
-          centered
-          style={{ margin: "auto" }}
-          bodyStyle={{ height: "80vh", padding: 0 }}
-          width="100%"
-        >
-          <div style={{ display: "flex", height: "100%" }}>
-          {/* Left: Apps List */}
+          </Button>
+        </div>
+      ]}
+      centered
+      style={{ margin: "auto" }}
+      bodyStyle={{ height: "80vh", padding: 0 }}
+      width="100%"
+    >
+      <div style={{ display: "flex", height: "100%" }}>
+        {/* Left: Apps List */}
         {!isCollapsed && (
           <div
             style={{
@@ -49,8 +73,9 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
             <h3>Available Apps</h3>
             <Space
               direction="vertical"
-              style={{ width: "100%", 
-                height: "100%", 
+              style={{
+                width: "100%",
+                height: "100%",
                 overflowY: "auto",
                 scrollbarWidth: "thin",
                 msOverflowStyle: "none",
@@ -115,7 +140,7 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
         </div>
 
         {/* Right: Workflow Canvas */}
-        <FlowCanvas
+        <FlowCanvasMain
           nodes={nodes}
           setNodes={setNodes}
           edges={edges}

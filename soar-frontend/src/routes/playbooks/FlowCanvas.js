@@ -4,13 +4,13 @@ import {
   MiniMap,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
   addEdge,
   MarkerType,
   ReactFlowProvider,
   Handle,
   Position,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -74,9 +74,7 @@ const nodeTypes = {
   deletable: DeletableNode,
 };
 
-const FlowCanvasInner = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
   // Node delete handler
@@ -86,7 +84,7 @@ const FlowCanvasInner = () => {
   );
 
   useEffect(() => {
-    if (reactFlowInstance) {
+    if (reactFlowInstance && nodes.length === 0) {
       const centerScreen = {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
@@ -103,7 +101,7 @@ const FlowCanvasInner = () => {
 
       setNodes([initialNode]);
     }
-  }, [reactFlowInstance, setNodes, handleDeleteNode]);
+  }, [reactFlowInstance, setNodes, handleDeleteNode, nodes.length]);
 
   const onInit = (instance) => {
     setReactFlowInstance(instance);
@@ -146,29 +144,44 @@ const FlowCanvasInner = () => {
     [setEdges]
   );
 
+  // FIX: Use applyNodeChanges/applyEdgeChanges
+  const onNodesChange = useCallback(
+    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+    [setNodes]
+  );
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
+
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onDrop={onDrop}
-      onDragOver={(event) => event.preventDefault()}
-      onInit={onInit}
-      fitView
-      nodeTypes={nodeTypes}
-    >
-      <Controls />
-      <MiniMap />
-      <Background variant="dots" gap={12} size={1} />
-    </ReactFlow>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDrop={onDrop}
+        onDragOver={(event) => event.preventDefault()}
+        onInit={onInit}
+        fitView
+        nodeTypes={nodeTypes}
+      >
+        <Controls />
+        <MiniMap />
+        <Background variant="dots" gap={12} size={1} />
+      </ReactFlow>
   );
 };
 
-const FlowCanvasMain = () => (
+const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges }) => (
   <ReactFlowProvider>
-    <FlowCanvasInner />
+    <FlowCanvasInner
+      nodes={nodes}
+      setNodes={setNodes}
+      edges={edges}
+      setEdges={setEdges}
+    />
   </ReactFlowProvider>
 );
 

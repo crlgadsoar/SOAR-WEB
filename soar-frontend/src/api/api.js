@@ -286,3 +286,18 @@ export const markIncidentAsOld = async (incidentid) => {
     throw error; // Re-throw the error to handle it in the calling function
   }
 };
+
+export const saveWorkflow = async (workflow) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/addWorkflows`, workflow, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to save workflow:", error);
+    throw error;
+  }
+};
