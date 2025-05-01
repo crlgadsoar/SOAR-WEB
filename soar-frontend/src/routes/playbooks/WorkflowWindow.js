@@ -1,9 +1,11 @@
 // WorkflowWindow.js
 import React, { useState } from "react";
 import { Modal, Button, Card, Space, message, Tooltip, Avatar, Input } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import FlowCanvasMain from "./FlowCanvas"; 
-import { saveWorkflow } from "../../api/api"
+import { LeftOutlined, RightOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import FlowCanvasMain from "./FlowCanvas";
+import { saveWorkflow } from "../../api/api";
+
+const { confirm } = Modal;
 
 const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
   const [workflowName, setWorkflowName] = useState("");
@@ -11,6 +13,29 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+
+  // Clear all workflow variables
+  const clearWorkflow = () => {
+    setWorkflowName("");
+    setSelectedApp(null);
+    setNodes([]);
+    setEdges([]);
+  };
+
+  // Show confirmation before closing
+  const handleCancel = () => {
+    confirm({
+      title: "Are you sure you want to close the workflow window?",
+      icon: <ExclamationCircleOutlined />,
+      content: "All unsaved changes will be lost.",
+      okText: "Yes, Close",
+      cancelText: "No",
+      onOk() {
+        clearWorkflow();
+        onCancel();
+      },
+    });
+  };
 
   const handleSaveWorkflow = async () => {
     try {
@@ -20,9 +45,9 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
         edges,
         created_at: new Date().toISOString(),
       };
-      console.log("Saving workflow:", workflow);
       await saveWorkflow(workflow);
       message.success("Workflow saved successfully!");
+      clearWorkflow();
       onCancel();
     } catch (error) {
       message.error("Failed to save workflow.");
@@ -33,7 +58,7 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
     <Modal
       title="Create Workflow"
       open={visible}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       maskClosable={false}
       footer={[
         <div key="name-input" style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", flex: 1 }}>
@@ -43,13 +68,13 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
             onChange={e => setWorkflowName(e.target.value)}
             style={{ marginRight: 16, width: 200 }}
           />
-          <Button onClick={onCancel} style={{ marginRight: 8 }}>
+          <Button onClick={handleCancel} style={{ marginRight: 8 }}>
             Cancel
           </Button>
           <Button
             type="primary"
             onClick={handleSaveWorkflow}
-            disabled={!workflowName.trim()} // Disable save button if workflow name is empty
+            disabled={!workflowName.trim()}
           >
             Save Workflow
           </Button>
