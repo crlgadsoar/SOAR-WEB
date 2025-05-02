@@ -301,3 +301,15 @@ export const saveWorkflow = async (workflow) => {
     throw error;
   }
 };
+
+export const getWorkflows = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/getWorkflows`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch workflows:", error);
+    throw error;
+  }
+};

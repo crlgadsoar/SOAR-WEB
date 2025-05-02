@@ -4,12 +4,10 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import CrudTable from "./CrudTable";
 import AddPlaybook from "./AddPlaybook";
-import WorkflowWindow from "./WorkflowWindow"; // Import the WorkflowWindow component
 import { fetchApps } from "../../api/api"; // Import the fetchApps API
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [workflowModalVisible, setWorkflowModalVisible] = useState(false); // State for workflow modal
   const [apps, setApps] = useState([]); // State for apps
   const [loadingApps, setLoadingApps] = useState(true); // State for loading apps
   const childRef = useRef(null);
@@ -49,16 +47,6 @@ const Playbooks = () => {
                 <PlusOutlined style={{ fontSize: "15px" }} />
               </Button>
             </Tooltip>
-            <Tooltip title="Add Workflow" color={colorPrimary}>
-              <Button
-                type="primary"
-                style={{ color: "white", borderColor: colorPrimary }}
-                onClick={() => setWorkflowModalVisible(true)} // Open the workflow modal
-              >
-                <PlusOutlined style={{ fontSize: "15px" }} />
-                Add Workflow
-              </Button>
-            </Tooltip>
           </Space>
         }
       >
@@ -70,17 +58,6 @@ const Playbooks = () => {
         <AddPlaybook
           visible={modalVisible}
           onCancel={() => setModalVisible(false)}
-        />
-      )}
-
-      {/* Workflow Window */}
-      {loadingApps ? (
-        <Spin size="large" />
-      ) : (
-        <WorkflowWindow
-          visible={workflowModalVisible}
-          onCancel={() => setWorkflowModalVisible(false)} // Close the workflow modal
-          apps={apps} // Pass the fetched apps
         />
       )}
     </>
