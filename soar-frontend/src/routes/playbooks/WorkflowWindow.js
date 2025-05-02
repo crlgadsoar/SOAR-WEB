@@ -28,8 +28,9 @@ const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
       title: "Are you sure you want to close the workflow window?",
       icon: <ExclamationCircleOutlined />,
       content: "All unsaved changes will be lost.",
-      okText: "Yes, Close",
+      okText: "Yes",
       cancelText: "No",
+      centered: true,
       onOk() {
         clearWorkflow();
         onCancel();
