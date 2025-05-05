@@ -11,8 +11,12 @@ import {
   Position,
   applyNodeChanges,
   applyEdgeChanges,
+  getBezierPath,
+  BaseEdge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import './style.css';
+import { CloseOutlined } from '@ant-design/icons'; // Add this import at the top if not present
 
 // Custom Node with Delete Button (cross at top right)
 const DeletableNode = ({ id, data, selected }) => {
@@ -23,42 +27,11 @@ const DeletableNode = ({ id, data, selected }) => {
 
   return (
     <div
-      style={{
-        border: selected ? '2px solid #1890ff' : '1px solid #d9d9d9',
-        borderRadius: 6,
-        background: "#fff",
-        padding: "10px 16px",
-        minWidth: 120,
-        minHeight: 40,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 2px 8px #f0f1f2",
-        fontWeight: 500,
-        position: "relative",
-      }}
+      className={`flow-node${selected ? " flow-node-selected" : ""}`}
     >
       <span>{data.label}</span>
       <button
-        style={{
-          position: "absolute",
-          top: -8,
-          right: -8,
-          background: "#ff4d4f",
-          color: "#fff",
-          border: "none",
-          borderRadius: "50%",
-          cursor: "pointer",
-          width: 20,
-          height: 20,
-          lineHeight: "16px",
-          padding: 0,
-          fontWeight: "bold",
-          fontSize: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="flow-node-delete-btn"
         onClick={onDelete}
         title="Delete Node"
       >
@@ -74,6 +47,62 @@ const nodeTypes = {
   deletable: DeletableNode,
 };
 
+// Custom Edge with Delete Icon
+const DeletableEdge = (props) => {
+  const { id, sourceX, sourceY, targetX, targetY, style, markerEnd, data } = props;
+  const [hovered, setHovered] = useState(false);
+
+  const edgePath = getBezierPath({
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+  });
+
+  // Center of the edge
+  const [centerX, centerY] = [
+    (sourceX + targetX) / 2,
+    (sourceY + targetY) / 2,
+  ];
+
+  return (
+    <g
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ cursor: 'pointer' }}
+    >
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+      {hovered && (
+        <foreignObject
+          x={centerX - 10}
+          y={centerY - 10}
+          width={20}
+          height={20}
+          style={{ overflow: 'visible', pointerEvents: 'none' }}
+        >
+          <button
+            className="flow-edge-delete-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (data && typeof data.onDelete === 'function') {
+                data.onDelete(id);
+              }
+            }}
+            title="Delete Edge"
+            tabIndex={-1}
+          >
+            <CloseOutlined style={{ fontSize: 14 }} />
+          </button>
+        </foreignObject>
+      )}
+    </g>
+  );
+};
+
+const edgeTypes = {
+  deletable: DeletableEdge,
+};
+
 const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
@@ -81,6 +110,12 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
   const handleDeleteNode = useCallback(
     (id) => setNodes((nds) => nds.filter((n) => n.id !== id)),
     [setNodes]
+  );
+
+  // Edge delete handler
+  const handleDeleteEdge = useCallback(
+    (id) => setEdges((eds) => eds.filter((e) => e.id !== id)),
+    [setEdges]
   );
 
   useEffect(() => {
@@ -137,14 +172,27 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
             ...params,
             markerEnd: { type: MarkerType.Arrow },
             style: { strokeWidth: 4 },
+            type: 'deletable',
+            data: { onDelete: handleDeleteEdge },
           },
           eds
         )
       ),
-    [setEdges]
+    [setEdges, handleDeleteEdge]
   );
 
-  // FIX: Use applyNodeChanges/applyEdgeChanges
+  // Ensure all edges have the correct type and data for delete
+  useEffect(() => {
+    setEdges((eds) =>
+      eds.map((edge) => ({
+        ...edge,
+        type: 'deletable',
+        data: { onDelete: handleDeleteEdge },
+      }))
+    );
+    // eslint-disable-next-line
+  }, []);
+
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
     [setNodes]
@@ -155,22 +203,23 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
   );
 
   return (
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDrop={onDrop}
-        onDragOver={(event) => event.preventDefault()}
-        onInit={onInit}
-        fitView
-        nodeTypes={nodeTypes}
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
-      </ReactFlow>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onDrop={onDrop}
+      onDragOver={(event) => event.preventDefault()}
+      onInit={onInit}
+      fitView
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+    >
+      <Controls />
+      <MiniMap />
+      <Background variant="dots" gap={12} size={1} />
+    </ReactFlow>
   );
 };
 
