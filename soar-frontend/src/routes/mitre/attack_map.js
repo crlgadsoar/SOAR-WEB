@@ -1,5 +1,17 @@
 const attack_map = [
         {
+            "attack" : "Wi-Fi Networks",
+            "mitreid" : "T1669"
+        },
+        {
+            "attack" : "Input Injection",
+            "mitreid" : "T1674"
+        },
+        {
+            "attack" : "ESXi Administration Command",
+            "mitreid" : "T1669"
+        },
+        {
             "attack" : "Spearphishing Link",
             "mitreid" : "T1192"
         },
@@ -176,7 +188,7 @@ const attack_map = [
             "mitreid" : "T1557.003"
         },
         {
-            "attack" : "Regsvcs\/Regasm",
+            "attack" : "Insecure design",
             "mitreid" : "T1121"
         },
         {
@@ -640,7 +652,7 @@ const attack_map = [
             "mitreid" : "T1557.002"
         },
         {
-            "attack" : "Component Object Model Hijacking",
+            "attack" : "Security Misconfig",
             "mitreid" : "T1122"
         },
         {
@@ -828,7 +840,7 @@ const attack_map = [
             "mitreid" : "T1574.012"
         },
         {
-            "attack" : "Network Share Connection Removal",
+            "attack" : "Security Logging Monitoring Failures",
             "mitreid" : "T1126"
         },
         {
@@ -844,7 +856,7 @@ const attack_map = [
             "mitreid" : "T1546.013"
         },
         {
-            "attack" : "Multi-Stage Channels",
+            "attack" : "File and object access events",
             "mitreid" : "T1104"
         },
         {
@@ -972,7 +984,7 @@ const attack_map = [
             "mitreid" : "T1574.013"
         },
         {
-            "attack" : "Security Support Provider",
+            "attack" : "Distributed DOS events",
             "mitreid" : "T1101"
         },
         {
@@ -1160,7 +1172,7 @@ const attack_map = [
             "mitreid" : "T1564.012"
         },
         {
-            "attack" : "Ingress Tool Transfer",
+            "attack" : "Dam Events",
             "mitreid" : "T1105"
         },
         {
@@ -1464,7 +1476,7 @@ const attack_map = [
             "mitreid" : "T1143"
         },
         {
-            "attack" : "OS Exhaustion Flood",
+            "attack" : "Network Activity Event",
             "mitreid" : "T1499.001"
         },
         {
@@ -1500,7 +1512,7 @@ const attack_map = [
             "mitreid" : "T1555.004"
         },
         {
-            "attack" : "Redundant Access",
+            "attack" : "Cryptographic failure",
             "mitreid" : "T1108"
         },
         {
@@ -1528,8 +1540,8 @@ const attack_map = [
             "mitreid" : "T1090"
         },
         {
-            "attack" : "Bidirectional Communication",
-            "mitreid" : "T1102.002"
+            "attack" : "Authentication Events",
+            "mitreid" : "T1102"
         },
         {
             "attack" : "Vulnerabilities",
@@ -1568,7 +1580,7 @@ const attack_map = [
             "mitreid" : "T1558.004"
         },
         {
-            "attack" : "Component Firmware",
+            "attack" : "Injection",
             "mitreid" : "T1109"
         },
         {
@@ -1596,8 +1608,8 @@ const attack_map = [
             "mitreid" : "T1556.004"
         },
         {
-            "attack" : "ClickOnce",
-            "mitreid" : "T1127.002"
+            "attack" : "SSRF",
+            "mitreid" : "T1127"
         },
         {
             "attack" : "Server",
@@ -1796,7 +1808,7 @@ const attack_map = [
             "mitreid" : "T1555.006"
         },
         {
-            "attack" : "Video Capture",
+            "attack" : "Software Data Integrity Failures",
             "mitreid" : "T1125"
         },
         {
@@ -2404,6 +2416,10 @@ const attack_map = [
             "mitreid" : "T1037"
         },
         {
+            "attack" : "Boot or Logon Autostart Execution",
+            "mitreid" : "T1547.015"
+        },
+        {
             "attack" : "Clear Windows Event Logs",
             "mitreid" : "T1070.001"
         },
@@ -2420,7 +2436,7 @@ const attack_map = [
             "mitreid" : "T1218.009"
         },
         {
-            "attack" : "System Time Discovery",
+            "attack" : "Identification and Auth Failures",
             "mitreid" : "T1124"
         },
         {
@@ -2452,7 +2468,7 @@ const attack_map = [
             "mitreid" : "T1546.003"
         },
         {
-            "attack" : "AppInit DLLs",
+            "attack" : "System Activity Events",
             "mitreid" : "T1103"
         },
         {
@@ -2864,7 +2880,7 @@ const attack_map = [
             "mitreid" : "T1489"
         },
         {
-            "attack" : "Audio Capture",
+            "attack" : "Vunerable Outdated Components",
             "mitreid" : "T1123"
         },
         {
@@ -3016,7 +3032,7 @@ const attack_map = [
             "mitreid" : "T1556.005"
         },
         {
-            "attack" : "Native API",
+            "attack" : "SQL Injection",
             "mitreid" : "T1106"
         },
         {
@@ -3148,7 +3164,7 @@ const attack_map = [
             "mitreid" : "T1164"
         },
         {
-            "attack" : "File Deletion",
+            "attack" : "Broken Access Control",
             "mitreid" : "T1107"
         },
         {

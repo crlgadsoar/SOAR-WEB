@@ -15,23 +15,130 @@ const Playbooks = () => {
     token: { colorPrimary },
   } = theme.useToken();
 
-  // Fetch apps when the component is mounted
-  useEffect(() => {
-    const fetchAvailableApps = async () => {
-      try {
-        const appsData = await fetchApps(); // Fetch apps using the API
-        setApps(appsData); // Set the fetched apps
-      } catch (error) {
-        console.error("Failed to fetch apps:", error);
-        message.error("Failed to load apps. Please try again.");
-      } finally {
-        setLoadingApps(false); // Stop the loading spinner
-      }
-    };
+  const openModalHandler = (value, row) => {
+    setModalComponent(value);
+    setModalVisible(true);
+    setData(row);
 
-    fetchAvailableApps();
-  }, []);
+    if (row?.playbook_id) {
+      fetchPlaybookDetails(row.playbook_id)
+        .then((res) => {
+          const fullData = {
+            ...row,
+            ...res.data, // in case API gives more data like 'source', 'utility' etc
+          };
+          setRowDetail(fullData);
+        })
+        .catch((err) => console.error("Error fetching playbook details:", err));
+    }    
+  };
 
+  const modalComponentRender = () => {
+    if (modalComponent === "ADD") {
+      return (
+        <AddPlaybook
+          visible={modalVisible}
+          onCancel={() => {
+            setModalVisible(false);
+            setModalComponent(null);
+          }}
+          onSubmit={(flowData) => {
+            setButtonSpin(true);
+            const payload = {
+              source: flowData.source,
+              utility: flowData.utility,
+              action: flowData.action,
+              format: flowData.format,
+              ip: flowData.ip,
+              port: flowData.port,
+              playbook_id: flowData.playbookId,  // match AddPlaybook.js field
+              playbook_name: flowData.playbookname,
+              mitreIds: flowData.mitreIds,
+            };
+          
+            addPlaybook(payload)
+              .then((res) => {
+              if (res?.data?.success) {
+              childRef.current.reloadDataHandle(); // ✅ reload table
+              message.success("Playbook Added Successfully!");
+              setModalVisible(false); // ✅ close modal
+              setModalComponent(null);
+            } else {
+              message.error(res?.data?.message || "Mitre Id already mapped, Failed to add Playbook!");
+            }
+            })
+              .catch((error) => {
+              console.error(error);
+              const errorMessage = error?.response?.data?.message || "Server Error: Failed to add Playbook!";
+              message.error(errorMessage);
+            })
+              .finally(() => setButtonSpin(false));
+            }}    
+        />
+      );
+    }
+  
+    if (modalComponent === "EDIT") {
+      return (
+        <InputForm
+          title="Playbook Details"
+          visible={modalVisible}
+          buttonSpin={buttonSpin}
+          onSubmit={onSubmit}
+          onCancel={() => {
+            setModalVisible(false);
+            setModalComponent(null);
+          }}
+          type={modalComponent}
+          initialValues={rowDetail}
+        />
+      );
+    }
+  
+    return null;
+  };  
+
+  const onSubmit = (values) => {
+    setButtonSpin(true);
+    let parsedValue = { ...values };
+
+    Object.keys(parsedValue).forEach((key) => {
+      if (parsedValue[key] === undefined) parsedValue[key] = null;
+    });
+
+    if (values.action === "ADD") {
+      parsedValue = { ...values, createdBy: authUser.username, createdOn: "-1" };
+      instance
+        .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_ADD_USER, parsedValue)
+        .then(() => {
+          childRef.current.reloadDataHandle();
+          setModalVisible(false);
+        })
+        .catch(console.error)
+        .finally(() => setButtonSpin(false));
+    } else if (values.action === "EDIT") {
+      instance
+        .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_SUBMIT_EDIT_USER, parsedValue)
+        .then(() => {
+          childRef.current.reloadDataHandle();
+          setModalVisible(false);
+        })
+        .catch(console.error)
+        .finally(() => setButtonSpin(false));
+    }
+  };
+   
+  const deleteData = (row) => {
+    instance
+      .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_DEL_USER, {
+        playbook_id: row.playbook_id, // ✅ this is correct
+      })
+      .then(() => childRef.current.reloadDataHandle())
+      .catch(console.error)
+      .finally(() => setButtonSpin(false));
+  };
+  
+  console.log(modalComponent, modalVisible)
   return (
     <>
       <Card

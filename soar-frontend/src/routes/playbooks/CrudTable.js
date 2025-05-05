@@ -2,7 +2,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Table, Space } from "antd";
 import EditDeleteAction from "components/EditDeleteAction";
-import { fetchPlaybooks, deletePlaybook } from "api/api";
+import { fetchPlaybooks, deletePlaybook, deleteMitrePlaybookMapping } from "api/api";
 import { message } from "antd";
 
 const PlaybookCrudTable = ({ openModalHandler }, ref) => {
@@ -31,16 +31,33 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
     loadData();
   }, []);
 
+
   const handleDelete = async (playbookId) => {
     console.log("Deleting playbook with ID:", playbookId);
-    const result = await deletePlaybook(playbookId);
-    if (result?.status === 200) {
-      message.success("Playbook deleted!");
-      setData((prevData) => prevData.filter((p) => p.playbook_id !== playbookId));
-    } else {
-      alert("Failed to delete playbook.");
+  
+    try {
+      // Step 1: Delete MITRE mapping via api.js
+      const mitreDeleteResponse = await deleteMitrePlaybookMapping(playbookId);
+  
+      if (mitreDeleteResponse?.status !== 200) {
+        throw new Error("Failed to delete MITRE mapping.");
+      }
+  
+      // Step 2: Delete the playbook
+      const result = await deletePlaybook(playbookId);
+  
+      if (result?.status === 200) {
+        message.success("Playbook Deleted!");
+        setData((prevData) => prevData.filter((p) => p.playbook_id !== playbookId));
+      } else {
+        message.error("Failed to delete playbook.");
+      }
+    } catch (error) {
+      console.error("Error deleting playbook and MITRE mapping:", error);
+      message.error("Error occurred while deleting.");
     }
   };
+  
 
   // ✅ Expose reload method to parent using ref
   useImperativeHandle(ref, () => ({
