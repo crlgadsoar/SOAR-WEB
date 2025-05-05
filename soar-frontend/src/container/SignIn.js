@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
 import backgroundImage from "../assets/images/background.jpg";
-import { login } from "api/api";
+import { login, signUp } from "api/api";
 
 const SignIn = () => {
   const [loading, setLoading] = useState(false);
@@ -36,21 +36,15 @@ const SignIn = () => {
   const handleSignUp = async (values) => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5002/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        message.success("Registration successful! Please log in.");
+      const result = await signUp(values);
+      if (result.success) {
+        message.success(result.message);
         setIsSignUp(false);
       } else {
-        message.error(data.message || "Registration failed");
+        message.error(result.message);
       }
     } catch (error) {
-      message.error("Server error. Please try again.");
+      message.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

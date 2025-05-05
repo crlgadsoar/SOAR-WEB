@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Tag } from "antd";
-import axios from "axios";
+import { fetchIncidents } from "api/api"; // Import the fetchIncidents function
 import { incidentTypeMapping } from "../../../components/util/mapping";
 
 const DashboardIncidentTable = () => {
@@ -8,16 +8,15 @@ const DashboardIncidentTable = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5002/incidents?status=Mitigated", {
-        withCredentials: true, // Ensures cookies are sent
-      }) // API call for incidents
-      .then((response) => {
-        console.log("API Response:", response.data); // Debugging line
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch incidents using the reusable API function
+        const response = await fetchIncidents({ status: "Mitigated" });
 
-        if (Array.isArray(response.data)) {
+        if (Array.isArray(response)) {
           // Ensure all datetimestamp values are in valid format before sorting
-          const formattedData = response.data.map((incident) => {
+          const formattedData = response.map((incident) => {
             let formattedTimestamp = incident.datetimestamp;
 
             // Check if the datetimestamp is valid
@@ -42,20 +41,20 @@ const DashboardIncidentTable = () => {
             (a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp)
           );
 
-          console.log("Sorted Data:", sortedData); // Debugging line
           setData(sortedData);
         } else {
-          console.error("API response is not an array:", response.data);
+          console.error("API response is not an array:", response);
           setData([]);
         }
-
-        setLoading(false);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching data:", error);
         setData([]);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   const columns = [

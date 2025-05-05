@@ -1,15 +1,35 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:5000"; // Backend base URL
+export const API_BASE_URL = "http://localhost:5000"; 
 
-// export const axios = axios.create({
-//   baseURL: "http://localhost:5002", // Backend base URL
-//   withCredentials: true, // Send cookies with requests
-// });
 
-export const fetchIncidents = async () => {
+export const signUp = async (values) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/incidents`, {
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      return { success: true, message: "Registration successful! Please log in." };
+    } else {
+      return { success: false, message: data.message || "Registration failed" };
+    }
+  } catch (error) {
+    console.error("Error during sign-up:", error);
+    return { success: false, message: "Server error. Please try again." };
+  }
+};
+
+export const fetchIncidents = async (params = {}) => {
+  try {
+    // Construct query parameters if provided
+    const query = new URLSearchParams(params).toString();
+    const url = query ? `${API_BASE_URL}/incidents?${query}` : `${API_BASE_URL}/incidents`;
+
+    const response = await axios.get(url, {
       withCredentials: true,
     });
     return response.data;
@@ -275,19 +295,6 @@ export const deleteMitrePlaybookMapping = async (playbookId) => {
   }
 };
 
-// Generate a unique Playbook Id
-
-export const fetchPlaybookId = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/api/generate_playbook_id`, {
-      withCredentials: true,
-    });
-    return response.data.playbook_id;
-  } catch (error) {
-    console.error("Failed to fetch Playbook ID:", error);
-    return null;
-  }
-};
 
 export const markIncidentAsOld = async (incidentid) => {
   try {
@@ -312,3 +319,65 @@ export const fetchUtilities = async () => {
   }
 };
 
+
+
+// Generate a unique Playbook Id
+export const fetchPlaybookId = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/generate_playbook_id`, {
+      withCredentials: true,
+    });
+    return response.data.playbook_id;
+  } catch (error) {
+    console.error("Failed to fetch Playbook ID:", error);
+    return null;
+  }
+};
+
+
+
+
+
+
+export const saveWorkflow = async (workflow) => {
+  try {
+    // If workflow has an id, update; else, create
+    const url = workflow.id
+      ? `${API_BASE_URL}/api/editWorkflow/${workflow.id}`
+      : `${API_BASE_URL}/api/addWorkflows`;
+    const method = workflow.id ? "put" : "post";
+    const response = await axios({
+      url,
+      method,
+      data: workflow,
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to save workflow:", error);
+    throw error;
+  }
+};
+
+export const getWorkflows = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/getWorkflows`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch workflows:", error);
+    throw error;
+  }
+};
+
+export const deleteWorkflow = async (workflowId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/deleteWorkflow/${workflowId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete workflow:", error);
+    throw error;
+  }
+};

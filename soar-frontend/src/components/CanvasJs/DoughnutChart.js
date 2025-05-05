@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { fetchIncidents } from "api/api"; // Import the fetchIncidents function
 import CanvasJSReact from "./canvasjs.react";
 
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -9,25 +9,21 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
   const [selectedSeverity, setSelectedSeverity] = useState(""); // Track selected severity
   const [showModal, setShowModal] = useState(false); // Track modal visibility
 
-  const handleDataPointClick = (e) => {
+  const handleDataPointClick = async (e) => {
     const severity = e.dataPoint.label; // Get clicked severity
     setSelectedSeverity(severity);
     setShowModal(true); // Show the modal
 
     console.log("Clicked Severity:", severity);
 
-    // Fetch incidents from the API
-    axios
-      .get(`http://localhost:5002/incidents/severity?severity=${severity}`, {
-        withCredentials: true, // Ensures cookies are sent
-      })
-      .then((response) => {
-        console.log("Fetched Incidents:", response.data);
-        setIncidents(response.data); // Store incidents in state
-      })
-      .catch((error) => {
-        console.error("Error fetching incidents:", error);
-      });
+    try {
+      // Fetch incidents using the API function
+      const fetchedIncidents = await fetchIncidents({ severity });
+      console.log("Fetched Incidents:", fetchedIncidents);
+      setIncidents(fetchedIncidents); // Store incidents in state
+    } catch (error) {
+      console.error("Error fetching incidents:", error);
+    }
   };
 
   const handleCloseModal = () => {
@@ -107,70 +103,6 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
           </div>
         </div>
       )}
-
-      {/* Styles for Modal */}
-      <style>
-        {`
-          /* Modal Overlay - Full Screen */
-          .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999; /* Ensure it's above everything */
-          }
-          
-          /* Modal Content */
-          .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 50%;
-            max-height: 80%;
-            overflow-y: auto;
-            position: relative;
-            z-index: 10000;
-            box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
-          }
-
-          /* Close Button */
-          .close-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            border: none;
-            background: none;
-            font-size: 20px;
-            cursor: pointer;
-          }
-
-          /* Prevent Background Scrolling when Modal is Open */
-          body.modal-open {
-            overflow: hidden;
-          }
-
-          /* Table Styling */
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          
-          th, td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            text-align: left;
-          }
-          
-          th {
-            background: #f2f2f2;
-          }
-        `}
-      </style>
     </div>
   );
 };

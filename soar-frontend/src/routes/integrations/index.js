@@ -391,21 +391,36 @@ const Integrations = () => {
               hoverable
               className="integration-card"
               onClick={() => handleCardClick(app)} // This should only trigger when clicking on the card itself
+            // This should only trigger when clicking on the card itself
             >
               <p>{app.description}</p>
-              {app.logo && (
-                <img
-                  src={app.logo.startsWith("http") ? app.logo : `${API_BASE_URL}/${app.logo}`}
-                  alt={`${app.title} logo`}
-                  style={{
-                    width: "100%",
-                    height: "150px",
-                    objectFit: "contain",
-                    marginTop: "10px",
-                    borderRadius: 50
-                  }}
-                />
-              )}
+              <div
+                style={{
+                  width: "190px",
+                  height: "190px",
+                  borderRadius: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  margin: "10px auto",
+                  boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                {app.logo ? (
+                  <img
+                    src={app.logo.startsWith("http") ? app.logo : `${API_BASE_URL}/${app.logo}`}
+                    alt={`${app.title} logo`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      borderRadius: "100%",
+                    }}
+                  />
+                ) : (
+                  <span style={{ color: "#999" }}>No Image</span> // Placeholder text
+                )}
+              </div>
               <div
                 onClick={(e) => e.stopPropagation()} // Prevent triggering the card click
               >
