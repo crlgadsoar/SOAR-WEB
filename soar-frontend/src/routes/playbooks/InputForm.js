@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Select, Modal, Button, Card } from "antd";
-import CommonService from "apiServices/common";
+import { Form, Modal, Card } from "antd";
 import TextArea from "antd/es/input/TextArea";
-
-const { Option } = Select;
+import CommonService from "apiServices/common";
+import FlowChart from "./FlowChart";
 
 const InputForm = ({
   title,
@@ -13,22 +12,23 @@ const InputForm = ({
   initialValues,
   buttonSpin,
 }) => {
-  console.log("Initial Values:", initialValues);
-
   const [form] = Form.useForm();
   const [playbookList, setPlaybookList] = useState([]);
+  const [playbookId, setPlaybookId] = useState(null);
 
   useEffect(() => {
     fetchPlaybookList();
   }, []);
 
   useEffect(() => {
+    console.log("initialValues received:", initialValues); // <-- add this
     if (initialValues) {
       form.setFieldsValue(initialValues);
+      setPlaybookId(initialValues.playbook_id);
     }
   }, [initialValues, form]);
+  
 
-  // Fetch playbook list from API
   const fetchPlaybookList = async () => {
     try {
       const res = await CommonService.getStationList();
@@ -44,8 +44,8 @@ const InputForm = ({
       open={visible}
       onCancel={onCancel}
       width={600}
-      footer={[,
-      ]}
+      forceRender
+      footer={null}
     >
       <Card>
         <Form
@@ -55,14 +55,29 @@ const InputForm = ({
           onFinish={onSubmit}
           autoComplete="off"
         >
-          <Form.Item label="Playbook ID" name="PlaybookID">
-            <TextArea rows={1} disabled style={{ color: "black" }} />
-          </Form.Item>
+          <Form.Item label="Playbook ID">
+  <div style={{ padding: "8px", background: "#f5f5f5", borderRadius: "4px", minHeight: "32px" }}>
+    {playbookId ?? "N/A"}
+  </div>
+</Form.Item>
+<Form.Item label="Playbook Flowchart">
+{initialValues ? (
+  <FlowChart
+    visible={visible}
+    playbookData={{
+      source: initialValues.source || "N/A",
+      utility: initialValues.utility || "N/A",
+      format: initialValues.format || "N/A",
+      ip: initialValues.ip || "N/A",
+      port: initialValues.port || "N/A",
+      action: initialValues.action || "N/A",
+    }}
+  />
+) : (
+  "Loading..."
+)}
 
-          <Form.Item label="Playbook Details" name="Details">
-            <TextArea rows={4} disabled style={{ color: "black" }} />
-          </Form.Item>
-          
+</Form.Item>
         </Form>
       </Card>
     </Modal>
@@ -70,3 +85,6 @@ const InputForm = ({
 };
 
 export default InputForm;
+
+
+

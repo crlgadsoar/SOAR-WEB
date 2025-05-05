@@ -256,3 +256,59 @@ export const fetchActions = async (utility) => {
     return []; // Return an empty list in case of an error
   }
 };
+
+// Delete mapping when a playbook is deleted
+export const deleteMitrePlaybookMapping = async (playbookId) => {
+  try {
+    const response = await axios.delete(
+      `${API_BASE_URL}/delete_mitre_playbook_mapping`,
+      {
+        data: { playbook_id: playbookId },
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Failed to delete MITRE mapping:", error);
+    throw error;
+  }
+};
+
+// Generate a unique Playbook Id
+
+export const fetchPlaybookId = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/generate_playbook_id`, {
+      withCredentials: true,
+    });
+    return response.data.playbook_id;
+  } catch (error) {
+    console.error("Failed to fetch Playbook ID:", error);
+    return null;
+  }
+};
+
+export const markIncidentAsOld = async (incidentid) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/incidents/mark_old`, { incidentid });
+    return response.data; // Return the response data for further use
+  } catch (error) {
+    console.error("Error updating isnew status:", error);
+    throw error; // Re-throw the error to handle it in the calling function
+  }
+};
+
+// Fetch all utilities name while adding a new playbook
+export const fetchUtilities = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/apps/titles`, {
+      withCredentials: true,
+    });
+    return response.data.map(item => item.title); // extract titles
+  } catch (error) {
+    console.error("Failed to fetch utilities:", error);
+    return [];
+  }
+};
+
