@@ -1,16 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Card, Space, Tooltip, Button, theme, message, Spin } from "antd";
+import React, { useState, useRef } from "react";
+import { Card, Space, Tooltip, Button, theme, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
+import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
+import { instance } from "util/connection/axios";
+import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
+import { fetchPlaybookDetails, addPlaybook } from "api/api";
 import AddPlaybook from "./AddPlaybook";
-import { fetchApps } from "../../api/api"; // Import the fetchApps API
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [apps, setApps] = useState([]); // State for apps
-  const [loadingApps, setLoadingApps] = useState(true); // State for loading apps
+  const [modalComponent, setModalComponent] = useState(null);
+  const [rowDetail, setRowDetail] = useState(null);
+  const [data, setData] = useState(null);
+  const [buttonSpin, setButtonSpin] = useState(false);
   const childRef = useRef(null);
+  const { displayMode } = useSelector((state) => state.themeConfig);
+  const { authUser } = useSelector(({ auth }) => auth);
   const {
     token: { colorPrimary },
   } = theme.useToken();
@@ -25,12 +32,14 @@ const Playbooks = () => {
         .then((res) => {
           const fullData = {
             ...row,
-            ...res.data, // in case API gives more data like 'source', 'utility' etc
+            ...res.data,
           };
           setRowDetail(fullData);
         })
         .catch((err) => console.error("Error fetching playbook details:", err));
-    }    
+    } else {
+      setRowDetail(null);
+    }
   };
 
   const modalComponentRender = () => {
@@ -51,33 +60,33 @@ const Playbooks = () => {
               format: flowData.format,
               ip: flowData.ip,
               port: flowData.port,
-              playbook_id: flowData.playbookId,  // match AddPlaybook.js field
+              playbook_id: flowData.playbookId,
               playbook_name: flowData.playbookname,
               mitreIds: flowData.mitreIds,
             };
-          
+
             addPlaybook(payload)
               .then((res) => {
-              if (res?.data?.success) {
-              childRef.current.reloadDataHandle(); // ✅ reload table
-              message.success("Playbook Added Successfully!");
-              setModalVisible(false); // ✅ close modal
-              setModalComponent(null);
-            } else {
-              message.error(res?.data?.message || "Mitre Id already mapped, Failed to add Playbook!");
-            }
-            })
+                if (res?.data?.success) {
+                  childRef.current.reloadDataHandle();
+                  message.success("Playbook Added Successfully!");
+                  setModalVisible(false);
+                  setModalComponent(null);
+                } else {
+                  message.error(res?.data?.message || "Mitre Id already mapped, Failed to add Playbook!");
+                }
+              })
               .catch((error) => {
-              console.error(error);
-              const errorMessage = error?.response?.data?.message || "Server Error: Failed to add Playbook!";
-              message.error(errorMessage);
-            })
+                console.error(error);
+                const errorMessage = error?.response?.data?.message || "Server Error: Failed to add Playbook!";
+                message.error(errorMessage);
+              })
               .finally(() => setButtonSpin(false));
-            }}    
+          }}
         />
       );
     }
-  
+
     if (modalComponent === "EDIT") {
       return (
         <InputForm
@@ -94,9 +103,9 @@ const Playbooks = () => {
         />
       );
     }
-  
+
     return null;
-  };  
+  };
 
   const onSubmit = (values) => {
     setButtonSpin(true);
@@ -127,29 +136,29 @@ const Playbooks = () => {
         .finally(() => setButtonSpin(false));
     }
   };
-   
+
   const deleteData = (row) => {
+    setButtonSpin(true);
     instance
       .post(API_ENDPOINT_URL.POST_USER_MANAGEMENT_DEL_USER, {
-        playbook_id: row.playbook_id, // ✅ this is correct
+        playbook_id: row.playbook_id,
       })
       .then(() => childRef.current.reloadDataHandle())
       .catch(console.error)
       .finally(() => setButtonSpin(false));
   };
-  
-  console.log(modalComponent, modalVisible)
+
   return (
     <>
       <Card
         title="List of Playbooks"
         extra={
           <Space>
-            <Tooltip title="Add Playbook" color={colorPrimary}>
+            <Tooltip title="Add" color={colorPrimary}>
               <Button
                 type="primary"
                 style={{ color: "white", borderColor: colorPrimary }}
-                onClick={() => setModalVisible(true)}
+                onClick={() => openModalHandler("ADD")}
               >
                 <PlusOutlined style={{ fontSize: "15px" }} />
               </Button>
@@ -157,16 +166,9 @@ const Playbooks = () => {
           </Space>
         }
       >
-        <CrudTable ref={childRef} />
+        <CrudTable openModalHandler={openModalHandler} ref={childRef} deleteData={deleteData} />
       </Card>
-
-      {/* Add Playbook Modal */}
-      {modalVisible && (
-        <AddPlaybook
-          visible={modalVisible}
-          onCancel={() => setModalVisible(false)}
-        />
-      )}
+      {modalComponentRender()}
     </>
   );
 };
