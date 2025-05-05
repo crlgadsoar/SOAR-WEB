@@ -1,0 +1,60 @@
+.workflows-container {
+  padding: 24px;
+}
+
+.workflow-card {
+  min-width: 180px;
+  max-width: 100%;
+  min-height: 110px;
+  max-height: 110px;
+  margin: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  word-break: break-word;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+
+.workflow-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.create-workflow-card {
+  border: 1.5px dashed #1890ff !important;
+  background: #fafcff !important;
+  color: #1890ff !important;
+  font-weight: 500;
+  font-size: 16px;
+  justify-content: center;
+  align-items: center;
+  min-height: 110px;
+  display: flex;
+}
+
+.workflow-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .workflows-container {
+    padding: 8px;
+  }
+  .workflow-card {
+    min-width: 120px;
+    padding: 0;
+  }
+}
+
+.workflow-created {
+  font-size: 12px;
+}
+
+.workflow-apps-used {
+  font-size: 14px;
+}

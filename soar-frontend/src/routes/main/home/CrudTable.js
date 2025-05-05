@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
-import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment } from "api/api";
+import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld } from "api/api";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
 import { BellOutlined } from "@ant-design/icons";
@@ -95,22 +95,23 @@ const IncidentTable = () => {
     });
   };
     
-  const handleIncidentClick = (incidentid) => {
-    axios.post("http://localhost:5002/incidents/mark_old", { incidentid })
-      .then(() => {
-          setData(prevData =>
-          prevData.map(item =>
+  const handleIncidentClick = async (incidentid) => {
+    try {
+      await markIncidentAsOld(incidentid); // Call the API function
+      setData((prevData) =>
+        prevData.map((item) =>
           item.incidentid === incidentid ? { ...item, isnew: false } : item
-          ));
-          setFilteredData(prevData =>
-            prevData.map(item =>
-            item.incidentid === incidentid ? { ...item, isnew: false } : item
-            ));
-          })
-          .catch(error => {
-            console.error("Error updating isnew status:", error);
-          });
-      };  
+        )
+      );
+      setFilteredData((prevData) =>
+        prevData.map((item) =>
+          item.incidentid === incidentid ? { ...item, isnew: false } : item
+        )
+      );
+    } catch (error) {
+      console.error("Error updating isnew status:", error);
+    }
+  };  
 
   function getAttackByMitreID(mitreid) {
     const entry = attack_map.find(item => item.mitreid === mitreid);
@@ -277,7 +278,6 @@ const columns = [
         );
       },
     },
-
     {
       title: "Action",
       dataIndex: "action",

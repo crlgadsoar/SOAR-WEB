@@ -1,25 +1,16 @@
-import React, { useState, useRef } from "react";
-import { Card, Space, Tooltip, Button, theme } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { Card, Space, Tooltip, Button, theme, message, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
-import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
-import { instance } from "util/connection/axios";
-import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
-import { fetchPlaybookDetails, addPlaybook } from "api/api";
 import AddPlaybook from "./AddPlaybook";
-import { message } from "antd";
-
+import { fetchApps } from "../../api/api"; // Import the fetchApps API
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalComponent, setModalComponent] = useState(null);
-  const [rowDetail, setRowDetail] = useState(null);
-  const [data, setData] = useState(null);
-  const [buttonSpin, setButtonSpin] = useState(false);
+  const [apps, setApps] = useState([]); // State for apps
+  const [loadingApps, setLoadingApps] = useState(true); // State for loading apps
   const childRef = useRef(null);
-  const { displayMode } = useSelector((state) => state.themeConfig);
-  const { authUser } = useSelector(({ auth }) => auth);
   const {
     token: { colorPrimary },
   } = theme.useToken();
@@ -154,17 +145,28 @@ const Playbooks = () => {
         title="List of Playbooks"
         extra={
           <Space>
-            <Tooltip title="Add" color={colorPrimary}>
-              <Button type="primary" style={{ color: "white", borderColor: colorPrimary }} onClick={() => openModalHandler("ADD")}>
+            <Tooltip title="Add Playbook" color={colorPrimary}>
+              <Button
+                type="primary"
+                style={{ color: "white", borderColor: colorPrimary }}
+                onClick={() => setModalVisible(true)}
+              >
                 <PlusOutlined style={{ fontSize: "15px" }} />
               </Button>
             </Tooltip>
           </Space>
         }
       >
-        <CrudTable openModalHandler={openModalHandler} ref={childRef} deleteData={deleteData} />
+        <CrudTable ref={childRef} />
       </Card>
-      {modalComponentRender()}
+
+      {/* Add Playbook Modal */}
+      {modalVisible && (
+        <AddPlaybook
+          visible={modalVisible}
+          onCancel={() => setModalVisible(false)}
+        />
+      )}
     </>
   );
 };

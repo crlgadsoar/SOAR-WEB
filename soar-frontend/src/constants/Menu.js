@@ -7,7 +7,8 @@ import {
   UserOutlined,
   DatabaseOutlined,
   MinusCircleOutlined,
-  ApiOutlined
+  ApiOutlined,
+  ForkOutlined
 } from "@ant-design/icons";
 import { LINK_STORE } from "./Link";
 //import IntlMessages from 'util/IntlMessages';
@@ -45,6 +46,13 @@ export const MENU_ITEMS = [
     icon: <FileDoneOutlined />,
     menuType: MENU_TYPE.NAVIGATE,
     path: "routes/configuration",
+  },
+  {
+    label: "Workflows",
+    key: LINK_STORE.WORKFLOWS,
+    icon: <ForkOutlined />,
+    menuType: MENU_TYPE.NAVIGATE,
+    path: "routes/workflows",
   },
   {
     label: "MITRE | ATT&CK",

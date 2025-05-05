@@ -12,6 +12,7 @@ import Users from "routes/user_management/config";
 import Mitre from "routes/mitre";
 import Login from "routes/auth/Login";  // Import the Login page
 import Integrations from "routes/integrations";
+import WorkflowsList from "routes/workflows";
 
 
 const Home = React.lazy(() => import("routes/main/home"));
@@ -72,6 +73,10 @@ const ProjectRouter = () => {
         {
           path: LINK_STORE.INTEGRATIONS,
           element: <Integrations />,
+        },
+        {
+          path: LINK_STORE.WORKFLOWS,
+          element: <WorkflowsList />,
         },
       ],
     },

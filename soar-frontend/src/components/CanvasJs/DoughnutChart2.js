@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { fetchIncidents } from "api/api"; // Import the fetchIncidents function
 import CanvasJSReact from "./canvasjs.react";
 
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -9,21 +9,18 @@ const DoughnutChart = ({ theme, exportEnable = "", style, data }) => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [showModal, setShowModal] = useState(false);
 
-  const handleDataPointClick = (e) => {
+  const handleDataPointClick = async (e) => {
     const status = e.dataPoint.label;
     setSelectedStatus(status);
     setShowModal(true);
 
-    axios
-      .get(`http://localhost:5002/incidents/status?status=${encodeURIComponent(status)}`, {
-        withCredentials: true, // Ensures cookies are sent
-      })
-      .then((response) => {
-        setIncidents(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching incidents:", error);
-      });
+    try {
+      // Fetch incidents using the API function
+      const fetchedIncidents = await fetchIncidents({ status });
+      setIncidents(fetchedIncidents);
+    } catch (error) {
+      console.error("Error fetching incidents:", error);
+    }
   };
 
   const handleCloseModal = () => {
