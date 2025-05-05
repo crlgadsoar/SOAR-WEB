@@ -289,10 +289,16 @@ export const markIncidentAsOld = async (incidentid) => {
 
 export const saveWorkflow = async (workflow) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/addWorkflows`, workflow, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    // If workflow has an id, update; else, create
+    const url = workflow.id
+      ? `${API_BASE_URL}/api/editWorkflow/${workflow.id}`
+      : `${API_BASE_URL}/api/addWorkflows`;
+    const method = workflow.id ? "put" : "post";
+    const response = await axios({
+      url,
+      method,
+      data: workflow,
+      headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
     return response.data;

@@ -52,16 +52,20 @@ const WorkflowWindowContent = ({ visible, onCancel, apps, workflow }) => {
 
   const handleSaveWorkflow = async () => {
     try {
-      const workflow = {
+      const workflowToSave = {
         name: workflowName,
         nodes,
         edges,
-        created_at: new Date().toISOString(),
+        created_at: workflow?.created_at || new Date().toISOString(),
       };
-      await saveWorkflow(workflow);
-      message.success("Workflow saved successfully!");
+      // If editing, include the id
+      if (workflow && workflow.id) {
+        workflowToSave.id = workflow.id;
+      }
+      await saveWorkflow(workflowToSave); // Your API should handle create or update based on id
+      message.success(workflow && workflow.id ? "Workflow updated successfully!" : "Workflow saved successfully!");
       clearWorkflow();
-      onCancel();
+      onCancel(true); // Pass true to reload workflows
     } catch (error) {
       message.error("Failed to save workflow.");
     }
