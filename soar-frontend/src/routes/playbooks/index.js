@@ -8,6 +8,7 @@ import { fetchApps } from "../../api/api"; // Import the fetchApps API
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalComponent, setModalComponent] = useState(null); // State for modal component
   const [apps, setApps] = useState([]); // State for apps
   const [loadingApps, setLoadingApps] = useState(true); // State for loading apps
   const childRef = useRef(null);
