@@ -34,6 +34,12 @@
   display: flex;
 }
 
+.workflow-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @media (max-width: 600px) {
   .workflows-container {
     padding: 8px;

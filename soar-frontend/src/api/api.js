@@ -313,3 +313,13 @@ export const getWorkflows = async () => {
     throw error;
   }
 };
+
+export const deleteWorkflow = async (workflowId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/deleteWorkflow/${workflowId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete workflow:", error);
+    throw error;
+  }
+};

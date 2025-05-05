@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, List, Spin, Typography, message } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { getWorkflows, fetchApps } from "../../api/api";
+import { Card, List, Spin, Typography, message, Popconfirm, Button } from "antd";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { getWorkflows, fetchApps, deleteWorkflow } from "../../api/api";
 import WorkflowWindow from "./WorkflowWindow";
 import "./style.css"
 
@@ -48,6 +48,17 @@ const WorkflowsList = () => {
     { isCreateCard: true },
     ...workflows
   ];
+
+  // Delete workflow handler
+  const handleDeleteWorkflow = async (workflowId) => {
+    try {
+      await deleteWorkflow(workflowId);
+      setWorkflows((prev) => prev.filter((w) => w.id !== workflowId));
+      message.success("Workflow deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete workflow");
+    }
+  };
 
   return (
     <div className="workflows-container">
@@ -114,9 +125,30 @@ const WorkflowsList = () => {
                     Created: {new Date(workflow.created_at).toLocaleString()}
                   </Text>
                   <br />
-                  <Text className="workflow-apps-used">
-                    Apps Used: {appSet.size}
-                  </Text>
+                  <div className="workflow-card-bottom">
+                    <Text className="workflow-apps-used">
+                      Apps Used: {appSet.size}
+                    </Text>
+                    <Popconfirm
+                      title="Delete this workflow?"
+                      description="Are you sure you want to delete this workflow?"
+                      okText="Yes"
+                      cancelText="No"
+                      onConfirm={e => {
+                        e?.stopPropagation();
+                        handleDeleteWorkflow(workflow.id);
+                      }}
+                      onCancel={e => e?.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </Popconfirm>
+                  </div>
                 </Card>
               </List.Item>
             );
@@ -132,7 +164,7 @@ const WorkflowsList = () => {
             setSelectedWorkflow(null);
           }}
           apps={apps}
-          workflow={selectedWorkflow} // Pass the selected workflow (or null for create)
+          workflow={selectedWorkflow}
         />
       )}
     </div>
