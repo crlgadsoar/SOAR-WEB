@@ -13,6 +13,7 @@ const WorkflowsList = () => {
   const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
   const [apps, setApps] = useState([]);
   const [loadingApps, setLoadingApps] = useState(true);
+  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
 
   useEffect(() => {
     const fetchWorkflowsData = async () => {
@@ -71,7 +72,10 @@ const WorkflowsList = () => {
                 <List.Item>
                   <Card
                     className="workflow-card create-workflow-card"
-                    onClick={() => setWorkflowModalVisible(true)}
+                    onClick={() => {
+                      setSelectedWorkflow(null);
+                      setWorkflowModalVisible(true);
+                    }}
                     hoverable
                   >
                     <PlusOutlined style={{ fontSize: 22, marginRight: 8 }} />
@@ -100,6 +104,11 @@ const WorkflowsList = () => {
                   className="workflow-card"
                   headStyle={{ fontSize: 16, textAlign: "center", padding: "8px 0" }}
                   bodyStyle={{ padding: "10px 16px" }}
+                  hoverable
+                  onClick={() => {
+                    setSelectedWorkflow(workflow);
+                    setWorkflowModalVisible(true);
+                  }}
                 >
                   <Text type="secondary" className="workflow-created">
                     Created: {new Date(workflow.created_at).toLocaleString()}
@@ -114,12 +123,16 @@ const WorkflowsList = () => {
           }}
         />
       )}
-      {/* Workflow Creation Modal */}
+      {/* Workflow Creation/Editing Modal */}
       {workflowModalVisible && !loadingApps && (
         <WorkflowWindow
           visible={workflowModalVisible}
-          onCancel={() => setWorkflowModalVisible(false)}
+          onCancel={() => {
+            setWorkflowModalVisible(false);
+            setSelectedWorkflow(null);
+          }}
           apps={apps}
+          workflow={selectedWorkflow} // Pass the selected workflow (or null for create)
         />
       )}
     </div>

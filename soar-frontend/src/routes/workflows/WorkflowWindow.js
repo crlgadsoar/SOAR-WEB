@@ -1,5 +1,5 @@
 // WorkflowWindow.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Card, Space, message, Tooltip, Avatar, Input } from "antd";
 import { LeftOutlined, RightOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import FlowCanvasMain from "./FlowCanvas";
@@ -7,12 +7,24 @@ import { saveWorkflow } from "../../api/api";
 
 const { confirm } = Modal;
 
-const WorkflowWindowContent = ({ visible, onCancel, apps }) => {
+const WorkflowWindowContent = ({ visible, onCancel, apps, workflow }) => {
   const [workflowName, setWorkflowName] = useState("");
   const [selectedApp, setSelectedApp] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+
+  useEffect(() => {
+    if (workflow) {
+      setWorkflowName(workflow.name || "");
+      setNodes(workflow.nodes || []);
+      setEdges(workflow.edges || []);
+    } else {
+      setWorkflowName("");
+      setNodes([]);
+      setEdges([]);
+    }
+  }, [workflow]);
 
   // Clear all workflow variables
   const clearWorkflow = () => {
