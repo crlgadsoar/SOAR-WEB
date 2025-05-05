@@ -359,3 +359,21 @@ export const deleteWorkflow = async (workflowId) => {
     throw error;
   }
 };
+
+// Delete mapping when a playbook is deleted
+export const deleteMitrePlaybookMapping = async (playbookId) => {
+  try {
+    const response = await axios.delete(
+      `${API_BASE_URL}/delete_mitre_playbook_mapping`,
+      {
+        data: { playbook_id: playbookId },
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Failed to delete MITRE mapping:", error);
+    throw error;
+  }
+};
