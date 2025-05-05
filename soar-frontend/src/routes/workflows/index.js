@@ -15,17 +15,20 @@ const WorkflowsList = () => {
   const [loadingApps, setLoadingApps] = useState(true);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
 
+  // Fetch workflows from API
+  const fetchWorkflowsData = async () => {
+    setLoading(true);
+    try {
+      const data = await getWorkflows();
+      setWorkflows(data);
+    } catch (error) {
+      message.error("Failed to load workflows");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchWorkflowsData = async () => {
-      try {
-        const data = await getWorkflows();
-        setWorkflows(data);
-      } catch (error) {
-        message.error("Failed to load workflows");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchWorkflowsData();
   }, []);
 
@@ -53,10 +56,19 @@ const WorkflowsList = () => {
   const handleDeleteWorkflow = async (workflowId) => {
     try {
       await deleteWorkflow(workflowId);
-      setWorkflows((prev) => prev.filter((w) => w.id !== workflowId));
       message.success("Workflow deleted successfully");
+      fetchWorkflowsData(); // Reload workflows from API after deletion
     } catch (error) {
       message.error("Failed to delete workflow");
+    }
+  };
+
+  // When workflow modal closes, reload workflows if a workflow was created/edited
+  const handleWorkflowModalClose = (shouldReload = false) => {
+    setWorkflowModalVisible(false);
+    setSelectedWorkflow(null);
+    if (shouldReload) {
+      fetchWorkflowsData();
     }
   };
 
@@ -159,10 +171,7 @@ const WorkflowsList = () => {
       {workflowModalVisible && !loadingApps && (
         <WorkflowWindow
           visible={workflowModalVisible}
-          onCancel={() => {
-            setWorkflowModalVisible(false);
-            setSelectedWorkflow(null);
-          }}
+          onCancel={() => handleWorkflowModalClose(true)}
           apps={apps}
           workflow={selectedWorkflow}
         />
