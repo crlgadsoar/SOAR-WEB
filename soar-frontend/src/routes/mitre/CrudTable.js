@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Table } from "antd";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { Table, Modal, Button } from "antd";
 import axios from "axios";
 import TableData from "./TableData";
 import "./CrudTable.css";
 import { fetchAttackCount } from "api/api";
+import attack_map from "./attack_map";
 
 const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
   const [data, setData] = useState([]);
@@ -11,6 +19,11 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
   const [attackCounts, setAttackCounts] = useState({});
   const isComponentMounted = useRef(true);
   const [tableKey, setTableKey] = useState(0);
+
+  // Modal state
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalIncidents, setModalIncidents] = useState([]);
 
   const getData = useCallback(async () => {
     setLoading(true);
@@ -20,7 +33,9 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
       TableData.map(async (item) => {
         for (const key in item) {
           if (item[key]?.attack_id) {
-            attackCountsTemp[item[key].attack_id] = await fetchAttackCount(item[key].attack_id);
+            attackCountsTemp[item[key].attack_id] = await fetchAttackCount(
+              item[key].attack_id
+            );
           }
         }
       })
@@ -43,10 +58,30 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
 
   // Function to determine cell styling
   const getCellStyle = (count) => {
-    if (count === null || count === undefined) return { backgroundColor: "transparent", color: "inherit" };
-    if (count === 0) return { backgroundColor: "transparent", color: "inherit" };
-    if (count >= 1 && count <= 10) return { backgroundColor: "#E3F2FD", color: "inherit" };
+    if (count === null || count === undefined)
+      return { backgroundColor: "transparent", color: "inherit" };
+    if (count === 0)
+      return { backgroundColor: "transparent", color: "inherit" };
+    if (count >= 1 && count <= 10)
+      return { backgroundColor: "#E3F2FD", color: "inherit" };
     return { backgroundColor: "#FFEBEE", color: "inherit" };
+  };
+
+  const handleCellClick = async (attackName) => {
+    const found = attack_map.find((entry) => entry.attack === attackName);
+    if (!found) return;
+
+    try {
+      const response = await axios.get(
+        `http://10.229.40.56:5000/incidents/attack_id?attack_id=${found.mitreid}`,
+        { withCredentials: true }
+      );
+      setModalIncidents(response.data);
+      setModalTitle(`${attackName} (${found.mitreid})`);
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching incidents:", error);
+    }
   };
 
   const columns = [
@@ -68,14 +103,20 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
     ...col,
     align: "center",
     render: (text) => {
-      if (!text || !text.name) return <div className="table-cell-wrapper empty-cell"></div>;
+      if (!text || !text.name)
+        return <div className="table-cell-wrapper empty-cell"></div>;
 
       const count = attackCounts[text?.attack_id] ?? null;
-      const cellStyle = count !== null ? getCellStyle(count) : { backgroundColor: "transparent" };
+      const cellStyle =
+        count !== null ? getCellStyle(count) : { backgroundColor: "transparent" };
 
       return (
         <div className="table-cell-wrapper">
-          <div className="table-cell" style={cellStyle}>
+          <div
+            className="table-cell clickable"
+            style={{ ...cellStyle, cursor: "pointer" }}
+            onClick={() => handleCellClick(text.name)}
+          >
             {text.name}
             {count !== null && count > 0 && <br />}
             {count !== null && count > 0 && `(${count})`}
@@ -96,8 +137,45 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
         bordered
         size="small"
         rowClassName={() => "custom-row"}
-        scroll={false} // Prevents horizontal scrolling
+        scroll={false}
       />
+
+      <Modal
+        title={`Incidents for ${modalTitle}`}
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setIsModalVisible(false)}>
+            Close
+          </Button>,
+        ]}
+        width={800}
+      >
+        {modalIncidents.length > 0 ? (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Incident ID</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Severity</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Description</th>
+                <th style={{ border: "1px solid #ddd", padding: "8px" }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {modalIncidents.map((incident) => (
+                <tr key={incident.incidentid}>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{incident.incidentid}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{incident.severity}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{incident.description}</td>
+                  <td style={{ border: "1px solid #ddd", padding: "8px" }}>{incident.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No incidents found for {modalTitle}.</p>
+        )}
+      </Modal>
     </div>
   );
 });
