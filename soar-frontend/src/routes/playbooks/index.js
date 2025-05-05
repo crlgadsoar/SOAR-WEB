@@ -60,21 +60,29 @@ const Playbooks = () => {
               format: flowData.format,
               ip: flowData.ip,
               port: flowData.port,
-              playbook_id: flowData.playbookId,  // ✅ fixed to match form field
+              playbook_id: flowData.playbookId,  // match AddPlaybook.js field
               playbook_name: flowData.playbookname,
               mitreIds: flowData.mitreIds,
-            };            
-  
-            addPlaybook(payload) // ✅ using your API helper function
-            .then(() => {
-            childRef.current.reloadDataHandle();
-            setModalVisible(false);
-            setModalComponent(null);
-            message.success("Playbook Added");
+            };
+          
+            addPlaybook(payload)
+              .then((res) => {
+              if (res?.data?.success) {
+              childRef.current.reloadDataHandle(); // ✅ reload table
+              message.success("Playbook Added Successfully!");
+              setModalVisible(false); // ✅ close modal
+              setModalComponent(null);
+            } else {
+              message.error(res?.data?.message || "Mitre Id already mapped, Failed to add Playbook!");
+            }
             })
-            .catch(console.error)
-            .finally(() => setButtonSpin(false));
-          }}
+              .catch((error) => {
+              console.error(error);
+              const errorMessage = error?.response?.data?.message || "Server Error: Failed to add Playbook!";
+              message.error(errorMessage);
+            })
+              .finally(() => setButtonSpin(false));
+            }}    
         />
       );
     }
