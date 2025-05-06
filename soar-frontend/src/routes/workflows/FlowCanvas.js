@@ -16,19 +16,40 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './style.css';
-import { CloseOutlined } from '@ant-design/icons'; // Add this import at the top if not present
+import { CloseOutlined, DownOutlined } from '@ant-design/icons';
+import { Dropdown, Menu, message } from "antd";
 
-// Custom Node with Delete Button (cross at top right)
-const DeletableNode = ({ id, data, selected }) => {
+// Custom Node with Delete Button (cross at top right) and Actions Dropdown at bottom right
+const DeletableNode = ({ id, data, selected}) => {
   const onDelete = (e) => {
     e.stopPropagation();
     if (data.onDelete) data.onDelete(id);
   };
 
+  // Handler to fetch actions when dropdown is clicked
+  const handleDropdownClick = async (e) => {
+    e.stopPropagation();
+  };
+
+  const actions = data.actions || [];
+  const onAction = data.onAction || (() => {});
+
+  const menu = (
+    <Menu>
+      {actions.length > 0 ? (
+        actions.map((action, idx) => (
+          <Menu.Item key={idx} onClick={() => onAction(id, action)}>
+            {action.action_name}
+          </Menu.Item>
+        ))
+      ) : (
+        <Menu.Item disabled>No Actions</Menu.Item>
+      )}
+    </Menu>
+  );
+
   return (
-    <div
-      className={`flow-node${selected ? " flow-node-selected" : ""}`}
-    >
+    <div className={`flow-node${selected ? " flow-node-selected" : ""}`}>
       <span>{data.label}</span>
       <button
         className="flow-node-delete-btn"
@@ -37,15 +58,31 @@ const DeletableNode = ({ id, data, selected }) => {
       >
         ×
       </button>
+      {/* Dropdown at bottom right */}
+      <div className="flow-node-action-dropdown">
+        <Dropdown
+          overlay={menu}
+          trigger={['click']}
+          getPopupContainer={trigger => trigger.parentNode}
+        >
+          <a
+            href="#!"
+            onClick={handleDropdownClick}
+            style={{ color: "#1890ff", fontSize: 16 }}
+          >
+            <DownOutlined />
+          </a>
+        </Dropdown>
+      </div>
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
     </div>
   );
 };
 
-const nodeTypes = {
-  deletable: DeletableNode,
-};
+const nodeTypes = (setNodes) => ({
+  deletable: (props) => <DeletableNode {...props} />,
+});
 
 // Custom Edge with Delete Icon
 const DeletableEdge = (props) => {
@@ -153,7 +190,15 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
 
       const newNode = {
         id: `${app.id}-${nodes.length}`,
-        data: { label: app.title, onDelete: handleDeleteNode },
+        data: {
+          label: app.title,
+          appId: app.id, // <-- ensure this is set
+          onDelete: handleDeleteNode,
+          actions: app.actions || [], // <-- ensure this is set
+          onAction: (nodeId, action) => {
+            message.info(`Action "${action}" selected for node "${nodeId}"`);
+          },
+        },
         position,
         draggable: true,
         type: 'deletable',
@@ -213,7 +258,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
       onDragOver={(event) => event.preventDefault()}
       onInit={onInit}
       fitView
-      nodeTypes={nodeTypes}
+      nodeTypes={nodeTypes(setNodes)}
       edgeTypes={edgeTypes}
     >
       <Controls />
@@ -223,7 +268,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
   );
 };
 
-const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges }) => (
+const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges}) => (
   <ReactFlowProvider>
     <FlowCanvasInner
       nodes={nodes}

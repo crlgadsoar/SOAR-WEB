@@ -115,3 +115,25 @@
   box-shadow: none;
   pointer-events: auto;
 }
+
+.flow-node-action-dropdown {
+  position: absolute;
+  right: -9px;
+  bottom: -9px;
+  z-index: 2;
+  background: #ffff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 4px #eee;
+}
+
+/* Make all node action dropdown menu items smaller */
+.flow-node-action-dropdown .ant-dropdown-menu-item,
+.flow-node-action-dropdown .ant-dropdown-menu-submenu-title {
+  font-size: 12px !important;
+  white-space: nowrap;
+}

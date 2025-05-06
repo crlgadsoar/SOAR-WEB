@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, List, Spin, Typography, message, Popconfirm, Button } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { getWorkflows, fetchApps, deleteWorkflow } from "../../api/api";
+import { getWorkflows, fetchApps, deleteWorkflow, fetchAppActions } from "../../api/api";
 import WorkflowWindow from "./WorkflowWindow";
 import "./style.css"
 
@@ -28,23 +28,33 @@ const WorkflowsList = () => {
     }
   };
 
-  useEffect(() => {
-    fetchWorkflowsData();
-  }, []);
+  // Fetch apps and their actions
+  const fetchAppsWithActions = async () => {
+    try {
+      const appsData = await fetchApps();
+      // For each app, fetch its actions and attach to the app object
+      const appsWithActions = await Promise.all(
+        appsData.map(async (app) => {
+          try {
+            const actions = await fetchAppActions(app.id);
+            return { ...app, actions };
+          } catch {
+            return { ...app, actions: [] };
+          }
+        })
+      );
+      setApps(appsWithActions);
+    } catch (error) {
+      message.error("Failed to load apps for workflow creation.");
+    } finally {
+      setLoadingApps(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAvailableApps = async () => {
-      try {
-        const appsData = await fetchApps();
-        setApps(appsData);
-      } catch (error) {
-        message.error("Failed to load apps for workflow creation.");
-      } finally {
-        setLoadingApps(false);
-      }
-    };
-    if (workflowModalVisible) fetchAvailableApps();
-  }, [workflowModalVisible]);
+    fetchWorkflowsData();
+    fetchAppsWithActions();
+  }, []);
 
   // Insert the "Create Workflow" card as the first item in the list
   const workflowsWithCreate = [
