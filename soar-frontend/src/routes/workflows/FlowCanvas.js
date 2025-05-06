@@ -20,7 +20,7 @@ import { CloseOutlined, DownOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, message } from "antd";
 
 // Custom Node with Delete Button (cross at top right) and Actions Dropdown at bottom right
-const DeletableNode = ({ id, data, selected}) => {
+const DeletableNode = ({ id, data, selected, setNodes }) => {
   const onDelete = (e) => {
     e.stopPropagation();
     if (data.onDelete) data.onDelete(id);
@@ -32,18 +32,60 @@ const DeletableNode = ({ id, data, selected}) => {
   };
 
   const actions = data.actions || [];
-  const onAction = data.onAction || (() => {});
+  const selectedAction = data.selectedAction || null;
+
+  // Highlight selected action and update node data on selection
+  const onAction = (nodeId, action) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                selectedAction: action, // Save selected action in node data
+              },
+            }
+          : node
+      )
+    );
+  };
 
   const menu = (
     <Menu>
       {actions.length > 0 ? (
         actions.map((action, idx) => (
-          <Menu.Item key={idx} onClick={() => onAction(id, action)}>
-            {action.action_name}
+          <Menu.Item
+            key={idx}
+            onClick={() => onAction(id, action)}
+            style={{
+              fontSize: "12px",
+              fontWeight:
+                selectedAction &&
+                ((action.action_name && selectedAction.action_name === action.action_name) ||
+                  action === selectedAction)
+                  ? "bold"
+                  : "normal",
+              background:
+                selectedAction &&
+                ((action.action_name && selectedAction.action_name === action.action_name) ||
+                  action === selectedAction)
+                  ? "#e6f7ff"
+                  : undefined,
+            }}
+          >
+            {action.action_name || action}
+            {selectedAction &&
+              ((action.action_name && selectedAction.action_name === action.action_name) ||
+                action === selectedAction) && (
+                <span style={{ color: "#1890ff", marginLeft: 6 }}>✔</span>
+              )}
           </Menu.Item>
         ))
       ) : (
-        <Menu.Item disabled>No Actions</Menu.Item>
+        <Menu.Item disabled style={{ fontSize: "12px" }}>
+          No Actions
+        </Menu.Item>
       )}
     </Menu>
   );
@@ -81,7 +123,7 @@ const DeletableNode = ({ id, data, selected}) => {
 };
 
 const nodeTypes = (setNodes) => ({
-  deletable: (props) => <DeletableNode {...props} />,
+  deletable: (props) => <DeletableNode {...props} setNodes={setNodes} />,
 });
 
 // Custom Edge with Delete Icon
