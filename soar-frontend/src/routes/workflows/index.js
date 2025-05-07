@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, List, Spin, Typography, message, Popconfirm, Button } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { getWorkflows, fetchApps, deleteWorkflow, fetchAppActions } from "../../api/api";
+import { getWorkflows, fetchAppsWithActions, deleteWorkflow } from "../../api/api";
 import WorkflowWindow from "./WorkflowWindow";
 import "./style.css"
 
@@ -29,21 +29,11 @@ const WorkflowsList = () => {
   };
 
   // Fetch apps and their actions
-  const fetchAppsWithActions = async () => {
+  const fetchAppsAndActions = async () => {
+    setLoadingApps(true);
     try {
-      const appsData = await fetchApps();
-      // For each app, fetch its actions and attach to the app object
-      const appsWithActions = await Promise.all(
-        appsData.map(async (app) => {
-          try {
-            const actions = await fetchAppActions(app.id);
-            return { ...app, actions };
-          } catch {
-            return { ...app, actions: [] };
-          }
-        })
-      );
-      setApps(appsWithActions);
+      const appsData = await fetchAppsWithActions();
+      setApps(appsData);
     } catch (error) {
       message.error("Failed to load apps for workflow creation.");
     } finally {
@@ -53,7 +43,7 @@ const WorkflowsList = () => {
 
   useEffect(() => {
     fetchWorkflowsData();
-    fetchAppsWithActions();
+    fetchAppsAndActions();
   }, []);
 
   // Insert the "Create Workflow" card as the first item in the list

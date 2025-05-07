@@ -139,6 +139,16 @@ export const fetchApps = async () => {
   }
 };
 
+export const fetchAppsWithActions = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/integrations/getAppsWithActions`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching apps with actions:", error);
+    throw error;
+  }
+};
+
 export const fetchAppActions = async (appId) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/integrations/getAppActions`, {
