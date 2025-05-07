@@ -381,3 +381,23 @@ export const deleteWorkflow = async (workflowId) => {
     throw error;
   }
 };
+
+export const fetchIncidentsByAttackName = async (attackName, attack_map) => {
+  const found = attack_map.find((entry) => entry.attack === attackName);
+  if (!found) return { success: false, message: "Attack not found in map." };
+
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/incidents/attack_id?attack_id=${found.mitreid}`,
+      { withCredentials: true }
+    );
+    return {
+      success: true,
+      data: response.data,
+      title: `${attackName} (${found.mitreid})`,
+    };
+  } catch (error) {
+    console.error("Error fetching incidents by attack name:", error);
+    return { success: false, message: "Failed to fetch incidents." };
+  }
+};

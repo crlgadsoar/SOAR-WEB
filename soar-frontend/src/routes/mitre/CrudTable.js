@@ -10,7 +10,7 @@ import { Table, Modal, Button } from "antd";
 import axios from "axios";
 import TableData from "./TableData";
 import "./CrudTable.css";
-import { fetchAttackCount } from "api/api";
+import { fetchAttackCount, fetchIncidentsByAttackName } from "api/api";
 import attack_map from "./attack_map";
 
 const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
@@ -68,19 +68,14 @@ const CrudTable = forwardRef(({ openModalHandler, deleteData }, ref) => {
   };
 
   const handleCellClick = async (attackName) => {
-    const found = attack_map.find((entry) => entry.attack === attackName);
-    if (!found) return;
-
-    try {
-      const response = await axios.get(
-        `http://10.229.40.56:5000/incidents/attack_id?attack_id=${found.mitreid}`,
-        { withCredentials: true }
-      );
-      setModalIncidents(response.data);
-      setModalTitle(`${attackName} (${found.mitreid})`);
+    const result = await fetchIncidentsByAttackName(attackName, attack_map);
+  
+    if (result.success) {
+      setModalIncidents(result.data);
+      setModalTitle(result.title);
       setIsModalVisible(true);
-    } catch (error) {
-      console.error("Error fetching incidents:", error);
+    } else {
+      console.error(result.message);
     }
   };
 
