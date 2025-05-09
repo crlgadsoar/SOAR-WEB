@@ -137,3 +137,92 @@
   font-size: 12px !important;
   white-space: nowrap;
 }
+
+.flow-edge-mapper-btn {
+  background: #fff;
+  border: 1px solid #1890ff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  color: #1890ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 4px;
+  pointer-events: auto;
+  transition: box-shadow 0.2s;
+}
+
+.flow-edge-mapper-btn:hover {
+  outline: none;
+  box-shadow: 0 0 0 2px #1890ff33;
+}
+
+.kv-mapper-container {
+  padding: 8px 0;
+}
+
+.kv-mapper-header {
+  display: flex;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.kv-mapper-header span {
+  flex: 1;
+  text-align: left;
+}
+
+.kv-mapper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.kv-mapper-select {
+  flex: 1;
+  width: 100%;
+}
+
+.kv-mapper-remove-btn {
+  flex: 0 0 auto;
+  margin-left: 0;
+}
+
+.kv-mapper-add-btn {
+  width: 100%;
+}
+
+/* Tabular KeyValueMapper styles */
+.kv-mapper-table-container {
+  padding: 8px 0;
+}
+
+.kv-mapper-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.kv-mapper-table th,
+.kv-mapper-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.kv-mapper-table th {
+  background: #fafafa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.kv-mapper-input {
+  width: 100%;
+}

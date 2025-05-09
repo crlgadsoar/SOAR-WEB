@@ -16,12 +16,14 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './style.css';
-import { CloseOutlined, DownOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, message } from "antd";
-
+import { CloseOutlined, DownOutlined, LinkOutlined } from '@ant-design/icons';
+import { Dropdown, Menu, message, Modal, Popover } from "antd";
+import KeyValueMapper from './KeyValueMapper';
 
 const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [mapperModal, setMapperModal] = useState({ visible: false, edgeId: null });
+  const [mapperPopover, setMapperPopover] = useState({ visible: false, edgeId: null });
   
   // Custom Node with Delete Button (cross at top right) and Actions Dropdown at bottom right
   const DeletableNode = ({ id, data, selected, setNodes }) => {
@@ -130,9 +132,9 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
     deletable: (props) => <DeletableNode {...props} setNodes={setNodes} />,
   });
   
-  // Custom Edge with Delete Icon
+  // Custom Edge with Delete Icon and KeyValueMapper Modal
   const DeletableEdge = (props) => {
-    const { id, sourceX, sourceY, targetX, targetY, style, markerEnd, data } = props;
+    const { id, sourceX, sourceY, targetX, targetY, style, markerEnd, data, source, target } = props;
     const [hovered, setHovered] = useState(false);
   
     const edgePath = getBezierPath({
@@ -148,6 +150,35 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
       (sourceY + targetY) / 2,
     ];
   
+    // Find source and target node data for mapping keys
+    const sourceNode = nodes.find(n => n.id === source);
+    const targetNode = nodes.find(n => n.id === target);
+  
+    // Example: outputKeys from source, inputKeys from target
+    const outputKeys = sourceNode?.data?.outputKeys || [];
+    const inputKeys = targetNode?.data?.inputKeys || [];
+  
+    // Get mapping for this edge
+    const mapping = data?.keyMapping || {};
+  
+    // Handler to update mapping for this edge
+    const handleMappingChange = (newMapping) => {
+      setEdges((eds) =>
+        eds.map((edge) =>
+          edge.id === id
+            ? {
+                ...edge,
+                data: {
+                  ...edge.data,
+                  keyMapping: newMapping,
+                  onDelete: edge.data?.onDelete,
+                },
+              }
+            : edge
+        )
+      );
+    };
+  
     return (
       <g
         onMouseEnter={() => setHovered(true)}
@@ -155,6 +186,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
         style={{ cursor: 'pointer' }}
       >
         <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+        {/* Delete button */}
         {hovered && (
           <foreignObject
             x={centerX - 10}
@@ -176,6 +208,23 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
             </button>
           </foreignObject>
         )}
+        {/* KeyValueMapper icon button */}
+        <foreignObject
+          x={centerX + 14}
+          y={centerY - 10}
+          width={24}
+          height={24}
+          style={{ overflow: 'visible', pointerEvents: 'none' }}
+        >
+            <LinkOutlined
+            className="flow-edge-mapper-btn"
+            title="Map Keys"
+            tabIndex={-1}
+            onClick={e => {
+              e.stopPropagation();
+              setMapperModal({ visible: true, edgeId: id });
+            }}/>
+        </foreignObject>
       </g>
     );
   };
@@ -287,24 +336,71 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
     [setEdges]
   );
 
+  // Modal for KeyValueMapper
+  const currentEdge = edges.find(e => e.id === mapperModal.edgeId);
+  let sourceNode = null, targetNode = null, outputKeys = [], inputKeys = [], mappingRows = [];
+  if (currentEdge) {
+    sourceNode = nodes.find(n => n.id === currentEdge.source);
+    targetNode = nodes.find(n => n.id === currentEdge.target);
+    outputKeys = sourceNode?.data?.outputKeys || [];
+    inputKeys = targetNode?.data?.inputKeys || [];
+    mappingRows = currentEdge.data?.keyMappingRows || [];
+  }
+
+  const handleMappingChange = (newRows) => {
+    setEdges((eds) =>
+      eds.map((edge) =>
+        edge.id === mapperModal.edgeId
+          ? {
+              ...edge,
+              data: {
+                ...edge.data,
+                keyMappingRows: newRows,
+                onDelete: edge.data?.onDelete,
+              },
+            }
+          : edge
+      )
+    );
+  };
+
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onDrop={onDrop}
-      onDragOver={(event) => event.preventDefault()}
-      onInit={onInit}
-      fitView
-      nodeTypes={nodeTypes(setNodes)}
-      edgeTypes={edgeTypes}
-    >
-      <Controls />
-      <MiniMap />
-      <Background variant="dots" gap={12} size={1} />
-    </ReactFlow>
+    <>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDrop={onDrop}
+        onDragOver={(event) => event.preventDefault()}
+        onInit={onInit}
+        fitView
+        nodeTypes={nodeTypes(setNodes)}
+        edgeTypes={edgeTypes}
+      >
+        <Controls />
+        <MiniMap />
+        <Background variant="dots" gap={12} size={1} />
+      </ReactFlow>
+      {/* KeyValueMapper Modal */}
+      <Modal
+        open={mapperModal.visible}
+        title="Key Value Mapper"
+        onCancel={() => setMapperModal({ visible: false, edgeId: null })}
+        footer={null}
+        destroyOnClose
+      >
+        <KeyValueMapper
+          outputKeys={outputKeys}
+          inputKeys={inputKeys}
+          mappingRows={mappingRows}
+          onChange={handleMappingChange}
+          outputNodeName={sourceNode?.data?.label || "Output Node"}
+          inputNodeName={targetNode?.data?.label || "Input Node"}
+        />
+      </Modal>
+    </>
   );
 };
 
