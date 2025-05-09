@@ -226,3 +226,21 @@
 .kv-mapper-input {
   width: 100%;
 }
+
+.flow-status-legend {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+  padding-left: 8px;
+}
+.flow-status-box {
+  display: inline-block;
+  width: 18px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 3px;
+  border: 1px solid #d9d9d9;
+}

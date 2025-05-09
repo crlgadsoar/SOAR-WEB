@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Card, List, Spin, Typography, message, Popconfirm, Button } from "antd";
+import { Card, List, Spin, Typography, message, Popconfirm, Button, Table } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { getWorkflows, fetchAppsWithActions, deleteWorkflow } from "../../api/api";
+import { getWorkflows, fetchAppsWithActions, deleteWorkflow, fetchWorkflowRuns } from "../../api/api";
 import WorkflowWindow from "./WorkflowWindow";
+import WorkflowWindowReadOnly from "./WorkflowWindowReadOnly"; // import the new component
 import "./style.css"
 
 const { Title, Text } = Typography;
@@ -14,6 +15,9 @@ const WorkflowsList = () => {
   const [apps, setApps] = useState([]);
   const [loadingApps, setLoadingApps] = useState(true);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [workflowRuns, setWorkflowRuns] = useState([]);
+  const [loadingRuns, setLoadingRuns] = useState(true);
+  const [readOnlyWorkflow, setReadOnlyWorkflow] = useState(null);
 
   // Fetch workflows from API
   const fetchWorkflowsData = async () => {
@@ -41,9 +45,23 @@ const WorkflowsList = () => {
     }
   };
 
+  // Fetch workflow runs
+  const fetchRuns = async () => {
+    setLoadingRuns(true);
+    try {
+      const runs = await fetchWorkflowRuns();
+      setWorkflowRuns(runs);
+    } catch (error) {
+      message.error("Failed to load workflow runs.");
+    } finally {
+      setLoadingRuns(false);
+    }
+  };
+
   useEffect(() => {
     fetchWorkflowsData();
     fetchAppsAndActions();
+    fetchRuns(); // Fetch workflow runs on mount
   }, []);
 
   // Insert the "Create Workflow" card as the first item in the list
@@ -71,6 +89,22 @@ const WorkflowsList = () => {
       fetchWorkflowsData();
     }
   };
+
+  // Table columns
+  const runColumns = [
+    { title: "Run ID", dataIndex: "run_id", key: "run_id" },
+    { title: "Workflow Name", dataIndex: "workflow_name", key: "workflow_name" },
+    { title: "Created At", dataIndex: "created_at", key: "created_at" },
+  ];
+
+  // Map workflow name from workflow_id
+  const runsWithNames = workflowRuns.map(run => {
+    const wf = workflows.find(w => w.id === run.workflow_id);
+    return {
+      ...run,
+      workflow_name: wf ? wf.name : "Unknown",
+    };
+  });
 
   return (
     <div className="workflows-container">
@@ -167,7 +201,7 @@ const WorkflowsList = () => {
           }}
         />
       )}
-      {/* Workflow Creation/Editing Modal */}
+      {/* Editable Workflow Modal */}
       {workflowModalVisible && !loadingApps && (
         <WorkflowWindow
           visible={workflowModalVisible}
@@ -176,6 +210,35 @@ const WorkflowsList = () => {
           workflow={selectedWorkflow}
         />
       )}
+      {/* Read-Only Workflow Modal */}
+      {readOnlyWorkflow && (
+        <WorkflowWindowReadOnly
+          visible={!!readOnlyWorkflow}
+          onCancel={() => setReadOnlyWorkflow(null)}
+          apps={apps}
+          workflow={readOnlyWorkflow}
+        />
+      )}
+      <div style={{ marginTop: 32 }}>
+        <Typography.Title level={4}>Workflow Executions</Typography.Title>
+        <Table
+          columns={runColumns}
+          dataSource={runsWithNames}
+          loading={loadingRuns}
+          rowKey="run_id"
+          pagination={{ pageSize: 10 }}
+          onRow={record => ({
+            onClick: () => {
+              const wf = workflows.find(w => w.id === record.workflow_id);
+              if (wf) {
+                setReadOnlyWorkflow({ ...wf, results: record.results }); // Pass results to modal
+              } else {
+                message.warning("Workflow not found for this run.");
+              }
+            }
+          })}
+        />
+      </div>
     </div>
   );
 };

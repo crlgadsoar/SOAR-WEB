@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:5000"; 
+export const API_BASE_URL = "http://10.229.40.42:5000"; 
 
 
 export const signUp = async (values) => {
@@ -409,5 +409,17 @@ export const fetchIncidentsByAttackName = async (attackName, attack_map) => {
   } catch (error) {
     console.error("Error fetching incidents by attack name:", error);
     return { success: false, message: "Failed to fetch incidents." };
+  }
+};
+
+export const fetchWorkflowRuns = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/getWorkflowRuns`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch workflow runs:", error);
+    return [];
   }
 };

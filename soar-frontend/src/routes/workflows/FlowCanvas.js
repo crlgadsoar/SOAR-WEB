@@ -20,12 +20,12 @@ import { CloseOutlined, DownOutlined, LinkOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, message, Modal, Popover } from "antd";
 import KeyValueMapper from './KeyValueMapper';
 
-const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
+const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readOnly }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [mapperModal, setMapperModal] = useState({ visible: false, edgeId: null });
   const [mapperPopover, setMapperPopover] = useState({ visible: false, edgeId: null });
   
-  // Custom Node with Delete Button (cross at top right) and Actions Dropdown at bottom right
+  // Custom Node with Delete Button (cross at top right), Actions Dropdown at bottom right, and Status Indicator
   const DeletableNode = ({ id, data, selected, setNodes }) => {
     const onDelete = (e) => {
       e.stopPropagation();
@@ -95,10 +95,34 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
         )}
       </Menu>
     );
+
+    // Get status_code for this node from results
+    let status = null;
+    if (results && results[id]) {
+      status = results[id].status_code;
+    }
+
+    // Choose background color based on status
+    let nodeBg = "#fff";
+    if (status === 200) {
+      nodeBg = "#e6ffed"; // greenish for success
+    } else if (status != null) {
+      nodeBg = "#fff1f0"; // reddish for failure
+    }
   
     return (
-      <div className={`flow-node${selected ? " flow-node-selected" : ""}`}>
-        <span>{data.label}</span>
+      <div
+        title={status === 200 ? "Success" : status != null ? "Failed" : "Not executed"}
+        className={`flow-node${selected ? " flow-node-selected" : ""}`}
+        style={{
+          background: nodeBg,
+          border: selected ? "2px solid #1890ff" : "1px solid #d9d9d9",
+          transition: "background 0.2s, border 0.2s"
+        }}
+      >
+        <span>
+          {data.label}
+        </span>
         <button
           className="flow-node-delete-btn"
           onClick={onDelete}
@@ -364,53 +388,79 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges }) => {
     );
   };
 
+  // Legend for execution status
+  const StatusLegend = () => (
+    <div className="flow-status-legend">
+      <span>
+        <span className="flow-status-box" style={{ background: "#e6ffed", border: "1px solid #b7eb8f" }} /> Success
+      </span>
+      <span>
+        <span className="flow-status-box" style={{ background: "#fff1f0", border: "1px solid #ffa39e" }} /> Failed
+      </span>
+      <span>
+        <span className="flow-status-box" style={{ background: "#fff", border: "1px solid #d9d9d9" }} /> Not Executed
+      </span>
+    </div>
+  );
+
   return (
     <>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDrop={onDrop}
-        onDragOver={(event) => event.preventDefault()}
-        onInit={onInit}
-        fitView
-        nodeTypes={nodeTypes(setNodes)}
-        edgeTypes={edgeTypes}
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
-      </ReactFlow>
-      {/* KeyValueMapper Modal */}
-      <Modal
-        open={mapperModal.visible}
-        title="Key Value Mapper"
-        onCancel={() => setMapperModal({ visible: false, edgeId: null })}
-        footer={null}
-        destroyOnClose
-      >
-        <KeyValueMapper
-          outputKeys={outputKeys}
-          inputKeys={inputKeys}
-          mappingRows={mappingRows}
-          onChange={handleMappingChange}
-          outputNodeName={sourceNode?.data?.label || "Output Node"}
-          inputNodeName={targetNode?.data?.label || "Input Node"}
-        />
-      </Modal>
-    </>
+    {/* Header with workflow name and legend (only in readOnly mode) */}
+    {readOnly && (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <span style={{ fontWeight: 600, fontSize: 18, paddingLeft: 8 }}>
+          {nodes?.[0]?.data?.workflowName || "Workflow"}
+        </span>
+        <StatusLegend />
+      </div>
+    )}
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onDrop={onDrop}
+      onDragOver={(event) => event.preventDefault()}
+      onInit={onInit}
+      fitView
+      nodeTypes={nodeTypes(setNodes)}
+      edgeTypes={edgeTypes}
+    >
+      <Controls />
+      <MiniMap />
+      <Background variant="dots" gap={12} size={1} />
+    </ReactFlow>
+    {/* KeyValueMapper Modal */}
+    <Modal
+      open={mapperModal.visible}
+      title="Key Value Mapper"
+      onCancel={() => setMapperModal({ visible: false, edgeId: null })}
+      footer={null}
+      destroyOnClose
+    >
+      <KeyValueMapper
+        outputKeys={outputKeys}
+        inputKeys={inputKeys}
+        mappingRows={mappingRows}
+        onChange={handleMappingChange}
+        outputNodeName={sourceNode?.data?.label || "Output Node"}
+        inputNodeName={targetNode?.data?.label || "Input Node"}
+      />
+    </Modal>
+  </>
   );
 };
 
-const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges}) => (
+const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges, results, readOnly}) => (
   <ReactFlowProvider>
     <FlowCanvasInner
       nodes={nodes}
       setNodes={setNodes}
       edges={edges}
       setEdges={setEdges}
+      results={results}
+      readOnly={readOnly} // Set to true if you want read-only mode
     />
   </ReactFlowProvider>
 );
