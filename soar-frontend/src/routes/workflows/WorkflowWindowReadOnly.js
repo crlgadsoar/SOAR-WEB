@@ -1,6 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Input } from "antd";
+import { Modal } from "antd";
 import FlowCanvasMain from "./FlowCanvas";
+import { colours } from "./constants";
+
+// Legend component
+const StatusLegend = () => (
+  <div className="flow-status-legend">
+    <span>
+      <span className="flow-status-box" style={{ background: colours.nodeColourSuccess, border: "1px solid #b7eb8f" }} />
+      Success
+    </span>
+    <span>
+      <span className="flow-status-box" style={{ background: colours.nodeColourFailure, border: "1px solid #ffa39e" }} />
+      Failed
+    </span>
+    <span>
+      <span className="flow-status-box" style={{ background: colours.nodeColourNotExecuted, border: "1px solid #d9d9d9" }} />
+      Not Executed
+    </span>
+  </div>
+);
 
 const WorkflowWindowReadOnly = ({ visible, onCancel, apps, workflow }) => {
   const [nodes, setNodes] = useState([]);
@@ -20,12 +39,17 @@ const WorkflowWindowReadOnly = ({ visible, onCancel, apps, workflow }) => {
       setEdges([]);
       setResults({});
     }
-    console.log("Workflow results data:", workflow.results);
+    // eslint-disable-next-line
   }, [workflow]);
 
   return (
     <Modal
-      title="Workflow (Read Only)"
+      title={
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>{workflowName}</span>
+            <StatusLegend />
+        </div>
+      }
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -37,19 +61,13 @@ const WorkflowWindowReadOnly = ({ visible, onCancel, apps, workflow }) => {
     >
       <div style={{ display: "flex", height: "100%" }}>
         <div style={{ width: "100%", padding: "16px" }}>
-          <Input
-            value={workflowName}
-            disabled
-            style={{ marginBottom: 16, width: 300 }}
-            placeholder="Workflow Name"
-          />
           <FlowCanvasMain
             nodes={nodes}
-            setNodes={() => {}} // No-op
+            setNodes={() => { }} // No-op
             edges={edges}
-            setEdges={() => {}} // No-op
-            results={results} // Pass results here
-            readOnly={true} // Optional: pass a flag for read-only mode
+            setEdges={() => { }} // No-op
+            results={results}
+            readOnly={true}
           />
         </div>
       </div>

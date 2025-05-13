@@ -19,6 +19,7 @@ import './style.css';
 import { CloseOutlined, DownOutlined, LinkOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, message, Modal, Popover } from "antd";
 import KeyValueMapper from './KeyValueMapper';
+import { colours } from './constants';
 
 const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readOnly }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
@@ -103,11 +104,11 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
     }
 
     // Choose background color based on status
-    let nodeBg = "#fff";
+    let nodeBg = colours.nodeColourNotExecuted;
     if (status === 200) {
-      nodeBg = "#e6ffed"; // greenish for success
+      nodeBg = colours.nodeColourSuccess;
     } else if (status != null) {
-      nodeBg = "#fff1f0"; // reddish for failure
+      nodeBg = colours.nodeColourFailure;
     }
   
     return (
@@ -388,32 +389,9 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
     );
   };
 
-  // Legend for execution status
-  const StatusLegend = () => (
-    <div className="flow-status-legend">
-      <span>
-        <span className="flow-status-box" style={{ background: "#e6ffed", border: "1px solid #b7eb8f" }} /> Success
-      </span>
-      <span>
-        <span className="flow-status-box" style={{ background: "#fff1f0", border: "1px solid #ffa39e" }} /> Failed
-      </span>
-      <span>
-        <span className="flow-status-box" style={{ background: "#fff", border: "1px solid #d9d9d9" }} /> Not Executed
-      </span>
-    </div>
-  );
-
   return (
     <>
     {/* Header with workflow name and legend (only in readOnly mode) */}
-    {readOnly && (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <span style={{ fontWeight: 600, fontSize: 18, paddingLeft: 8 }}>
-          {nodes?.[0]?.data?.workflowName || "Workflow"}
-        </span>
-        <StatusLegend />
-      </div>
-    )}
     <ReactFlow
       nodes={nodes}
       edges={edges}

@@ -234,7 +234,9 @@
   margin-bottom: 12px;
   font-size: 13px;
   padding-left: 8px;
+  margin-right: 48px; /* or 56px if you want more space */
 }
+
 .flow-status-box {
   display: inline-block;
   width: 18px;
