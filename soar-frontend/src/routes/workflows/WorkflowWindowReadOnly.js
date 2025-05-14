@@ -7,11 +7,11 @@ import { colours } from "./constants";
 const StatusLegend = () => (
   <div className="flow-status-legend">
     <span>
-      <span className="flow-status-box" style={{ background: colours.nodeColourSuccess, border: "1px solid #b7eb8f" }} />
+      <span className="flow-status-box" style={{ background: colours.nodeColourSuccess, border: "1px solid #d9d9d9" }} />
       Success
     </span>
     <span>
-      <span className="flow-status-box" style={{ background: colours.nodeColourFailure, border: "1px solid #ffa39e" }} />
+      <span className="flow-status-box" style={{ background: colours.nodeColourFailure, border: "1px solid #d9d9d9" }} />
       Failed
     </span>
     <span>

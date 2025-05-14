@@ -25,39 +25,41 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [mapperModal, setMapperModal] = useState({ visible: false, edgeId: null });
   const [mapperPopover, setMapperPopover] = useState({ visible: false, edgeId: null });
-  
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [resultModalVisible, setResultModalVisible] = useState(false);
+
   // Custom Node with Delete Button (cross at top right), Actions Dropdown at bottom right, and Status Indicator
   const DeletableNode = ({ id, data, selected, setNodes }) => {
     const onDelete = (e) => {
       e.stopPropagation();
-      handleDeleteNode(id); 
+      handleDeleteNode(id);
     };
-  
+
     // Handler to fetch actions when dropdown is clicked
     const handleDropdownClick = async (e) => {
       e.stopPropagation();
     };
-  
+
     const actions = data.actions || [];
     const selectedAction = data.selectedAction || null;
-  
+
     // Highlight selected action and update node data on selection
     const onAction = (nodeId, action) => {
       setNodes((nds) =>
         nds.map((node) =>
           node.id === nodeId
             ? {
-                ...node,
-                data: {
-                  ...node.data,
-                  selectedAction: action, // Save selected action in node data
-                },
-              }
+              ...node,
+              data: {
+                ...node.data,
+                selectedAction: action, // Save selected action in node data
+              },
+            }
             : node
         )
       );
     };
-  
+
     const menu = (
       <Menu>
         {actions.length > 0 ? (
@@ -69,14 +71,14 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
                 fontSize: "12px",
                 fontWeight:
                   selectedAction &&
-                  ((action.action_name && selectedAction.action_name === action.action_name) ||
-                    action === selectedAction)
+                    ((action.action_name && selectedAction.action_name === action.action_name) ||
+                      action === selectedAction)
                     ? "bold"
                     : "normal",
                 background:
                   selectedAction &&
-                  ((action.action_name && selectedAction.action_name === action.action_name) ||
-                    action === selectedAction)
+                    ((action.action_name && selectedAction.action_name === action.action_name) ||
+                      action === selectedAction)
                     ? "#e6f7ff"
                     : undefined,
               }}
@@ -110,7 +112,15 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
     } else if (status != null) {
       nodeBg = colours.nodeColourFailure;
     }
-  
+
+    // Only allow click to show result in readOnly mode
+    const handleNodeClick = () => {
+      if (readOnly && results && results[id]) {
+        setSelectedNodeId(id);
+        setResultModalVisible(true);
+      }
+    };
+
     return (
       <div
         title={status === 200 ? "Success" : status != null ? "Failed" : "Not executed"}
@@ -118,20 +128,26 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
         style={{
           background: nodeBg,
           border: selected ? "2px solid #1890ff" : "1px solid #d9d9d9",
-          transition: "background 0.2s, border 0.2s"
+          transition: "background 0.2s, border 0.2s",
+          cursor: readOnly ? "pointer" : "default"
         }}
+        onClick={handleNodeClick}
       >
         <span>
           {data.label}
         </span>
-        <button
-          className="flow-node-delete-btn"
-          onClick={onDelete}
-          title="Delete Node"
-        >
-          ×
-        </button>
-        {/* Dropdown at bottom right */}
+        {!readOnly && (
+          <>
+            <button
+              className="flow-node-delete-btn"
+              onClick={onDelete}
+              title="Delete Node"
+            >
+              ×
+            </button>
+            {/* Dropdown at bottom right */}
+          </>
+        )}
         <div className="flow-node-action-dropdown">
           <Dropdown
             overlay={menu}
@@ -152,58 +168,58 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
       </div>
     );
   };
-  
+
   const nodeTypes = (setNodes) => ({
     deletable: (props) => <DeletableNode {...props} setNodes={setNodes} />,
   });
-  
+
   // Custom Edge with Delete Icon and KeyValueMapper Modal
   const DeletableEdge = (props) => {
     const { id, sourceX, sourceY, targetX, targetY, style, markerEnd, data, source, target } = props;
     const [hovered, setHovered] = useState(false);
-  
+
     const edgePath = getBezierPath({
       sourceX,
       sourceY,
       targetX,
       targetY,
     });
-  
+
     // Center of the edge
     const [centerX, centerY] = [
       (sourceX + targetX) / 2,
       (sourceY + targetY) / 2,
     ];
-  
+
     // Find source and target node data for mapping keys
     const sourceNode = nodes.find(n => n.id === source);
     const targetNode = nodes.find(n => n.id === target);
-  
+
     // Example: outputKeys from source, inputKeys from target
     const outputKeys = sourceNode?.data?.outputKeys || [];
     const inputKeys = targetNode?.data?.inputKeys || [];
-  
+
     // Get mapping for this edge
     const mapping = data?.keyMapping || {};
-  
+
     // Handler to update mapping for this edge
     const handleMappingChange = (newMapping) => {
       setEdges((eds) =>
         eds.map((edge) =>
           edge.id === id
             ? {
-                ...edge,
-                data: {
-                  ...edge.data,
-                  keyMapping: newMapping,
-                  onDelete: edge.data?.onDelete,
-                },
-              }
+              ...edge,
+              data: {
+                ...edge.data,
+                keyMapping: newMapping,
+                onDelete: edge.data?.onDelete,
+              },
+            }
             : edge
         )
       );
     };
-  
+
     return (
       <g
         onMouseEnter={() => setHovered(true)}
@@ -241,19 +257,19 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
           height={24}
           style={{ overflow: 'visible', pointerEvents: 'none' }}
         >
-            <LinkOutlined
+          <LinkOutlined
             className="flow-edge-mapper-btn"
             title="Map Keys"
             tabIndex={-1}
             onClick={e => {
               e.stopPropagation();
               setMapperModal({ visible: true, edgeId: id });
-            }}/>
+            }} />
         </foreignObject>
       </g>
     );
   };
-  
+
   const edgeTypes = {
     deletable: DeletableEdge,
   };
@@ -377,60 +393,82 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
       eds.map((edge) =>
         edge.id === mapperModal.edgeId
           ? {
-              ...edge,
-              data: {
-                ...edge.data,
-                keyMappingRows: newRows,
-                onDelete: edge.data?.onDelete,
-              },
-            }
+            ...edge,
+            data: {
+              ...edge.data,
+              keyMappingRows: newRows,
+              onDelete: edge.data?.onDelete,
+            },
+          }
           : edge
       )
     );
   };
 
+  // Prepare result data for modal
+  const selectedNodeResult = selectedNodeId && results[selectedNodeId];
+
   return (
     <>
-    {/* Header with workflow name and legend (only in readOnly mode) */}
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onDrop={onDrop}
-      onDragOver={(event) => event.preventDefault()}
-      onInit={onInit}
-      fitView
-      nodeTypes={nodeTypes(setNodes)}
-      edgeTypes={edgeTypes}
-    >
-      <Controls />
-      <MiniMap />
-      <Background variant="dots" gap={12} size={1} />
-    </ReactFlow>
-    {/* KeyValueMapper Modal */}
-    <Modal
-      open={mapperModal.visible}
-      title="Key Value Mapper"
-      onCancel={() => setMapperModal({ visible: false, edgeId: null })}
-      footer={null}
-      destroyOnClose
-    >
-      <KeyValueMapper
-        outputKeys={outputKeys}
-        inputKeys={inputKeys}
-        mappingRows={mappingRows}
-        onChange={handleMappingChange}
-        outputNodeName={sourceNode?.data?.label || "Output Node"}
-        inputNodeName={targetNode?.data?.label || "Input Node"}
-      />
-    </Modal>
-  </>
+      {/* Header with workflow name and legend (only in readOnly mode) */}
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDrop={onDrop}
+        onDragOver={(event) => event.preventDefault()}
+        onInit={onInit}
+        fitView
+        nodeTypes={nodeTypes(setNodes)}
+        edgeTypes={edgeTypes}
+      >
+        <Controls />
+        <MiniMap />
+        <Background variant="dots" gap={12} size={1} />
+      </ReactFlow>
+      {/* Node Result Modal */}
+      <Modal
+        open={resultModalVisible}
+        title={`Node Result: ${selectedNodeId}`}
+        onCancel={() => setResultModalVisible(false)}
+        footer={null}
+        width={600}
+      >
+        {selectedNodeResult ? (
+          <pre style={{ maxHeight: 400, overflow: "auto", background: "#f6f6f6", padding: 12, borderRadius: 6 }}>
+            {JSON.stringify(selectedNodeResult.result, null, 2)}
+          </pre>
+        ) : (
+          <div>No result data available.</div>
+        )}
+        <div style={{ marginTop: 12 }}>
+          <b>Status Code:</b> {selectedNodeResult ? selectedNodeResult.status_code : "N/A"}
+        </div>
+      </Modal>
+      {/* KeyValueMapper Modal */}
+      <Modal
+        open={mapperModal.visible}
+        title="Key Value Mapper"
+        onCancel={() => setMapperModal({ visible: false, edgeId: null })}
+        footer={null}
+        destroyOnClose
+      >
+        <KeyValueMapper
+          outputKeys={outputKeys}
+          inputKeys={inputKeys}
+          mappingRows={mappingRows}
+          onChange={handleMappingChange}
+          outputNodeName={sourceNode?.data?.label || "Output Node"}
+          inputNodeName={targetNode?.data?.label || "Input Node"}
+        />
+      </Modal>
+    </>
   );
 };
 
-const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges, results, readOnly}) => (
+const FlowCanvasMain = ({ nodes, setNodes, edges, setEdges, results, readOnly }) => (
   <ReactFlowProvider>
     <FlowCanvasInner
       nodes={nodes}
