@@ -94,9 +94,9 @@ const WorkflowsList = () => {
 
   // Table columns
   const runColumns = [
-    { title: "Run ID", dataIndex: "run_id", key: "run_id" },
-    { title: "Workflow Name", dataIndex: "workflow_name", key: "workflow_name" },
-    { title: "Created At", dataIndex: "created_at", key: "created_at" },
+    { title: "Run ID", dataIndex: "run_id", key: "run_id", align: "center" },
+    { title: "Workflow Name", dataIndex: "workflow_name", key: "workflow_name", align: "center" },
+    { title: "Created At", dataIndex: "created_at", key: "created_at", align: "center" },
   ];
 
   // Map workflow name from workflow_id
