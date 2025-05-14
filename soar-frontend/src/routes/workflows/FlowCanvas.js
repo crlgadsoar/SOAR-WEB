@@ -26,6 +26,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
   const [mapperModal, setMapperModal] = useState({ visible: false, edgeId: null });
   const [mapperPopover, setMapperPopover] = useState({ visible: false, edgeId: null });
   const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [selectedNodeName, setSelectedNodeName] = useState(null);
   const [resultModalVisible, setResultModalVisible] = useState(false);
 
   // Custom Node with Delete Button (cross at top right), Actions Dropdown at bottom right, and Status Indicator
@@ -117,6 +118,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
     const handleNodeClick = () => {
       if (readOnly && results && results[id]) {
         setSelectedNodeId(id);
+        setSelectedNodeName(data.label)
         setResultModalVisible(true);
       }
     };
@@ -431,7 +433,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
       {/* Node Result Modal */}
       <Modal
         open={resultModalVisible}
-        title={`Node Result: ${selectedNodeId}`}
+        title={`Node Result: ${selectedNodeName}`}
         onCancel={() => setResultModalVisible(false)}
         footer={null}
         width={600}
