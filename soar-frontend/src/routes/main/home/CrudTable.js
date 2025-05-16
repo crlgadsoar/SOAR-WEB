@@ -3,6 +3,7 @@ import axios from "axios";
 import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
 import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld } from "api/api";
+import { fetchPlaybookName as getPlaybookNameFromAPI } from "api/fetchData";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
 import { BellOutlined } from "@ant-design/icons";
@@ -10,7 +11,6 @@ import { useSelector } from "react-redux"; // Import useSelector to access displ
 import "./IncidentTable.css";
 import { Steps } from "antd";
 const { Step } = Steps;
-
 
 const IncidentTable = () => {
   const [data, setData] = useState([]);
@@ -27,6 +27,7 @@ const IncidentTable = () => {
   const [flowModalVisible, setFlowModalVisible] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [hoveredRowKey, setHoveredRowKey] = useState(null); // Track the hovered row
+  const [selectedPlaybookName, setSelectedPlaybookName] = useState("N/A");
 
   const previousDataRef = useRef([]);
   const { displayMode } = useSelector((state) => state.themeConfig); // Get displayMode from Redux
@@ -94,9 +95,37 @@ const IncidentTable = () => {
       console.error("Error updating status:", error);
     });
   };
+
+
+  const fetchPlaybookName = async (playbookId) => {
+    if (!playbookId) {
+      setSelectedPlaybookName("N/A");
+      return;
+    }
+  
+    try {
+      const data = await getPlaybookNameFromAPI(playbookId);
+      if (data && data.playbook_name) {
+        setSelectedPlaybookName(data.playbook_name);
+      } else {
+        setSelectedPlaybookName("Unknown");
+      }
+    } catch (error) {
+      console.error("Error fetching playbook name:", error);
+      setSelectedPlaybookName("Error");
+    }
+  };
+  
+  
     
   const handleIncidentClick = async (incidentid) => {
     try {
+      const incident = data.find((item) => item.incidentid === incidentid);
+      if (incident) {
+        setSelectedIncident(incident);
+        fetchPlaybookName(incident.playbookid);
+      }
+
       await markIncidentAsOld(incidentid); // Call the API function
       setData((prevData) =>
         prevData.map((item) =>
@@ -155,7 +184,8 @@ const columns = [
       >
         {incidentid}
         {record.isnew && (
-          <BellOutlined style={{ color: "red", marginLeft: 8 }} />
+          //<BellOutlined style={{ color: "red", marginLeft: 8 }} />
+          <span style={{ color: "red", marginLeft: 8, fontWeight: 'bold' }}>New</span>
         )}
       </div>
     ),
@@ -264,7 +294,8 @@ const columns = [
         return (
           <Tag
             color={color}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (text === "Under Investigation") {
                 handleStatusClick(record.incidentid);
               } else if (text === "Manually Mitigated") {
@@ -336,8 +367,6 @@ const columns = [
   footer={null}
 >
 
-
-
 {selectedIncident && (
   <div style={{ padding: '20px', textAlign: 'center' }}>
     <h2 style={{ textTransform: 'uppercase', marginBottom: '20px' }}>
@@ -356,44 +385,33 @@ const columns = [
 
       <Step
         title={<span style={{ fontSize: '18px' }}>Playbook Triggered</span>}
-        description={<span style={{ fontSize: '16px' }}>{`Playbook ID: ${selectedIncident.playbookid || 'N/A'}`}</span>}
+        //description={<span style={{ fontSize: '16px' }}>{`Playbook ID: ${selectedIncident.playbookid || 'N/A'}`}</span>}
+        description={<span style={{ fontSize: '16px' }}>{`Playbook: ${selectedPlaybookName}`}</span>}
       />
 
-      <Step
+    <Step
         title={<span style={{ fontSize: '18px' }}>Output</span>}
         description={
-          <span
-            style={{
-              fontSize: '16px',
-              color: (() => {
-                const output =
-                  selectedIncident.attack_id?.startsWith("T1499") ||
-                  selectedIncident.attack_id?.startsWith("T1217") ||
-                  selectedIncident.attack_id?.startsWith("T1070") ||
-                  selectedIncident.attack_id?.startsWith("T1055.008");
-
-                return output ? 'green' : 'firebrick';
-              })(),
-              fontWeight: 'bold',
-            }}
-          >
-            {selectedIncident.attack_id?.startsWith("T1499")
-              ? "Network IP Blocked"
-              : selectedIncident.attack_id?.startsWith("T1217")
-              ? "Login IP Blocked"
-              : selectedIncident.attack_id?.startsWith("T1070")
-              ? "Web IP Blocked"
-              : selectedIncident.attack_id?.startsWith("T1055.008")
-              ? "IP Blocked"
-              : selectedIncident.status || "Under Investigation"}
-          </span>
+          <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+            <div
+              style={{
+                color:
+                  selectedIncident.status?.toLowerCase() === "success"
+                    ? "green"
+                    : "firebrick",
+              }}
+            >
+              Status: {selectedIncident.status || "Under Investigation"}
+            </div>
+            <div style={{ color: "gray", marginTop: "4px" }}>
+              Action: {selectedIncident.action || "Unknown"}
+            </div>
+          </div>
         }
       />
     </Steps>
   </div>
 )}
-
- 
   
 </Modal>
 
