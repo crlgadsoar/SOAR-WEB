@@ -119,7 +119,7 @@ export const mitigateUsingAI = async (message) => {
 
 export const fetchPlaybookDetails = async (playbookId) => {
   try {
-    const response = await axios.get(API_BASE_URL + `/playbooks/details/${playbookId}`, {
+    const response = await axios.get(API_BASE_URL + `/playbook/details/${playbookId}`, {
       withCredentials: true,
     });
     return response;
@@ -329,8 +329,6 @@ export const fetchUtilities = async () => {
   }
 };
 
-
-
 // Generate a unique Playbook Id
 export const fetchPlaybookId = async () => {
   try {
@@ -343,11 +341,6 @@ export const fetchPlaybookId = async () => {
     return null;
   }
 };
-
-
-
-
-
 
 export const saveWorkflow = async (workflow) => {
   try {

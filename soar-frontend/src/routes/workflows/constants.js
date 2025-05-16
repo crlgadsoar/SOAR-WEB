@@ -1,5 +1,5 @@
 export const colours = {
     nodeColourNotExecuted: "#fff",
-    nodeColourSuccess: "#e6ffed",
-    nodeColourFailure: "#fff1f0",
+    nodeColourSuccess: "#8BC34A",
+    nodeColourFailure: "#F44336",
 }

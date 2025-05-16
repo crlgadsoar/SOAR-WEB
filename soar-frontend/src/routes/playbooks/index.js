@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, Space, Tooltip, Button, theme, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -6,8 +6,9 @@ import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
 import { instance } from "util/connection/axios";
 import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
-import { fetchPlaybookDetails, addPlaybook } from "api/api";
+import { fetchPlaybookDetails, addPlaybook, getWorkflows } from "api/api";
 import AddPlaybook from "./AddPlaybook";
+import WorkflowWindowReadOnly from "routes/workflows/WorkflowWindowReadOnly";
 
 const Playbooks = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -15,12 +16,18 @@ const Playbooks = () => {
   const [rowDetail, setRowDetail] = useState(null);
   const [data, setData] = useState(null);
   const [buttonSpin, setButtonSpin] = useState(false);
+  const [readOnlyWorkflow, setReadOnlyWorkflow] = useState(null);
+  const [workflows, setWorkflows] = useState([]);
   const childRef = useRef(null);
   const { displayMode } = useSelector((state) => state.themeConfig);
   const { authUser } = useSelector(({ auth }) => auth);
   const {
     token: { colorPrimary },
   } = theme.useToken();
+
+  useEffect(() => {
+    getWorkflows().then(setWorkflows).catch(() => setWorkflows([]));
+  }, []);
 
   const openModalHandler = (value, row) => {
     setModalComponent(value);
@@ -42,6 +49,15 @@ const Playbooks = () => {
     }
   };
 
+  const handleWorkflowClick = (wfId) => {
+    const wf = workflows.find(w => w.id === wfId || w.workflow_id === wfId);
+    if (wf) {
+      setReadOnlyWorkflow(wf);
+    } else {
+      message.error("Workflow not found");
+    }
+  };
+
   const modalComponentRender = () => {
     if (modalComponent === "ADD") {
       return (
@@ -54,15 +70,11 @@ const Playbooks = () => {
           onSubmit={(flowData) => {
             setButtonSpin(true);
             const payload = {
-              source: flowData.source,
-              utility: flowData.utility,
-              action: flowData.action,
-              format: flowData.format,
-              ip: flowData.ip,
-              port: flowData.port,
               playbook_id: flowData.playbookId,
               playbook_name: flowData.playbookname,
+              playbook_description: flowData.playbookDescription,
               mitreIds: flowData.mitreIds,
+              workflow_ids: flowData.workflowIds,
             };
 
             addPlaybook(payload)
@@ -88,9 +100,10 @@ const Playbooks = () => {
     }
 
     if (modalComponent === "EDIT") {
+      // Only show InputForm in read-only mode, remove editMode logic
       return (
         <InputForm
-          title="Playbook Details"
+          title={<span>Playbook Details</span>}
           visible={modalVisible}
           buttonSpin={buttonSpin}
           onSubmit={onSubmit}
@@ -100,6 +113,7 @@ const Playbooks = () => {
           }}
           type={modalComponent}
           initialValues={rowDetail}
+          onWorkflowClick={handleWorkflowClick}
         />
       );
     }
@@ -169,6 +183,13 @@ const Playbooks = () => {
         <CrudTable openModalHandler={openModalHandler} ref={childRef} deleteData={deleteData} />
       </Card>
       {modalComponentRender()}
+      {readOnlyWorkflow && (
+        <WorkflowWindowReadOnly
+          visible={!!readOnlyWorkflow}
+          onCancel={() => setReadOnlyWorkflow(null)}
+          workflow={readOnlyWorkflow}
+        />
+      )}
     </>
   );
 };
