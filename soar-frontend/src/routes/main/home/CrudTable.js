@@ -10,6 +10,8 @@ import { BellOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux"; // Import useSelector to access displayMode
 import "./IncidentTable.css";
 import { Steps } from "antd";
+import dayjs from "dayjs";
+
 const { Step } = Steps;
 
 const IncidentTable = () => {
@@ -171,12 +173,22 @@ const getColumnSearchProps = (dataIndex) => ({
     record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
 });
 
+const widthIncidentID	 = 70;
+const widthTimestamp = 70;
+const widthAttackType = 80;
+const widthDescription = 120;
+const widthMitreID = 65;
+const widthEventDetails	 = 120;
+const widthStatus = 80;
+const widthAction = 80;
+
 const columns = [
   {
     title: "Incident ID",
     dataIndex: "incidentid",
     key: "incidentid",
     align: "center",
+    width: widthIncidentID,
     render: (incidentid, record) => (
       <div
         style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
@@ -184,56 +196,65 @@ const columns = [
       >
         {incidentid}
         {record.isnew && (
-          //<BellOutlined style={{ color: "red", marginLeft: 8 }} />
           <span style={{ color: "red", marginLeft: 8, fontWeight: 'bold' }}>New</span>
         )}
       </div>
     ),
-  }
-    , {
-      title: "Timestamp",
-      dataIndex: "datetimestamp",
-      key: "datetimestamp",
-      align: "center",
-      sorter: (a, b) => new Date(a.datetimestamp) - new Date(b.datetimestamp),
-    },
-
-    {
-      title: "Attack Type",
-      dataIndex: "attack_id",
-      key: "attack_type",
-      align: "center",
-      width: 150,
-      filters: Array.from(new Set(data.map((item) => getAttackByMitreID(item.attack_id))))
-        .map(type => ({ text: type, value: type })),
-      onFilter: (value, record) => getAttackByMitreID(record.attack_id) === value,
-      render: (type) => getAttackByMitreID(type),
-    },
-    
-    // { title: "Incident Type", width: 150, dataIndex: "incidenttype", key: "incidenttype", align: "center", render: (type) => incidentTypeMapping[type] || "Unknown" },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-      align: "center",
-    },
-    {
-      title: "Mitre ID",
-      dataIndex: "attack_id",
-      key: "attack_id",
-      align: "center",
-      sorter: (a, b) => a.attack_id.localeCompare(b.attack_id),
-    },
-    
-    {
-      title: "Event Details",
-      dataIndex: "event_details",
-      key: "event_details",
-      align: "center",
-      width: 300,
-      ellipsis: false,
-      render: (eventDetails) =>
-        eventDetails ? (
+  },
+  {
+    title: "Timestamp",
+    dataIndex: "datetimestamp",
+    key: "datetimestamp",
+    align: "center",
+    width: widthTimestamp,
+    sorter: (a, b) => new Date(a.datetimestamp) - new Date(b.datetimestamp),
+    render: (value) =>
+      value ? (
+        <div>
+          <div>{dayjs(value).format("DD-MMMM-YYYY")}</div>
+          <div>{dayjs(value).format("hh-mm-ss A")}</div>
+        </div>
+      ) : "N/A",
+  },
+  {
+    title: "Attack Type",
+    dataIndex: "attack_id",
+    key: "attack_type",
+    align: "center",
+    width: widthAttackType,
+    filters: Array.from(new Set(data.map((item) => getAttackByMitreID(item.attack_id))))
+      .map(type => ({ text: type, value: type })),
+    onFilter: (value, record) => getAttackByMitreID(record.attack_id) === value,
+    render: (type) => getAttackByMitreID(type),
+  },
+  {
+    title: "Description",
+    dataIndex: "description",
+    key: "description",
+    align: "center",
+    width: widthDescription,
+    render: (text) => (
+      <div className="cell-scroll">{text}</div>
+    ),
+  },
+  {
+    title: "Mitre ID",
+    dataIndex: "attack_id",
+    key: "attack_id",
+    align: "center",
+    width: widthMitreID,
+    sorter: (a, b) => a.attack_id.localeCompare(b.attack_id),
+  },
+  {
+    title: "Event Details",
+    dataIndex: "event_details",
+    key: "event_details",
+    align: "center",
+    width: widthEventDetails,
+    ellipsis: false,
+    render: (eventDetails) =>
+      eventDetails ? (
+        <div className="cell-scroll">
           <ul style={{ margin: 0, paddingLeft: "15px", textAlign: "left" }}>
             {Object.entries(eventDetails).map(([key, value]) => (
               <li key={key}>
@@ -241,85 +262,86 @@ const columns = [
               </li>
             ))}
           </ul>
-        ) : (
-          "N/A"
-        ),
+        </div>
+      ) : (
+        "N/A"
+      ),
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    key: "status",
+    align: "center",
+    width: widthStatus,
+    filters: [
+      { text: "Under Investigation", value: "under" },
+      { text: "Mitigated", value: "mitigated" },
+      { text: "Manually Mitigated", value: "manually" },
+    ],
+    onFilter: (value, record) => {
+      const s = (record.status || "").toLowerCase();
+      return (
+        (value === "under" && s === "") ||
+        (value === "mitigated" && s === "mitigated") ||
+        (value === "manually" && s === "manually mitigated")
+      );
     },
+    render: (status, record) => {
+      let color = "red";
+      let text = "Under Investigation";
 
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      filters: [
-        { text: "Under Investigation", value: "under" },
-        { text: "Mitigated", value: "mitigated" },
-        { text: "Manually Mitigated", value: "manually" },
-      ],
-      onFilter: (value, record) => {
-        const s = (record.status || "").toLowerCase();
-        return (
-          (value === "under" && s === "") ||
-          (value === "mitigated" && s === "mitigated") ||
-          (value === "manually" && s === "manually mitigated")
-        );
-      },
-      render: (status, record) => {
-        let color = "red";
-        let text = "Under Investigation";
+      if(record.attack_id){
 
-        if(record.attack_id){
-  
-        if (record.attack_id.startsWith("T1499")) {
-          color = "green";
-          text = "Mitigated && Network IP Blocked";
-        } else if (record.attack_id.startsWith("T1217")) {
-          color = "green";
-          text = "Mitigated && Login IP Blocked";
-        } else if (record.attack_id.startsWith("T1070")) {
-          color = "green";
-          text = "Mitigated && Web IP Blocked";
-        } else if (record.attack_id.startsWith("T1055.008")) {
-          color = "green";
-          text = "Mitigated && IP Blocked";
-        } else if (status?.toLowerCase() === "mitigated") {
-          color = "green";
-          text = "Mitigated";
-        } else if (status?.toLowerCase() === "manually mitigated") {
-          color = "blue";
-          text = "Manually Mitigated";
-        }
-        }
+      if (record.attack_id.startsWith("T1499")) {
+        color = "green";
+        text = "Mitigated && Network IP Blocked";
+      } else if (record.attack_id.startsWith("T1217")) {
+        color = "green";
+        text = "Mitigated && Login IP Blocked";
+      } else if (record.attack_id.startsWith("T1070")) {
+        color = "green";
+        text = "Mitigated && Web IP Blocked";
+      } else if (record.attack_id.startsWith("T1055.008")) {
+        color = "green";
+        text = "Mitigated && IP Blocked";
+      } else if (status?.toLowerCase() === "mitigated") {
+        color = "green";
+        text = "Mitigated";
+      } else if (status?.toLowerCase() === "manually mitigated") {
+        color = "blue";
+        text = "Manually Mitigated";
+      }
+      }
 
-        return (
-          <Tag
-            color={color}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (text === "Under Investigation") {
-                handleStatusClick(record.incidentid);
-              } else if (text === "Manually Mitigated") {
-                handleViewComment(record.status_comment);
-              }
-            }}
-            style={{ cursor: text.includes("Mitigated") ? "default" : "pointer" }}
-          >
-            {text}
-          </Tag>
-        );
-      },
+      return (
+        <Tag
+          color={color}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (text === "Under Investigation") {
+              handleStatusClick(record.incidentid);
+            } else if (text === "Manually Mitigated") {
+              handleViewComment(record.status_comment);
+            }
+          }}
+          style={{ cursor: text.includes("Mitigated") ? "default" : "pointer" }}
+        >
+          {text}
+        </Tag>
+      );
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      key: "action",
-      align: "center",
-    },
-
-  ];
+  },
+  {
+    title: "Action",
+    dataIndex: "action",
+    key: "action",
+    align: "center",
+    width: widthAction,
+  },
+];
 
   return (
-    <div style={{ textAlign: "center", marginTop: "30px" }}>
+    <div style={{ textAlign: "center" }}>
       <Input
         placeholder="Search by Incident ID"
         value={searchText}
@@ -336,10 +358,13 @@ const columns = [
         sticky
         bordered
         rowClassName={(record) => {
+          let baseClass = "fixed-row";
           if (displayMode === "DARK") {
-            return hoveredRowKey === record.incidentid ? "hovered-row" : "dark-mode-row";
+            baseClass += " " + (hoveredRowKey === record.incidentid ? "hovered-row" : "dark-mode-row");
+          } else {
+            baseClass += " default-row";
           }
-          return "default-row"; // Light mode uses default-row styles
+          return baseClass;
         }}
         onRow={(record) => ({
           onMouseEnter: () => {

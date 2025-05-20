@@ -74,13 +74,14 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
         const numB = parseInt(b.playbook_id.replace(/\D/g, ""), 10);
         return numA - numB;
       },
-      
       defaultSortOrder: "ascend",
+      align: "center"
     },
     {
       title: "Playbook Name",
       dataIndex: "playbook_name",
       key: "playbook_name",
+      align: "center"
     },
     {
       title: "Action",
@@ -94,6 +95,7 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
           />
         </Space>
       ),
+      align: "center"
     },
   ];
 
