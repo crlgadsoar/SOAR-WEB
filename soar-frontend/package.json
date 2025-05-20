@@ -17,6 +17,7 @@
     "@visx/scale": "^3.5.0",
     "@visx/shape": "^3.5.0",
     "@visx/tooltip": "^3.3.0",
+    "@xyflow/react": "^12.6.4",
     "antd": "^5.12.5",
     "axios": "^1.4.0",
     "d3": "^7.8.5",
@@ -25,8 +26,11 @@
     "echarts-liquidfill": "^3.1.0",
     "lucide-react": "^0.484.0",
     "moment": "^2.29.4",
+    "papaparse": "^5.5.2",
     "react": "^18.2.0",
     "react-custom-scrollbars-2": "^4.5.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-intl": "^5.25.1",
     "react-redux": "^9.0.4",
@@ -36,6 +40,7 @@
     "reactflow": "^11.11.4",
     "recharts": "^2.10.3",
     "socket.io-client": "^4.8.1",
+    "uuid": "^11.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
