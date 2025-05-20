@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card, Space, Tooltip, Button, theme, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
-import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
 import { instance } from "util/connection/axios";
 import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
