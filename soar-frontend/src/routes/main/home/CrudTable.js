@@ -34,6 +34,14 @@ const IncidentTable = () => {
   const previousDataRef = useRef([]);
   const { displayMode } = useSelector((state) => state.themeConfig); // Get displayMode from Redux
 
+  //Refresh only when new data is added
+  useEffect(() => {
+    const filtered = data.filter(item =>
+      item.incidentid.toString().toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [data, searchText]);
+
   useEffect(() => {
     const fetchData = () => {
       fetchIncidents()
@@ -42,7 +50,7 @@ const IncidentTable = () => {
             const sortedData = response.sort((a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp));
             previousDataRef.current = sortedData;
             setData(sortedData);
-            setFilteredData(sortedData);
+            //setFilteredData(sortedData);
           } else {
             console.error("API response is not an array", response);
           }
@@ -60,12 +68,9 @@ const IncidentTable = () => {
   }, []);
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchText(value);
-    const filtered = data.filter(item => item.incidentid.toString().toLowerCase().includes(value.toLowerCase()));
-    setFilteredData(filtered);
+    setSearchText(e.target.value);
   };
-
+  
   const handleStatusClick = (incidentId) => {
     setCurrentIncidentId(incidentId);
     setActionModalVisible(true);
