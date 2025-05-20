@@ -48,4 +48,72 @@
     transform: scale(1.03);
     box-shadow: 0 0 10px rgba(255,255,255,0.2);
   }
-  
+
+/* Fixed row height and width, scroll on overflow */
+.fixed-row {
+  height: 48px !important; /* Fixed row height */
+}
+
+.ant-table-cell {
+  max-height: 48px;
+  min-height: 48px;
+  overflow: auto !important;
+  white-space: normal !important;
+  vertical-align: middle;
+  padding: 8px;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #bfbfbf #f0f0f0; /* Firefox */
+}
+
+.ant-table-cell::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+  transition: width 0.2s, height 0.2s;
+}
+
+.ant-table-cell:hover::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: #f0f0f0;
+}
+
+.ant-table-cell::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+  border-radius: 4px;
+}
+
+.ant-table-cell:hover::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+}
+
+/* Optional: For columns with lots of text, you can add a special class */
+.cell-scroll {
+  max-height: 48px;
+  overflow-y: auto;
+  white-space: normal;
+  scrollbar-width: thin;
+  scrollbar-color: #bfbfbf #f0f0f0;
+}
+
+.cell-scroll::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+  transition: width 0.2s, height 0.2s;
+}
+
+.cell-scroll:hover::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: #f0f0f0;
+}
+
+.cell-scroll::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+  border-radius: 4px;
+}
+
+.cell-scroll:hover::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+}

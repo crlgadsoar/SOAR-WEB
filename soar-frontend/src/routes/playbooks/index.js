@@ -2,11 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Card, Space, Tooltip, Button, theme, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
-import InputForm from "./InputForm";
 import CrudTable from "./CrudTable";
 import { instance } from "util/connection/axios";
 import API_ENDPOINT_URL from "apiServices/API_ENDPOINT_URL";
-import { fetchPlaybookDetails, addPlaybook, getWorkflows } from "api/api";
+import { addPlaybook, getWorkflows, editPlaybook } from "api/api";
 import AddPlaybook from "./AddPlaybook";
 import WorkflowWindowReadOnly from "routes/workflows/WorkflowWindowReadOnly";
 
@@ -18,6 +17,7 @@ const Playbooks = () => {
   const [buttonSpin, setButtonSpin] = useState(false);
   const [readOnlyWorkflow, setReadOnlyWorkflow] = useState(null);
   const [workflows, setWorkflows] = useState([]);
+  const [addPlaybookMode, setAddPlaybookMode] = useState("add"); // 'add' | 'view' | 'edit'
   const childRef = useRef(null);
   const { displayMode } = useSelector((state) => state.themeConfig);
   const { authUser } = useSelector(({ auth }) => auth);
@@ -30,31 +30,20 @@ const Playbooks = () => {
   }, []);
 
   const openModalHandler = (value, row) => {
-    setModalComponent(value);
-    setModalVisible(true);
-    setData(row);
-
-    if (row?.playbook_id) {
-      fetchPlaybookDetails(row.playbook_id)
-        .then((res) => {
-          const fullData = {
-            ...row,
-            ...res.data,
-          };
-          setRowDetail(fullData);
-        })
-        .catch((err) => console.error("Error fetching playbook details:", err));
-    } else {
+    // value: "ADD" | "EDIT"
+    if (value === "ADD") {
+      setAddPlaybookMode("add");
       setRowDetail(null);
+      setModalComponent("ADD");
+      setModalVisible(true);
+      return;
     }
-  };
-
-  const handleWorkflowClick = (wfId) => {
-    const wf = workflows.find(w => w.id === wfId || w.workflow_id === wfId);
-    if (wf) {
-      setReadOnlyWorkflow(wf);
-    } else {
-      message.error("Workflow not found");
+    if (value === "EDIT") {
+      setAddPlaybookMode("view");
+      setModalComponent("EDIT");
+      setModalVisible(true);
+      setRowDetail(row); // Only pass row, not full details
+      return;
     }
   };
 
@@ -66,6 +55,7 @@ const Playbooks = () => {
           onCancel={() => {
             setModalVisible(false);
             setModalComponent(null);
+            setAddPlaybookMode("add");
           }}
           onSubmit={(flowData) => {
             setButtonSpin(true);
@@ -84,6 +74,7 @@ const Playbooks = () => {
                   message.success("Playbook Added Successfully!");
                   setModalVisible(false);
                   setModalComponent(null);
+                  setAddPlaybookMode("add");
                 } else {
                   message.error(res?.data?.message || "Mitre Id already mapped, Failed to add Playbook!");
                 }
@@ -95,25 +86,43 @@ const Playbooks = () => {
               })
               .finally(() => setButtonSpin(false));
           }}
+          mode="add"
         />
       );
     }
 
     if (modalComponent === "EDIT") {
-      // Only show InputForm in read-only mode, remove editMode logic
       return (
-        <InputForm
-          title={<span>Playbook Details</span>}
+        <AddPlaybook
           visible={modalVisible}
-          buttonSpin={buttonSpin}
-          onSubmit={onSubmit}
           onCancel={() => {
             setModalVisible(false);
             setModalComponent(null);
+            setAddPlaybookMode("add");
           }}
-          type={modalComponent}
+          onSubmit={async (flowData) => {
+            setButtonSpin(true);
+            const payload = {
+              playbook_id: flowData.playbookId,
+              playbook_name: flowData.playbookname,
+              playbook_description: flowData.playbookDescription,
+              mitreIds: flowData.mitreIds,
+              workflow_ids: flowData.workflowIds,
+            };
+            const res = await editPlaybook(flowData.playbookId, payload);
+            if (res?.data?.success) {
+              childRef.current.reloadDataHandle();
+              message.success("Playbook Updated Successfully!");
+              setModalVisible(false);
+              setModalComponent(null);
+              setAddPlaybookMode("add");
+            } else {
+              message.error(res?.data?.message || "Failed to update Playbook!");
+            }
+            setButtonSpin(false);
+          }}
           initialValues={rowDetail}
-          onWorkflowClick={handleWorkflowClick}
+          mode={addPlaybookMode}
         />
       );
     }

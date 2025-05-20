@@ -416,3 +416,22 @@ export const fetchWorkflowRuns = async () => {
     return [];
   }
 };
+
+export const editPlaybook = async (playbookId, playbookData) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/api/edit_playbook/${playbookId}`,
+      playbookData,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error editing playbook:", error.response?.data || error.message);
+    return null;
+  }
+};
