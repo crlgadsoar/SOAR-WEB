@@ -212,7 +212,7 @@ const columns = [
       value ? (
         <div>
           <div>{dayjs(value).format("DD-MMMM-YYYY")}</div>
-          <div>{dayjs(value).format("hh-mm-ss A")}</div>
+          <div>{dayjs(value).format("hh:mm:ss A")}</div>
         </div>
       ) : "N/A",
   },

@@ -14,7 +14,6 @@ const AddPlaybook = ({
   onSubmit,
   mode = "add", // 'add' | 'view' | 'edit'
   initialValues = {},
-  onEditMode, // callback to switch to edit mode
 }) => {
   const [form] = Form.useForm();
   const [actions, setActions] = useState([]);
@@ -156,29 +155,53 @@ const AddPlaybook = ({
       footer={
         isReadOnly
           ? [
-            <Button key="close" onClick={onCancel}>
-              Close
-            </Button>,
-            <Button
-              key="edit"
-              type="primary"
-              icon={<EditTwoTone />}
-              onClick={() => {
-                setInternalMode("edit");
-                if (onEditMode) onEditMode();
-              }}
-            >
-              Edit
-            </Button>,
-          ]
+              <Button key="close" onClick={onCancel}>
+                Close
+              </Button>,
+              <Button
+                key="edit"
+                type="primary"
+                icon={<EditTwoTone />}
+                onClick={() => {
+                  setInternalMode("edit");
+                }}
+              >
+                Edit
+              </Button>,
+            ]
           : [
-            <Button key="cancel" onClick={internalMode == "edit" ? () => { setInternalMode("view"); } : onCancel}>
-              Cancel
-            </Button>,
-            <Button key="submit" type="primary" onClick={handleOk}>
-              Submit
-            </Button>,
-          ]
+              <Button
+                key="cancel"
+                onClick={() => {
+                  if (internalMode === "edit") {
+                    setInternalMode("view");
+                    // Reset form fields to original playbookDetails when cancelling edit
+                    if (playbookDetails) {
+                      form.setFieldsValue({
+                        playbookId: playbookDetails.playbook_id,
+                        playbookname: playbookDetails.playbook_name,
+                        playbookDescription: playbookDetails.playbook_description,
+                        workflowIds:
+                          playbookDetails.workflow_ids ||
+                          playbookDetails.workflows?.map((wf) => wf.id || wf.workflow_id) ||
+                          [],
+                        mitreIds:
+                          playbookDetails.mitreIds ||
+                          playbookDetails.mitre_ids ||
+                          [],
+                      });
+                    }
+                  } else {
+                    onCancel();
+                  }
+                }}
+              >
+                Cancel
+              </Button>,
+              <Button key="submit" type="primary" onClick={handleOk}>
+                Submit
+              </Button>,
+            ]
       }
     >
       <Form form={form} layout="vertical">

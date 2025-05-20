@@ -47,11 +47,6 @@ const Playbooks = () => {
     }
   };
 
-  // Handler to switch to edit mode from view mode inside AddPlaybook
-  const handleEditMode = () => {
-    setAddPlaybookMode("edit");
-  };
-
   const modalComponentRender = () => {
     if (modalComponent === "ADD") {
       return (
@@ -128,7 +123,6 @@ const Playbooks = () => {
           }}
           initialValues={rowDetail}
           mode={addPlaybookMode}
-          onEditMode={handleEditMode}
         />
       );
     }
