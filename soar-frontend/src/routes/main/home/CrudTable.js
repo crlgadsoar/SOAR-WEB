@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Table, Tag, Modal, Input, Button, notification } from "antd"; // ← Button added here
+import { Table, Tag, Modal, Input, Button, notification, Popover } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
 import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld } from "api/api";
 import { fetchPlaybookName as getPlaybookNameFromAPI } from "api/fetchData";
@@ -195,7 +195,14 @@ const IncidentTable = () => {
       render: (incidentid, record) => (
         <div
           style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "clip" }}
-          onClick={() => handleIncidentClick(incidentid)}
+          onClick={
+            (record) => { 
+              handleIncidentClick(incidentid)
+              setSelectedIncident(record);
+              setFlowModalVisible(true);
+              handleIncidentClick(record.incidentid); // Handle row click
+             }
+          }
           >
           <div>
             {incidentid}
@@ -239,7 +246,27 @@ const IncidentTable = () => {
       align: "center",
       width: widthDescription,
       render: (text) => (
-        <div className="cell-scroll">{text}</div>
+        <Popover
+          content={
+            <div style={{ maxWidth: 300, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap" }}>
+              {text}
+            </div>
+          }
+          title="Description"
+          trigger="hover"
+        >
+          <div
+            className="ellipsis-cell"
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              cursor: "pointer"
+            }}
+          >
+            {text}
+          </div>
+        </Popover>
       ),
     },
     {
@@ -257,20 +284,36 @@ const IncidentTable = () => {
       align: "center",
       width: widthEventDetails,
       ellipsis: false,
-      render: (eventDetails) =>
-        eventDetails ? (
-          <div className="cell-scroll">
-            <ul style={{ margin: 0, paddingLeft: "15px", textAlign: "left" }}>
-              {Object.entries(eventDetails).map(([key, value]) => (
-                <li key={key}>
-                  <strong>{key}:</strong> {String(value)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          "N/A"
-        ),
+      render: (eventDetails) => {
+        const detailsString = eventDetails
+          ? Object.entries(eventDetails)
+              .map(([key, value]) => `${key}: ${String(value)}`)
+              .join("\n")
+          : "N/A";
+        return (
+          <Popover
+            content={
+              <div style={{ maxWidth: 350, maxHeight: 200, overflowY: "auto", whiteSpace: "pre-wrap" }}>
+                {detailsString}
+              </div>
+            }
+            title="Event Details"
+            trigger="hover"
+          >
+            <div
+              className="ellipsis-cell"
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                cursor: "pointer"
+              }}
+            >
+              {detailsString}
+            </div>
+          </Popover>
+        );
+      },
     },
     {
       title: "Status",
@@ -381,12 +424,6 @@ const IncidentTable = () => {
             if (displayMode === "DARK") {
               setHoveredRowKey(null); // Reset hovered row key only in dark mode
             }
-          },
-          onClick: () => {
-            // handleIncidentClick(record.incidentid); // Keep this to mark isnew
-            setSelectedIncident(record);
-            setFlowModalVisible(true);
-            handleIncidentClick(record.incidentid); // Handle row click
           },
         })}
       />
