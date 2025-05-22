@@ -405,15 +405,26 @@ export const fetchIncidentsByAttackName = async (attackName, attack_map) => {
   }
 };
 
-export const fetchWorkflowRuns = async () => {
+export const fetchWorkflowRuns = async (runId = null) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/getWorkflowRuns`, {
+    const config = {
+      url: `${API_BASE_URL}/api/getWorkflowRuns`,
+      method: "get",
       withCredentials: true,
-    });
+    };
+    if (runId) {
+      config.params = { run_id: runId };
+    }
+    const response = await axios(config);
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch workflow runs:", error);
-    return [];
+    console.error(
+      runId
+        ? "Failed to fetch workflow run by id:"
+        : "Failed to fetch workflow runs:",
+      error
+    );
+    return runId ? null : [];
   }
 };
 

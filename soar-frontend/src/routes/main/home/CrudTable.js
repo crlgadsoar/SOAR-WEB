@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Table, Tag, Modal, Input, Button, notification, Popover } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
-import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld } from "api/api";
+import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld, getWorkflows, fetchWorkflowRuns, fetchAppsWithActions } from "api/api";
 import { fetchPlaybookName as getPlaybookNameFromAPI } from "api/fetchData";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
@@ -11,6 +11,7 @@ import { useSelector } from "react-redux"; // Import useSelector to access displ
 import "./IncidentTable.css";
 import { Steps } from "antd";
 import dayjs from "dayjs";
+import WorkflowWindowReadOnly from "routes/workflows/WorkflowWindowReadOnly";
 
 const { Step } = Steps;
 
@@ -31,8 +32,19 @@ const IncidentTable = () => {
   const [hoveredRowKey, setHoveredRowKey] = useState(null); // Track the hovered row
   const [selectedPlaybookName, setSelectedPlaybookName] = useState("N/A");
 
+  const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
+  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [apps, setApps] = useState([]);
+  const [workflows, setWorkflows] = useState([]);
+  const [workflowRuns, setWorkflowRuns] = useState([]);
   const previousDataRef = useRef([]);
   const { displayMode } = useSelector((state) => state.themeConfig); // Get displayMode from Redux
+
+  useEffect(() => {
+    getWorkflows().then(setWorkflows);
+    // fetchWorkflowRuns().then(setWorkflowRuns);
+    // fetchAppsWithActions().then(setApps);
+  }, []);
 
   //Refresh only when new data is added
   useEffect(() => {
@@ -185,6 +197,48 @@ const IncidentTable = () => {
   const widthStatus = 80;
   const widthAction = 80;
 
+  // State to track which workflow runs are loading or loaded
+  const [loadingWorkflowRuns, setLoadingWorkflowRuns] = useState({});
+  const [loadedWorkflowRuns, setLoadedWorkflowRuns] = useState({});
+
+  const handleWorkflowClick = async (wf, wfDef) => {
+    const runId = wf.run_id;
+    // If already loaded, just open modal
+    if (loadedWorkflowRuns[runId]) {
+      setSelectedWorkflow({
+        ...(wfDef || {}),
+        results: loadedWorkflowRuns[runId].results || {},
+        name: wf.workflow_name,
+      });
+      setWorkflowModalVisible(true);
+      return;
+    }
+    // If loading, do nothing
+    if (loadingWorkflowRuns[runId]) return;
+
+    // Set loading state
+    setLoadingWorkflowRuns(prev => ({ ...prev, [runId]: true }));
+    try {
+      // Fetch only the clicked run by runId
+      const wfRunArr = await fetchWorkflowRuns(runId); // API returns an array
+      const wfRun = Array.isArray(wfRunArr) ? wfRunArr[0] : wfRunArr;
+      setLoadedWorkflowRuns(prev => ({
+        ...prev,
+        [runId]: wfRun || {},
+      }));
+      setSelectedWorkflow({
+        ...(wfDef || {}),
+        results: wfRun?.results || {},
+        name: wf.workflow_name,
+      });
+      setWorkflowModalVisible(true);
+    } catch (err) {
+      // Optionally handle error
+    } finally {
+      setLoadingWorkflowRuns(prev => ({ ...prev, [runId]: false }));
+    }
+  };
+
   const columns = [
     {
       title: "Incident ID",
@@ -196,14 +250,14 @@ const IncidentTable = () => {
         <div
           style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "clip" }}
           onClick={
-            (record) => { 
+            (record) => {
               handleIncidentClick(incidentid)
               setSelectedIncident(record);
               setFlowModalVisible(true);
               handleIncidentClick(record.incidentid); // Handle row click
-             }
+            }
           }
-          >
+        >
           <div>
             {incidentid}
           </div>
@@ -287,8 +341,8 @@ const IncidentTable = () => {
       render: (eventDetails) => {
         const detailsString = eventDetails
           ? Object.entries(eventDetails)
-              .map(([key, value]) => `${key}: ${String(value)}`)
-              .join("\n")
+            .map(([key, value]) => `${key}: ${String(value)}`)
+            .join("\n")
           : "N/A";
         return (
           <Popover
@@ -386,10 +440,49 @@ const IncidentTable = () => {
     },
     {
       title: "Action",
-      dataIndex: "action",
+      dataIndex: "playbook",
       key: "action",
       align: "center",
       width: widthAction,
+      render: (playbookArr) => {
+        playbookArr = JSON.parse(playbookArr);
+        if (!playbookArr || !Array.isArray(playbookArr) || playbookArr.length === 0) {
+          return <span>No Playbook</span>;
+        }
+        // Support multiple playbooks per incident
+        return playbookArr.map((pb, pbIdx) => (
+          <div key={pb.playbook_id || pbIdx} style={{ marginBottom: 4 }}>
+            <div style={{ fontWeight: 500 }}>{pb.playbook_name}</div>
+            {pb.workflows && pb.workflows.length > 0 ? (
+              pb.workflows.map((wf, wfIdx) => {
+                const wfDef = workflows.find(w => w.id === wf.workflow_id);
+                const runId = wf.run_id;
+                const isLoading = loadingWorkflowRuns[runId];
+                return (
+                  <span
+                    key={wf.run_id || wf.workflow_id || wfIdx}
+                    style={{
+                      color: "#1677ff",
+                      textDecoration: "underline",
+                      cursor: isLoading ? "not-allowed" : "pointer",
+                      marginRight: 8,
+                      display: "inline-block",
+                      opacity: isLoading ? 0.6 : 1,
+                    }}
+                    onClick={() => {
+                      if (!isLoading) handleWorkflowClick(wf, wfDef);
+                    }}
+                  >
+                    {wf.workflow_name} (Run {wf.run_id}){isLoading ? "..." : ""}
+                  </span>
+                );
+              })
+            ) : (
+              <span style={{ color: "#aaa" }}>No Workflows</span>
+            )}
+          </div>
+        ));
+      },
     },
   ];
 
@@ -537,6 +630,14 @@ const IncidentTable = () => {
           </p>
         )}
       </Modal>
+      {workflowModalVisible && selectedWorkflow && (
+        <WorkflowWindowReadOnly
+          visible={workflowModalVisible}
+          onCancel={() => setWorkflowModalVisible(false)}
+          workflow={selectedWorkflow}
+          apps={apps}
+        />
+      )}
     </div>
   );
 };
