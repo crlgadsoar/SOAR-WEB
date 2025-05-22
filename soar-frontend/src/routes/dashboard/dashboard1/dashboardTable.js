@@ -57,6 +57,14 @@ const DashboardIncidentTable = () => {
     fetchData();
   }, []);
 
+  const widthIncidentID = 50;
+  const widthTimestamp = 50;
+  const widthAttackType = 50;
+  const widthDescription = 50;
+  const widthMitreID = 50;
+  const widthPlaybookID = 50;
+  const widthStatus = 50;
+
   const columns = [
     {
       title: "Incident ID",
@@ -64,18 +72,21 @@ const DashboardIncidentTable = () => {
       key: "incidentid",
       fixed: "left",
       align: "center", // Center-align header & content
+      width: widthIncidentID,
     },
     {
       title: "Timestamp",
       dataIndex: "datetimestamp",
       key: "datetimestamp",
       align: "center",
+      width: widthTimestamp,
     },
     {
       title: "Incident Type",
       dataIndex: "incidenttype",
       key: "incidenttype",
       align: "center",
+      width: widthAttackType,
       render: (incidentType) => incidentTypeMapping[incidentType] || "Unknown",
     },
     {
@@ -83,18 +94,21 @@ const DashboardIncidentTable = () => {
       dataIndex: "description",
       key: "description",
       align: "center",
+      width: widthDescription,
     },
     {
       title: "Attack ID",
       dataIndex: "attack_id",
       key: "attack_id",
       align: "center",
+      width: widthMitreID,
     },
     {
       title: "Playbook ID",
       dataIndex: "playbookid",
       key: "playbookid",
       align: "center",
+      width: widthPlaybookID,
       render: (playbookid) => (playbookid ? playbookid : "No Playbook Assigned"),
     },
     {
@@ -102,6 +116,7 @@ const DashboardIncidentTable = () => {
       dataIndex: "status",
       key: "status",
       align: "center",
+      width: widthStatus,
       render: (status) => {
         let color = "red"; // Default color
         let text = "Under Investigation";

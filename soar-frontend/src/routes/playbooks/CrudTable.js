@@ -69,23 +69,27 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
       title: "Playbook ID",
       dataIndex: "playbook_id",
       key: "playbook_id",
+      align: "center",
+      width: 120, // Fixed width similar to IncidentTable
       sorter: (a, b) => {
         const numA = parseInt(a.playbook_id.replace(/\D/g, ""), 10);
         const numB = parseInt(b.playbook_id.replace(/\D/g, ""), 10);
         return numA - numB;
       },
       defaultSortOrder: "ascend",
-      align: "center"
     },
     {
       title: "Playbook Name",
       dataIndex: "playbook_name",
       key: "playbook_name",
-      align: "center"
+      align: "center",
+      width: 220, // Wider for names
     },
     {
       title: "Action",
       key: "action",
+      align: "center",
+      width: 120, // Fixed width for actions
       render: (_, row) => (
         <Space>
           <EditDeleteAction
@@ -95,11 +99,19 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
           />
         </Space>
       ),
-      align: "center"
     },
   ];
 
-  return <Table columns={columns} dataSource={data} loading={loading} rowKey="playbook_id" />;
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      loading={loading}
+      rowKey="playbook_id"
+      scroll={{ x: "max-content" }} // Enable horizontal scroll if needed
+      bordered
+    />
+  );
 };
 
 // ✅ Export wrapped with forwardRef

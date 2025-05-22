@@ -70,12 +70,12 @@ const IncidentTable = () => {
   const handleSearch = (e) => {
     setSearchText(e.target.value);
   };
-  
+
   const handleStatusClick = (incidentId) => {
     setCurrentIncidentId(incidentId);
     setActionModalVisible(true);
   };
-  
+
   const handleAIMitigation = async (incidentid) => {
     try {
       const data = (await mitigateUsingAI(incidentid)).data;
@@ -109,7 +109,7 @@ const IncidentTable = () => {
       setSelectedPlaybookName("N/A");
       return;
     }
-  
+
     try {
       const data = await getPlaybookNameFromAPI(playbookId);
       if (data && data.playbook_name) {
@@ -122,9 +122,7 @@ const IncidentTable = () => {
       setSelectedPlaybookName("Error");
     }
   };
-  
-  
-    
+
   const handleIncidentClick = async (incidentid) => {
     try {
       const incident = data.find((item) => item.incidentid === incidentid);
@@ -147,203 +145,205 @@ const IncidentTable = () => {
     } catch (error) {
       console.error("Error updating isnew status:", error);
     }
-  };  
+  };
 
   function getAttackByMitreID(mitreid) {
     const entry = attack_map.find(item => item.mitreid === mitreid);
     return entry ? entry.attack : "Unknown";
-}
+  }
 
 
-const getColumnSearchProps = (dataIndex) => ({
-  filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-    <div style={{ padding: 8 }}>
-      <Input
-        placeholder={`Search ${dataIndex}`}
-        value={selectedKeys[0]}
-        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-        onPressEnter={() => confirm()}
-        style={{ marginBottom: 8, display: 'block' }}
-      />
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <a onClick={() => confirm()} style={{ marginRight: 8 }}>Search</a>
-        <a onClick={() => clearFilters()}>Reset</a>
-      </div>
-    </div>
-  ),
-  filterIcon: (filtered) => (
-    <span role="img" aria-label="search" style={{ color: filtered ? "#1890ff" : undefined }}>🔍</span>
-  ),
-  onFilter: (value, record) =>
-    record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
-});
-
-const widthIncidentID	 = 70;
-const widthTimestamp = 70;
-const widthAttackType = 80;
-const widthDescription = 120;
-const widthMitreID = 65;
-const widthEventDetails	 = 120;
-const widthStatus = 80;
-const widthAction = 80;
-
-const columns = [
-  {
-    title: "Incident ID",
-    dataIndex: "incidentid",
-    key: "incidentid",
-    align: "center",
-    width: widthIncidentID,
-    render: (incidentid, record) => (
-      <div
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-        onClick={() => handleIncidentClick(incidentid)}
-      >
-        {incidentid}
-        {record.isnew && (
-          <span style={{ color: "red", marginLeft: 8, fontWeight: 'bold' }}>New</span>
-        )}
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => confirm()}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <a onClick={() => confirm()} style={{ marginRight: 8 }}>Search</a>
+          <a onClick={() => clearFilters()}>Reset</a>
+        </div>
       </div>
     ),
-  },
-  {
-    title: "Timestamp",
-    dataIndex: "datetimestamp",
-    key: "datetimestamp",
-    align: "center",
-    width: widthTimestamp,
-    sorter: (a, b) => new Date(a.datetimestamp) - new Date(b.datetimestamp),
-    render: (value) =>
-      value ? (
-        <div>
-          <div>{dayjs(value).format("DD-MMMM-YYYY")}</div>
-          <div>{dayjs(value).format("hh:mm:ss A")}</div>
-        </div>
-      ) : "N/A",
-  },
-  {
-    title: "Attack Type",
-    dataIndex: "attack_id",
-    key: "attack_type",
-    align: "center",
-    width: widthAttackType,
-    filters: Array.from(new Set(data.map((item) => getAttackByMitreID(item.attack_id))))
-      .map(type => ({ text: type, value: type })),
-    onFilter: (value, record) => getAttackByMitreID(record.attack_id) === value,
-    render: (type) => getAttackByMitreID(type),
-  },
-  {
-    title: "Description",
-    dataIndex: "description",
-    key: "description",
-    align: "center",
-    width: widthDescription,
-    render: (text) => (
-      <div className="cell-scroll">{text}</div>
+    filterIcon: (filtered) => (
+      <span role="img" aria-label="search" style={{ color: filtered ? "#1890ff" : undefined }}>🔍</span>
     ),
-  },
-  {
-    title: "Mitre ID",
-    dataIndex: "attack_id",
-    key: "attack_id",
-    align: "center",
-    width: widthMitreID,
-    sorter: (a, b) => a.attack_id.localeCompare(b.attack_id),
-  },
-  {
-    title: "Event Details",
-    dataIndex: "event_details",
-    key: "event_details",
-    align: "center",
-    width: widthEventDetails,
-    ellipsis: false,
-    render: (eventDetails) =>
-      eventDetails ? (
-        <div className="cell-scroll">
-          <ul style={{ margin: 0, paddingLeft: "15px", textAlign: "left" }}>
-            {Object.entries(eventDetails).map(([key, value]) => (
-              <li key={key}>
-                <strong>{key}:</strong> {String(value)}
-              </li>
-            ))}
-          </ul>
+    onFilter: (value, record) =>
+      record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
+  });
+
+  const widthIncidentID = 70;
+  const widthTimestamp = 70;
+  const widthAttackType = 80;
+  const widthDescription = 120;
+  const widthMitreID = 65;
+  const widthEventDetails = 120;
+  const widthStatus = 80;
+  const widthAction = 80;
+
+  const columns = [
+    {
+      title: "Incident ID",
+      dataIndex: "incidentid",
+      key: "incidentid",
+      align: "center",
+      width: widthIncidentID,
+      render: (incidentid, record) => (
+        <div
+          style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "clip" }}
+          onClick={() => handleIncidentClick(incidentid)}
+          >
+          <div>
+            {incidentid}
+          </div>
+          {record.isnew && (
+            <div style={{ color: "red", fontWeight: 'bold' }}>New</div>
+          )}
         </div>
-      ) : (
-        "N/A"
       ),
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-    align: "center",
-    width: widthStatus,
-    filters: [
-      { text: "Under Investigation", value: "under" },
-      { text: "Mitigated", value: "mitigated" },
-      { text: "Manually Mitigated", value: "manually" },
-    ],
-    onFilter: (value, record) => {
-      const s = (record.status || "").toLowerCase();
-      return (
-        (value === "under" && s === "") ||
-        (value === "mitigated" && s === "mitigated") ||
-        (value === "manually" && s === "manually mitigated")
-      );
     },
-    render: (status, record) => {
-      let color = "red";
-      let text = "Under Investigation";
-
-      if(record.attack_id){
-
-      if (record.attack_id.startsWith("T1499")) {
-        color = "green";
-        text = "Mitigated && Network IP Blocked";
-      } else if (record.attack_id.startsWith("T1217")) {
-        color = "green";
-        text = "Mitigated && Login IP Blocked";
-      } else if (record.attack_id.startsWith("T1070")) {
-        color = "green";
-        text = "Mitigated && Web IP Blocked";
-      } else if (record.attack_id.startsWith("T1055.008")) {
-        color = "green";
-        text = "Mitigated && IP Blocked";
-      } else if (status?.toLowerCase() === "mitigated") {
-        color = "green";
-        text = "Mitigated";
-      } else if (status?.toLowerCase() === "manually mitigated") {
-        color = "blue";
-        text = "Manually Mitigated";
-      }
-      }
-
-      return (
-        <Tag
-          color={color}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (text === "Under Investigation") {
-              handleStatusClick(record.incidentid);
-            } else if (text === "Manually Mitigated") {
-              handleViewComment(record.status_comment);
-            }
-          }}
-          style={{ cursor: text.includes("Mitigated") ? "default" : "pointer" }}
-        >
-          {text}
-        </Tag>
-      );
+    {
+      title: "Timestamp",
+      dataIndex: "datetimestamp",
+      key: "datetimestamp",
+      align: "center",
+      width: widthTimestamp,
+      sorter: (a, b) => new Date(a.datetimestamp) - new Date(b.datetimestamp),
+      render: (value) =>
+        value ? (
+          <div>
+            <div>{dayjs(value).format("DD-MMMM-YYYY")}</div>
+            <div>{dayjs(value).format("hh:mm:ss A")}</div>
+          </div>
+        ) : "N/A",
     },
-  },
-  {
-    title: "Action",
-    dataIndex: "action",
-    key: "action",
-    align: "center",
-    width: widthAction,
-  },
-];
+    {
+      title: "Attack Type",
+      dataIndex: "attack_id",
+      key: "attack_type",
+      align: "center",
+      width: widthAttackType,
+      filters: Array.from(new Set(data.map((item) => getAttackByMitreID(item.attack_id))))
+        .map(type => ({ text: type, value: type })),
+      onFilter: (value, record) => getAttackByMitreID(record.attack_id) === value,
+      render: (type) => getAttackByMitreID(type),
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      align: "center",
+      width: widthDescription,
+      render: (text) => (
+        <div className="cell-scroll">{text}</div>
+      ),
+    },
+    {
+      title: "Mitre ID",
+      dataIndex: "attack_id",
+      key: "attack_id",
+      align: "center",
+      width: widthMitreID,
+      sorter: (a, b) => a.attack_id.localeCompare(b.attack_id),
+    },
+    {
+      title: "Event Details",
+      dataIndex: "event_details",
+      key: "event_details",
+      align: "center",
+      width: widthEventDetails,
+      ellipsis: false,
+      render: (eventDetails) =>
+        eventDetails ? (
+          <div className="cell-scroll">
+            <ul style={{ margin: 0, paddingLeft: "15px", textAlign: "left" }}>
+              {Object.entries(eventDetails).map(([key, value]) => (
+                <li key={key}>
+                  <strong>{key}:</strong> {String(value)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          "N/A"
+        ),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      align: "center",
+      width: widthStatus,
+      filters: [
+        { text: "Under Investigation", value: "under" },
+        { text: "Mitigated", value: "mitigated" },
+        { text: "Manually Mitigated", value: "manually" },
+      ],
+      onFilter: (value, record) => {
+        const s = (record.status || "").toLowerCase();
+        return (
+          (value === "under" && s === "") ||
+          (value === "mitigated" && s === "mitigated") ||
+          (value === "manually" && s === "manually mitigated")
+        );
+      },
+      render: (status, record) => {
+        let color = "red";
+        let text = "Under Investigation";
+
+        if (record.attack_id) {
+
+          if (record.attack_id.startsWith("T1499")) {
+            color = "green";
+            text = "Mitigated && Network IP Blocked";
+          } else if (record.attack_id.startsWith("T1217")) {
+            color = "green";
+            text = "Mitigated && Login IP Blocked";
+          } else if (record.attack_id.startsWith("T1070")) {
+            color = "green";
+            text = "Mitigated && Web IP Blocked";
+          } else if (record.attack_id.startsWith("T1055.008")) {
+            color = "green";
+            text = "Mitigated && IP Blocked";
+          } else if (status?.toLowerCase() === "mitigated") {
+            color = "green";
+            text = "Mitigated";
+          } else if (status?.toLowerCase() === "manually mitigated") {
+            color = "blue";
+            text = "Manually Mitigated";
+          }
+        }
+
+        return (
+          <Tag
+            color={color}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (text === "Under Investigation") {
+                handleStatusClick(record.incidentid);
+              } else if (text === "Manually Mitigated") {
+                handleViewComment(record.status_comment);
+              }
+            }}
+            style={{ cursor: text.includes("Mitigated") ? "default" : "pointer" }}
+          >
+            {text}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+      align: "center",
+      width: widthAction,
+    },
+  ];
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -391,59 +391,59 @@ const columns = [
         })}
       />
 
-<Modal
-  visible={flowModalVisible}
-  onCancel={() => setFlowModalVisible(false)}
-  footer={null}
->
+      <Modal
+        visible={flowModalVisible}
+        onCancel={() => setFlowModalVisible(false)}
+        footer={null}
+      >
 
-{selectedIncident && (
-  <div style={{ padding: '20px', textAlign: 'center' }}>
-    <h2 style={{ textTransform: 'uppercase', marginBottom: '20px' }}>
-      Incident Flow
-    </h2>
+        {selectedIncident && (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2 style={{ textTransform: 'uppercase', marginBottom: '20px' }}>
+              Incident Flow
+            </h2>
 
-    <Steps
-      direction="vertical"
-      current={2}
-      style={{ margin: '0 auto', maxWidth: '600px' }}
-    >
-      <Step
-        title={<span style={{ fontSize: '18px' }}>Incident Detected</span>}
-        description={<span style={{ fontSize: '16px' }}>{`ID: ${selectedIncident.incidentid}`}</span>}
-      />
-
-      <Step
-        title={<span style={{ fontSize: '18px' }}>Playbook Triggered</span>}
-        //description={<span style={{ fontSize: '16px' }}>{`Playbook ID: ${selectedIncident.playbookid || 'N/A'}`}</span>}
-        description={<span style={{ fontSize: '16px' }}>{`Playbook: ${selectedPlaybookName}`}</span>}
-      />
-
-    <Step
-        title={<span style={{ fontSize: '18px' }}>Output</span>}
-        description={
-          <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-            <div
-              style={{
-                color:
-                  selectedIncident.status?.toLowerCase() === "success"
-                    ? "green"
-                    : "firebrick",
-              }}
+            <Steps
+              direction="vertical"
+              current={2}
+              style={{ margin: '0 auto', maxWidth: '600px' }}
             >
-              Status: {selectedIncident.status || "Under Investigation"}
-            </div>
-            <div style={{ color: "gray", marginTop: "4px" }}>
-              Action: {selectedIncident.action || "Unknown"}
-            </div>
+              <Step
+                title={<span style={{ fontSize: '18px' }}>Incident Detected</span>}
+                description={<span style={{ fontSize: '16px' }}>{`ID: ${selectedIncident.incidentid}`}</span>}
+              />
+
+              <Step
+                title={<span style={{ fontSize: '18px' }}>Playbook Triggered</span>}
+                //description={<span style={{ fontSize: '16px' }}>{`Playbook ID: ${selectedIncident.playbookid || 'N/A'}`}</span>}
+                description={<span style={{ fontSize: '16px' }}>{`Playbook: ${selectedPlaybookName}`}</span>}
+              />
+
+              <Step
+                title={<span style={{ fontSize: '18px' }}>Output</span>}
+                description={
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                    <div
+                      style={{
+                        color:
+                          selectedIncident.status?.toLowerCase() === "success"
+                            ? "green"
+                            : "firebrick",
+                      }}
+                    >
+                      Status: {selectedIncident.status || "Under Investigation"}
+                    </div>
+                    <div style={{ color: "gray", marginTop: "4px" }}>
+                      Action: {selectedIncident.action || "Unknown"}
+                    </div>
+                  </div>
+                }
+              />
+            </Steps>
           </div>
-        }
-      />
-    </Steps>
-  </div>
-)}
-  
-</Modal>
+        )}
+
+      </Modal>
 
       <Modal
         title="Update Status"
@@ -470,32 +470,32 @@ const columns = [
 
 
       <Modal
-  title="Choose Mitigation Option"
-  visible={actionModalVisible}
-  onCancel={() => setActionModalVisible(false)}
-  footer={null}
->
-  <p>How would you like to mitigate this incident?</p>
-  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
-  <Button type="default" onClick={() => {
-    setActionModalVisible(false);
-    setIsModalVisible(true); // open existing comment modal
-  }}>
-    Manually Mitigate
-  </Button>
+        title="Choose Mitigation Option"
+        visible={actionModalVisible}
+        onCancel={() => setActionModalVisible(false)}
+        footer={null}
+      >
+        <p>How would you like to mitigate this incident?</p>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px" }}>
+          <Button type="default" onClick={() => {
+            setActionModalVisible(false);
+            setIsModalVisible(true); // open existing comment modal
+          }}>
+            Manually Mitigate
+          </Button>
 
-  <Button className="generate-button" onClick={() => handleAIMitigation(currentIncidentId)}>
-  <span>Mitigate using AI ✨</span>
-  </Button>
+          <Button className="generate-button" onClick={() => handleAIMitigation(currentIncidentId)}>
+            <span>Mitigate using AI ✨</span>
+          </Button>
 
-</div>
+        </div>
 
-  {predictedActions[currentIncidentId] && (
-    <p style={{ marginTop: "20px" }}>
-      <strong>Predicted Action:</strong> {predictedActions[currentIncidentId]}
-    </p>
-  )}
-</Modal>
+        {predictedActions[currentIncidentId] && (
+          <p style={{ marginTop: "20px" }}>
+            <strong>Predicted Action:</strong> {predictedActions[currentIncidentId]}
+          </p>
+        )}
+      </Modal>
     </div>
   );
 };
