@@ -372,6 +372,7 @@ const IncidentTable = () => {
               }}
               style={{
                 cursor: text.includes("Mitigated") ? "default" : "pointer",
+                maxWidth: "100%",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 verticalAlign: "middle",
