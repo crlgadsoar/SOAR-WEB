@@ -117,3 +117,9 @@
 .cell-scroll:hover::-webkit-scrollbar-thumb {
   background: #bfbfbf;
 }
+
+.ellipsis-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

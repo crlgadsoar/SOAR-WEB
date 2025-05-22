@@ -337,9 +337,7 @@ const IncidentTable = () => {
       render: (status, record) => {
         let color = "red";
         let text = "Under Investigation";
-
         if (record.attack_id) {
-
           if (record.attack_id.startsWith("T1499")) {
             color = "green";
             text = "Mitigated && Network IP Blocked";
@@ -360,22 +358,28 @@ const IncidentTable = () => {
             text = "Manually Mitigated";
           }
         }
-
         return (
-          <Tag
-            color={color}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (text === "Under Investigation") {
-                handleStatusClick(record.incidentid);
-              } else if (text === "Manually Mitigated") {
-                handleViewComment(record.status_comment);
-              }
-            }}
-            style={{ cursor: text.includes("Mitigated") ? "default" : "pointer" }}
-          >
-            {text}
-          </Tag>
+          <div>
+            <Tag
+              color={color}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (text === "Under Investigation") {
+                  handleStatusClick(record.incidentid);
+                } else if (text === "Manually Mitigated") {
+                  handleViewComment(record.status_comment);
+                }
+              }}
+              style={{
+                cursor: text.includes("Mitigated") ? "default" : "pointer",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                verticalAlign: "middle",
+              }}
+            >
+              {text}
+            </Tag>
+          </div>
         );
       },
     },
@@ -402,7 +406,6 @@ const IncidentTable = () => {
         loading={loading}
         rowKey="incidentid"
         pagination={{ pageSize: 10 }}
-        scroll={{ x: "max-content", y: 900 }}
         sticky
         bordered
         rowClassName={(record) => {
