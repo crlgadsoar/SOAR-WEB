@@ -249,14 +249,11 @@ const IncidentTable = () => {
       render: (incidentid, record) => (
         <div
           style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "clip" }}
-          onClick={
-            (record) => {
-              handleIncidentClick(incidentid)
-              setSelectedIncident(record);
-              setFlowModalVisible(true);
-              handleIncidentClick(record.incidentid); // Handle row click
-            }
-          }
+          onClick={() => {
+            handleIncidentClick(incidentid);
+            setSelectedIncident(record);
+            setFlowModalVisible(true);
+          }}
         >
           <div>
             {incidentid}
@@ -439,9 +436,9 @@ const IncidentTable = () => {
       },
     },
     {
-      title: "Action",
+      title: "Playbook",
       dataIndex: "playbook",
-      key: "action",
+      key: "playbook",
       align: "center",
       width: widthAction,
       render: (playbookArr) => {
@@ -449,39 +446,74 @@ const IncidentTable = () => {
         if (!playbookArr || !Array.isArray(playbookArr) || playbookArr.length === 0) {
           return <span>No Playbook</span>;
         }
-        // Support multiple playbooks per incident
-        return playbookArr.map((pb, pbIdx) => (
-          <div key={pb.playbook_id || pbIdx} style={{ marginBottom: 4 }}>
-            <div style={{ fontWeight: 500 }}>{pb.playbook_name}</div>
-            {pb.workflows && pb.workflows.length > 0 ? (
-              pb.workflows.map((wf, wfIdx) => {
+        // Show playbook name, and on hover show workflows in a popover
+        return playbookArr.map((pb, pbIdx) => {
+          const workflowsList = pb.workflows && pb.workflows.length > 0 ? (
+            <div
+              style={{ display: "flex", flexDirection: "column"}}
+            >
+              {pb.workflows.map((wf, wfIdx) => {
                 const wfDef = workflows.find(w => w.id === wf.workflow_id);
                 const runId = wf.run_id;
                 const isLoading = loadingWorkflowRuns[runId];
                 return (
-                  <span
+                  <Popover
                     key={wf.run_id || wf.workflow_id || wfIdx}
-                    style={{
-                      color: "#1677ff",
-                      textDecoration: "underline",
-                      cursor: isLoading ? "not-allowed" : "pointer",
-                      marginRight: 8,
-                      display: "inline-block",
-                      opacity: isLoading ? 0.6 : 1,
-                    }}
-                    onClick={() => {
-                      if (!isLoading) handleWorkflowClick(wf, wfDef);
-                    }}
+                    content={<span>Run ID: {wf.run_id}</span>}
+                    title={null}
+                    trigger="hover"
                   >
-                    {wf.workflow_name} (Run {wf.run_id}){isLoading ? "..." : ""}
-                  </span>
+                    <div
+                      style={{
+                        color: "#1677ff",
+                        textDecoration: "underline",
+                        cursor: isLoading ? "not-allowed" : "pointer",
+                        marginBottom: 4,
+                        opacity: isLoading ? 0.6 : 1,
+                        display: "inline-block",
+                        maxWidth: "max-content",
+                        marginLeft: "5px"
+
+                      }}
+                      onClick={e => {
+                        e.stopPropagation();
+                        if (!isLoading) handleWorkflowClick(wf, wfDef);
+                      }}
+                    >
+                      {wf.workflow_name}{isLoading ? "..." : ""}
+                    </div>
+                  </Popover>
                 );
-              })
-            ) : (
-              <span style={{ color: "#aaa" }}>No Workflows</span>
-            )}
-          </div>
-        ));
+              })}
+            </div>
+          ) : (
+            <span style={{ color: "#aaa" }}>No Workflows</span>
+          );
+          return (
+            <Popover
+              key={pb.playbook_id || pbIdx}
+              content={workflowsList}
+              title={<div style={{maxWidth: "max-content"}}>Workflows</div>}
+              trigger="hover"
+              placement="right"
+            >
+              <div
+                style={{
+                  fontWeight: 500,
+                  cursor: pb.workflows && pb.workflows.length > 0 ? "pointer" : "default",
+                  marginBottom: 4,
+                  display: "inline-block",
+                  minWidth: "max-content",
+                  color: "#1677ff",
+                  textDecoration: "underline"
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                {pb.playbook_name}
+              </div>
+            </Popover>
+          );
+        });
       },
     },
   ];
