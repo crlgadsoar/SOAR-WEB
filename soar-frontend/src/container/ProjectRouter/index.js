@@ -13,6 +13,7 @@ import Mitre from "routes/mitre";
 import Login from "routes/auth/Login";  // Import the Login page
 import Integrations from "routes/integrations";
 import WorkflowsList from "routes/workflows";
+import AI from "routes/ai";
 
 
 const Home = React.lazy(() => import("routes/main/home"));
@@ -71,9 +72,13 @@ const ProjectRouter = () => {
           element: <Dashboard5 />,
         },
         {
-          path: LINK_STORE.INTEGRATIONS,
+         path: LINK_STORE.INTEGRATIONS,
           element: <Integrations />,
         },
+        {
+          path: LINK_STORE.AI,
+           element: <AI />,
+         },
         {
           path: LINK_STORE.WORKFLOWS,
           element: <WorkflowsList />,

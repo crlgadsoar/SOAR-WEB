@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://10.229.40.42:5000"; 
+export const API_BASE_URL = "http://localhost:5000"; 
 
 
 export const signUp = async (values) => {
@@ -103,10 +103,11 @@ export const predictFromChat = async (message) => {
   }
 }
 
-export const mitigateUsingAI = async (message) => {
+export const mitigateUsingAI = async (incidentId, modelName) => {
   try {
-    const response = await axios.post(API_BASE_URL + "/mitigate_using_ai", {
-      incident_id: message
+    const response = await axios.post(`${API_BASE_URL}/mitigate_using_ai`, {
+      incident_id: incidentId,
+      model_name: modelName
     }, {
       withCredentials: true,
     });
@@ -116,6 +117,7 @@ export const mitigateUsingAI = async (message) => {
     return null;
   }
 }
+
 
 export const fetchPlaybookDetails = async (playbookId) => {
   try {
@@ -433,5 +435,119 @@ export const editPlaybook = async (playbookId, playbookData) => {
   } catch (error) {
     console.error("Error editing playbook:", error.response?.data || error.message);
     return null;
+  }
+};
+
+
+export const fetchDatasets = async () => {
+  return [
+    { id: 1, name: "Incident Dataset" },
+    { id: 2, name: "Attack Log Dataset" },
+  ];
+};
+
+export const fetchModels = async () => {
+  return [
+    { id: 1, name: "DistilBERT" },
+    { id: 2, name: "BERT" },
+  ];
+};
+
+export const fetchEvaluations = async () => {
+  return [
+    { id: 1, name: "Accuracy" },
+    { id: 2, name: "F1 Score" },
+  ];
+};
+
+export const saveModelConfig = async (values) => {
+  console.log("Saving model config to backend:", values);
+  // Simulate save with a delay
+  return new Promise((resolve) => setTimeout(resolve, 500));
+};
+
+
+
+// AI Model APIs
+export const uploadDataset = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${API_BASE_URL}/upload-dataset`, {
+      method: "POST",
+      body: formData,
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error uploading dataset:", error);
+    throw error;
+  }
+};
+
+export const getColumns = async (filename) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/get-columns`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching columns:", error);
+    throw error;
+  }
+};
+
+export const getDatasetSample = async (filename) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/get-dataset-sample`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching dataset sample:", error);
+    throw error;
+  }
+};
+
+// api/api.js
+export const trainModel = async (filename, target, features, modelType, modelName) => {
+  const response = await fetch(`${API_BASE_URL}/train-model`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      filename,
+      target,
+      features,
+      model_type: modelType,
+      model_name: modelName  // Add model name to the request
+    }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Training failed');
+  }
+  
+  return await response.json();
+};
+
+export const fetchModelNames = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/ai/names`, {
+      withCredentials: true,
+    });
+    return response.data.names;
+  } catch (error) {
+    console.error("Error fetching AI model names:", error);
+    return [];
   }
 };
