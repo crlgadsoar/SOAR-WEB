@@ -8,5 +8,6 @@ export const LINK_STORE = {
   PROFILE: "/user_management/profile",
   CHANGE_PASSWORD_USER_MANAGEMENT: "/user_management/change_password",
   INTEGRATIONS: "/integrations",
+  AI: "/ai",
   WORKFLOWS: "/workflows",
 };

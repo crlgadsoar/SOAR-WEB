@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Table, Tag, Modal, Input, Button, notification, Popover } from "antd"; // ← Button added here
+import { Table, Tag, Modal, Input, Button, notification, Popover, Checkbox } from "antd"; // ← Button added here
 import { incidentTypeMapping } from "../../../components/util/mapping";
-import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld, getWorkflows, fetchWorkflowRuns, fetchAppsWithActions } from "api/api";
+import { fetchIncidents, mitigateUsingAI, updateIncidentStatusComment, markIncidentAsOld, getWorkflows, fetchWorkflowRuns, fetchAppsWithActions, fetchModelNames } from "api/api";
 import { fetchPlaybookName as getPlaybookNameFromAPI } from "api/fetchData";
 import attack_map from "routes/mitre/attack_map";
 import { useLocation } from "react-router-dom";
@@ -31,6 +31,7 @@ const IncidentTable = () => {
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [hoveredRowKey, setHoveredRowKey] = useState(null); // Track the hovered row
   const [selectedPlaybookName, setSelectedPlaybookName] = useState("N/A");
+  const [selectedModel, setSelectedModel] = useState(null);
 
   const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
@@ -88,19 +89,90 @@ const IncidentTable = () => {
     setActionModalVisible(true);
   };
 
-  const handleAIMitigation = async (incidentid) => {
+  const handleAIMitigation = async (incidentId) => {
     try {
-      const data = (await mitigateUsingAI(incidentid)).data;
-      if (data.predicted_action) {
-        setPredictedActions(prev => ({ ...prev, [incidentid]: data.predicted_action }));
-      } else {
-        alert("Prediction failed or incident not found");
+      const modelNames = await fetchModelNames();
+  
+      if (!modelNames || modelNames.length === 0) {
+        notification.warning({
+          message: 'No AI Models Available',
+          description: 'There are no AI models configured for mitigation',
+        });
+        return;
       }
+  
+      let selectedModel = null; // Local variable to track selection
+  
+      Modal.confirm({
+        title: 'Select AI Model for Mitigation',
+        content: (
+          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            {modelNames.map(model => (
+              <div key={model} style={{ margin: '8px 0' }}>
+                <Checkbox
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      selectedModel = model; // Update local variable
+                    } else {
+                      selectedModel = null;
+                    }
+                  }}
+                >
+                  {model}
+                </Checkbox>
+              </div>
+            ))}
+          </div>
+        ),
+        okText: 'Use Selected Model',
+        cancelText: 'Cancel',
+        onOk: async () => {
+          if (!selectedModel) {
+            notification.warning({
+              message: 'No Model Selected',
+              description: 'Please select a model to continue',
+            });
+            return Promise.reject();
+          }
+  
+          try {
+            const result = await mitigateUsingAI(incidentId, selectedModel);
+            const predictedAction = result?.data?.predicted_action;
+            
+            if (predictedAction) {
+              setPredictedActions((prev) => ({
+                ...prev,
+                [incidentId]: predictedAction,
+              }));
+              notification.success({
+                message: 'Mitigation Successful',
+                description: `AI model predicted: ${predictedAction}`,
+              });
+            } else {
+              notification.error({
+                message: 'Prediction Failed',
+                description: 'No predicted action returned from the model',
+              });
+            }
+          } catch (error) {
+            console.error('Mitigation error:', error);
+            notification.error({
+              message: 'Mitigation Error',
+              description: error.message || 'Failed to get prediction from AI model',
+            });
+            return Promise.reject();
+          }
+        },
+      });
     } catch (err) {
-      console.error(err);
-      alert("Error during prediction");
+      console.error('Error in AI mitigation:', err);
+      notification.error({
+        message: 'Error during AI mitigation',
+        description: err.message || 'An unexpected error occurred',
+      });
     }
   };
+
 
   const handleViewComment = (comment) => {
     setViewComment(comment);
