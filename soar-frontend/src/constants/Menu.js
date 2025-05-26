@@ -77,6 +77,13 @@ export const MENU_ITEMS = [
     path: "routes/integrations",
   },
   {
+    label: "AI",
+    key: LINK_STORE.AI,
+    icon: <ApiOutlined />,
+    menuType: MENU_TYPE.NAVIGATE,
+    path: "routes/ai",
+  },
+  {
     label: "About",
     key: LINK_STORE.ABOUT,
     icon: <InfoCircleOutlined />,
