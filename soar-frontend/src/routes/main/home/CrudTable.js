@@ -133,7 +133,7 @@ const IncidentTable = () => {
                 [incidentId]: predictedAction,
               }));
               notification.success({
-                message: 'Mitigation Successful',
+                message: 'Action Prediction Successful',
                 description: `AI model predicted: ${predictedAction}`,
               });
             } else {
