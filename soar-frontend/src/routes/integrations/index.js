@@ -415,6 +415,7 @@ const Integrations = () => {
                       height: "100%",
                       objectFit: "contain",
                       borderRadius: "100%",
+                      alignContent: "center"
                     }}
                   />
                 ) : (
