@@ -20,6 +20,7 @@ import { CloseOutlined, DownOutlined, LinkOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, message, Modal, Popover } from "antd";
 import KeyValueMapper from './KeyValueMapper';
 import { colours } from './constants';
+import ReactJson from 'react-json-view';
 
 const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readOnly }) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
@@ -410,6 +411,36 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
   // Prepare result data for modal
   const selectedNodeResult = selectedNodeId && results[selectedNodeId];
 
+  // Add state for view mode, default to "none"
+  const [viewMode, setViewMode] = useState("none");
+
+  // Update viewMode when modal opens or selectedNodeId changes
+  useEffect(() => {
+    if (resultModalVisible && selectedNodeId && results[selectedNodeId]) {
+      // Try to get viewMode from node data, fallback to "none"
+      const node = nodes.find(n => n.id === selectedNodeId);
+      setViewMode(node?.data?.viewMode || "none");
+    }
+  }, [resultModalVisible, selectedNodeId, results, nodes]);
+
+  // Handler for radio change
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === selectedNodeId
+          ? {
+            ...node,
+            data: {
+              ...node.data,
+              viewMode: mode,
+            },
+          }
+          : node
+      )
+    );
+  };
+
   return (
     <>
       {/* Header with workflow name and legend (only in readOnly mode) */}
@@ -440,16 +471,48 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
       >
         {selectedNodeResult ? (
           <pre style={{ maxHeight: 400, overflow: "auto", background: "#f6f6f6", padding: 12, borderRadius: 6 }}>
-            {JSON.stringify(selectedNodeResult.result, null, 2)}
+            {viewMode === "none" ? (
+              JSON.stringify(selectedNodeResult.result, null, 2)
+            ) : (
+              <ReactJson
+                src={selectedNodeResult.result}
+                name={false}
+                displayDataTypes={false}
+                displayObjectSize={false}
+                style={{ fontSize: 12, background: "#f6f6f6" }}
+                collapsed={2}
+              />
+            )}
           </pre>
         ) : (
           <div>No result data available.</div>
         )}
-        <div style={{ marginTop: 12 }}>
-          <b>Status Code:</b> {selectedNodeResult ? selectedNodeResult.status_code : "N/A"}
+        <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between" }}>
+          <span>
+            <b>Status Code:</b> {selectedNodeResult ? selectedNodeResult.status_code : "N/A"}
+          </span>
+          {/* Radio to select JSON mode or None mode */}
+          <span>
+            <label>
+              <input
+                type="radio"
+                checked={viewMode === "none"}
+                onChange={() => handleViewModeChange("none")}
+              />{" "}
+              Text
+            </label>
+            <label style={{ marginLeft: 12 }}>
+              <input
+                type="radio"
+                checked={viewMode === "json"}
+                onChange={() => handleViewModeChange("json")}
+              />{" "}
+              JSON
+            </label>
+          </span>
         </div>
       </Modal>
-      {/* KeyValueMapper Modal */}
+      {/* KeyValueMapper Modal */}}
       <Modal
         open={mapperModal.visible}
         title="Key Value Mapper"
