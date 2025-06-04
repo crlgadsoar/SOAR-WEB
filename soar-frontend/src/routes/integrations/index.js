@@ -17,6 +17,7 @@ const Integrations = () => {
   const [newAppData, setNewAppData] = useState({
     name: "",
     description: "",
+    api_token: "", // <-- Add this line
     logo: "",
   });
   const [logoType, setLogoType] = useState("file");
@@ -173,6 +174,7 @@ const Integrations = () => {
     const formData = new FormData();
     formData.append("name", newAppData.name);
     formData.append("description", newAppData.description);
+    formData.append("api_token", newAppData.api_token); // Append the API token
 
     if (logoType === "file") {
       if (newAppData.logo) {
@@ -215,6 +217,7 @@ const Integrations = () => {
     setNewAppData({
       name: app.title,
       description: app.description,
+      api_token: app.api_token, // Set the API token for editing
       logo: app.logo,
     });
     setLogoType(app.logo ? (app.logo.startsWith("http") ? "url" : "file") : "file"); // Determine if the logo is a URL or file
@@ -226,6 +229,7 @@ const Integrations = () => {
     form.setFieldsValue({
       name: app.title,
       description: app.description,
+      api_token: app.api_token, // Set the API token in the form
     });
   };
 
@@ -233,6 +237,7 @@ const Integrations = () => {
     setNewAppData({
       name: "",
       description: "",
+      api_token: "", // Reset the API token
       logo: "",
     });
     setLogoType("file");
@@ -551,9 +556,9 @@ const Integrations = () => {
         cancelText="Cancel"
       >
         <Form
-          form={form} // Link the form instance
+          form={form}
           layout="vertical"
-          onFinish={handleCreateApp} // Handle form submission
+          onFinish={handleCreateApp}
         >
           {/* Name Field */}
           <Form.Item
@@ -577,6 +582,17 @@ const Integrations = () => {
               placeholder="Enter app description"
               rows={4}
               onChange={(e) => handleNewAppChange("description", e.target.value)}
+            />
+          </Form.Item>
+
+          {/* API Token Field */}
+          <Form.Item
+            label="API Token"
+            name="api_token"
+          >
+            <Input
+              placeholder="Enter API token"
+              onChange={(e) => handleNewAppChange("api_token", e.target.value)}
             />
           </Form.Item>
 
