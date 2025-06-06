@@ -28,6 +28,9 @@ import { LINK_STORE } from "constants/Link";
 import About from "routes/about";
 import ChangePassword from "../../routes/user_management/change_password";
 import Icon from "@ant-design/icons";
+import { FileText } from "lucide-react";
+import useHandleReportClick from "./handleReportClick"; 
+
 
 // import LanguageSelector from './LanguageSelector';
 const {
@@ -67,6 +70,7 @@ const HeaderPage = () => {
   const { authUser } = useSelector((state) => state.auth);
   const selectedKeys = window.location.pathname;
   const [modal, contextHolder] = Modal.useModal();
+  const handleReportClick = useHandleReportClick();
   //console.devLog('HeaderPage -> displayMode', displayMode);
 
   const {
@@ -333,6 +337,18 @@ const HeaderPage = () => {
         </Menu>
       </div>
       <div className={style["profile-container"]}>
+
+
+<span style={{ marginRight: "10px" }}>
+  <Tooltip title="Report">   
+    <Button
+      type="text"
+      icon={<FileText size={20} />}
+      onClick={handleReportClick}
+    />
+  </Tooltip>
+</span>
+
         {/* <span>
           <LanguageSelector displayMode={displayMode} />
         </span> */}
