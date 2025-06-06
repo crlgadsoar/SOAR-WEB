@@ -551,3 +551,119 @@ export const fetchModelNames = async () => {
     return [];
   }
 };
+
+export const fetchIncidentColumns = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/get_columns`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching incident columns:", error);
+    return [];
+  }
+};
+
+export const downloadIncidentDataset = async (selectedColumns) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/api/create_dataset`,
+      selectedColumns,
+      { responseType: "blob", withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error downloading incident dataset:", error);
+    return null;
+  }
+};
+
+//AI Models
+export const getAIModels = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/ai_models`, {
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching AI models:", error);
+    // Return empty array to maintain consistent return type
+    return [];
+  }
+};
+
+export const createAIModel = async (modelData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/ai_models`, modelData, {
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating AI model:", error);
+    return null;
+  }
+};
+
+export const deleteAIModel = async (modelId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/ai_models/${modelId}`, {
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting AI model:", error);
+    return { success: false, message: "Failed to delete model" };
+  }
+};
+
+export const getAIModelDetails = async (modelId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/ai_models/${modelId}`, {
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching AI model details:", error);
+    return null;
+  }
+};
+
+// In api.js - add this new function
+export const generateIncidentReport = async ({ dateRange, severities, statuses }) => {
+  try {
+    const params = new URLSearchParams();
+    
+    if (dateRange) {
+      params.append('start_date', dateRange[0].format('YYYY-MM-DD'));
+      params.append('end_date', dateRange[1].format('YYYY-MM-DD'));
+    } else {
+      // Default to last 30 days if no date range selected
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      params.append('start_date', startDate.toISOString().split('T')[0]);
+      params.append('end_date', endDate.toISOString().split('T')[0]);
+    }
+
+    // Add severity filters if any selected
+    if (severities && severities.length > 0) {
+      params.append('severities', severities.join(','));
+    }
+
+    // Add status filters if any selected
+    if (statuses && statuses.length > 0) {
+      params.append('statuses', statuses.join(','));
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/api/report/incidents?${params.toString()}`, {
+      withCredentials: true
+    });
+    
+    if (response.status >= 200 && response.status < 300) {
+      return response.data;
+    } else {
+      throw new Error(response.data.error || 'Failed to fetch report data');
+    }
+  } catch (error) {
+    console.error('Error generating report:', error);
+    throw error; // Re-throw to let the calling component handle it
+  }
+};
