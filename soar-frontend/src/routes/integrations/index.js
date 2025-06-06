@@ -171,65 +171,98 @@ const Integrations = () => {
   };
 
   const handleCreateApp = async () => {
-    const formData = new FormData();
-    formData.append("name", newAppData.name);
-    formData.append("description", newAppData.description);
-    formData.append("api_token", newAppData.api_token); // Append the API token
-
-    if (logoType === "file") {
-      if (newAppData.logo) {
-        formData.append("logo_file", newAppData.logo); // Append the file
+    if (isEditMode) {
+      // Only send changed fields
+      const changedFields = {};
+      if (newAppData.name !== originalAppData.name) changedFields.name = newAppData.name;
+      if (newAppData.description !== originalAppData.description) changedFields.description = newAppData.description;
+      if (newAppData.api_token !== originalAppData.api_token) changedFields.api_token = newAppData.api_token;
+      if (
+        (logoType === "file" && newAppData.logo) ||
+        (logoType === "url" && newAppData.logo !== originalAppData.logo)
+      ) {
+        if (logoType === "file" && newAppData.logo) {
+          changedFields.logo_file = newAppData.logo;
+        } else if (logoType === "url") {
+          let value = newAppData.logo;
+          if (value && !value.startsWith("http")) value = `https://${value}`;
+          changedFields.logo = value;
+        }
       }
-    } else if (logoType === "url") {
-      let value = newAppData.logo;
-      if (!value.startsWith("http")) {
-        value = `https://${value}`;
-      }
-      formData.append("logo", value); // Append the URL
-    }
 
-    try {
-      if (isEditMode) {
-        // Update the existing app
-        const response = await updateApp(selectedApp.id, formData); // Call the API to update the app
-        console.log("App updated successfully:", response.data);
+      // If nothing changed, do nothing
+      if (Object.keys(changedFields).length === 0) {
+        message.info("No changes to save.");
+        return;
+      }
+
+      const formData = new FormData();
+      Object.entries(changedFields).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      try {
+        const response = await updateApp(selectedApp.id, formData);
         setApps((prevApps) =>
           prevApps.map((app) =>
             app.id === selectedApp.id ? { ...app, ...response.data } : app
           )
         );
         message.success("App updated successfully!");
-      } else {
-        // Create a new app
-        const response = await createApp(formData); // Call the API to create the app
-        console.log("App created successfully:", response.data);
-        message.success("App created successfully!");
+        setCreateAppModalVisible(false);
+        loadApps();
+      } catch (error) {
+        console.error("Failed to save app:", error);
+        message.error("Failed to save app. Please try again.");
       }
-      setCreateAppModalVisible(false);
-      loadApps();
-    } catch (error) {
-      console.error("Failed to save app:", error);
-      message.error("Failed to save app. Please try again.");
+    } else {
+      // Create new app (send all fields)
+      const formData = new FormData();
+      formData.append("name", newAppData.name);
+      formData.append("description", newAppData.description);
+      formData.append("api_token", newAppData.api_token);
+      if (logoType === "file" && newAppData.logo) {
+        formData.append("logo_file", newAppData.logo);
+      } else if (logoType === "url" && newAppData.logo) {
+        let value = newAppData.logo;
+        if (!value.startsWith("http")) value = `https://${value}`;
+        formData.append("logo", value);
+      }
+      try {
+        const response = await createApp(formData);
+        message.success("App created successfully!");
+        setCreateAppModalVisible(false);
+        loadApps();
+      } catch (error) {
+        console.error("Failed to save app:", error);
+        message.error("Failed to save app. Please try again.");
+      }
     }
   };
+
+  const [originalAppData, setOriginalAppData] = useState(null);
 
   const handleEditApp = (app) => {
     setNewAppData({
       name: app.title,
       description: app.description,
-      api_token: app.api_token, // Set the API token for editing
+      api_token: app.api_token,
       logo: app.logo,
     });
-    setLogoType(app.logo ? (app.logo.startsWith("http") ? "url" : "file") : "file"); // Determine if the logo is a URL or file
-    setSelectedApp(app); // Set the selected app for editing
-    setIsEditMode(true); // Set the modal to edit mode
-    setCreateAppModalVisible(true); // Open the modal
-
-    // Set the form fields with the app data
+    setOriginalAppData({
+      name: app.title,
+      description: app.description,
+      api_token: app.api_token,
+      logo: app.logo,
+    });
+    setLogoType(app.logo ? (app.logo.startsWith("http") ? "url" : "file") : "file");
+    setSelectedApp(app);
+    setIsEditMode(true);
+    setCreateAppModalVisible(true);
     form.setFieldsValue({
       name: app.title,
       description: app.description,
-      api_token: app.api_token, // Set the API token in the form
+      api_token: app.api_token,
     });
   };
 
@@ -337,6 +370,18 @@ const Integrations = () => {
       console.error("Failed to delete action:", error);
       message.error("Failed to delete action. Please try again.");
     }
+  };
+
+  const isAppDataChanged = () => {
+    if (!originalAppData) return false;
+    return (
+      newAppData.name !== originalAppData.name ||
+      newAppData.description !== originalAppData.description ||
+      newAppData.api_token !== originalAppData.api_token ||
+      (logoType === "file"
+        ? !!newAppData.logo // file object is always new if changed
+        : newAppData.logo !== originalAppData.logo)
+    );
   };
 
   if (loading) {
@@ -551,9 +596,12 @@ const Integrations = () => {
         title={isEditMode ? "Edit App" : "Create New App"}
         visible={createAppModalVisible}
         onCancel={handleCancel}
-        onOk={() => form.submit()} // Submit the form
+        onOk={() => form.submit()}
         okText={isEditMode ? "Save Changes" : "Create"}
         cancelText="Cancel"
+        okButtonProps={{
+          disabled: isEditMode && !isAppDataChanged(),
+        }}
       >
         <Form
           form={form}
