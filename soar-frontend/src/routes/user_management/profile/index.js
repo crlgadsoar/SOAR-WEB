@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'antd';
 import ProfileHeader from './ProfileHeader/index';
 import About from './About/index';
 import Contact from './Contact/index';
 import Organizational from './Organizational/index';
-
+import { fetchloggeduserdetails } from "api/api";
 import { useSelector } from 'react-redux';
+
 const ProfileView = () => {
-  // let { staffId } = useParams();
   const { authUser } = useSelector((state) => state.auth);
-  // console.log('staffId ', staffId);
-  // if (staffId === '0') {
-  //   staffId = authUser.staffId;
-  // }
+  const [userDetails, setUserDetails] = useState(null);
+
+  useEffect(() => {
+    const loadUserDetails = async () => {
+      try {
+        const response = await fetchloggeduserdetails();
+        if (response?.status === 200) {
+          setUserDetails(response.data); // response.data = { role: "admin", username: "soar" }
+        }
+      } catch (error) {
+        console.error("Failed to fetch logged user details", error);
+      }
+    };
+
+    loadUserDetails();
+  }, []);
 
   return (
     <>
@@ -21,11 +33,11 @@ const ProfileView = () => {
         id={'219462'}
         emailId={authUser?.emailId?.toLowerCase()}
         gender={authUser?.gender}
-        role={'Executive'}
+        role={userDetails?.role || 'Executive'}  
         nationality={'INDIAN'}
         city={'delhi'}
         designation={'MRS'}
-        userName={'Viv_10240'}
+        userName={userDetails?.username || 'Viv_10240'} 
       />
       <div className='gx-profile-content'>
         <Row>
@@ -36,7 +48,7 @@ const ProfileView = () => {
               yrOfExperience={2}
               govtIdNo={'219462'}
               govtIdType={'Aadhar'}
-              orgRole={'Executive'}
+              orgRole={userDetails?.role || 'Executive'}  
               contactNo={'88382948745'}
             />
             <Organizational
@@ -45,12 +57,11 @@ const ProfileView = () => {
               acceptingOfficerStaffName='harsh'
               hodStaffId='E5768'
               hodStaffName='sarwan ram'
-              orgRole='MRS'
+              orgRole={userDetails?.role || 'MRS'}  
               costCenter='delhi'
               costPerHour='20$'
             />
           </Col>
-          {/* <Col md={1} /> */}
           <Col md={10}>
             <Contact
               whatsApp={'staffData'?.whatsappNo}
@@ -68,3 +79,4 @@ const ProfileView = () => {
 };
 
 export default ProfileView;
+

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:5000"; 
+export const API_BASE_URL = "http://10.229.40.42:5000"; 
 
 
 export const signUp = async (values) => {
@@ -55,6 +55,7 @@ export const login = async (creds) => {
   try {
     const response = await axios.post(API_BASE_URL + "/login", creds, {
       withCredentials: true,
+      
     });
     return response;
   } catch (error) {
@@ -133,7 +134,9 @@ export const fetchPlaybookDetails = async (playbookId) => {
 
 export const fetchApps = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/integrations/getApps`);
+    const response = await axios.get(`${API_BASE_URL}/api/integrations/getApps`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching apps:", error);
@@ -143,7 +146,9 @@ export const fetchApps = async () => {
 
 export const fetchAppsWithActions = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/integrations/getAppsWithActions`);
+    const response = await axios.get(`${API_BASE_URL}/api/integrations/getAppsWithActions`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching apps with actions:", error);
@@ -154,6 +159,7 @@ export const fetchAppsWithActions = async () => {
 export const fetchAppActions = async (appId) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/integrations/getAppActions`, {
+      withCredentials: true,
       params: { appId },
     });
     return response.data;
@@ -166,6 +172,7 @@ export const fetchAppActions = async (appId) => {
 export const importAppsToDatabase = async (apps) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/integrations/import_apps`, apps, {
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
@@ -179,7 +186,9 @@ export const importAppsToDatabase = async (apps) => {
 
 export const deleteApp = async (appId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/api/integrations/delete_app/${appId}`);
+    const response = await axios.delete(`${API_BASE_URL}/api/integrations/delete_app/${appId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.error("Failed to delete app:", error);
@@ -190,6 +199,7 @@ export const deleteApp = async (appId) => {
 export const createApp = async (formData) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/integrations/create_app`, formData, {
+      withCredentials: true,
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -204,6 +214,7 @@ export const createApp = async (formData) => {
 export const updateApp = async (appId, formData) => {
   try {
     const response = await axios.put(`${API_BASE_URL}/api/integrations/updateApp/${appId}`, formData, {
+      withCredentials: true,
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -217,7 +228,9 @@ export const updateApp = async (appId, formData) => {
 
 export const addAppAction = async (appId, actionData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/integrations/${appId}/addAction/`, actionData);
+    const response = await axios.post(`${API_BASE_URL}/api/integrations/${appId}/addAction/`, actionData, {
+      withCredentials: true,
+    });
     return response;
   } catch (error) {
     console.error("Failed to add action:", error);
@@ -227,7 +240,9 @@ export const addAppAction = async (appId, actionData) => {
 
 export const updateAppAction = async (appId, actionId, actionData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/api/integrations/${appId}/editAction/${actionId}`, actionData);
+    const response = await axios.put(`${API_BASE_URL}/api/integrations/${appId}/editAction/${actionId}`, actionData, {
+      withCredentials: true,
+    });
     return response;
   } catch (error) {
     console.error("Failed to update action:", error);
@@ -237,7 +252,9 @@ export const updateAppAction = async (appId, actionId, actionData) => {
 
 export const deleteAppAction = async (appId, actionId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/api/integrations/${appId}/${actionId}/deleteAction`);
+    const response = await axios.delete(`${API_BASE_URL}/api/integrations/${appId}/${actionId}/deleteAction`, {
+      withCredentials: true,
+    });
     return response;
   } catch (error) {
     console.error("Failed to delete action:", error);
@@ -281,7 +298,9 @@ export const deletePlaybook = async (playbookId) => {
 
 export const fetchActions = async (utility) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/actions?utility=${utility}`);
+    const response = await axios.get(`${API_BASE_URL}/api/actions?utility=${utility}`, {
+      withCredentials: true,
+    });
     return response.data.actions; // Returns the actions list
   } catch (error) {
     console.error("Error fetching actions:", error);
@@ -310,7 +329,9 @@ export const deleteMitrePlaybookMapping = async (playbookId) => {
 
 export const markIncidentAsOld = async (incidentid) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/incidents/mark_old`, { incidentid });
+    const response = await axios.post(`${API_BASE_URL}/incidents/mark_old`, { incidentid }, {
+      withCredentials: true,
+    });
     return response.data; // Return the response data for further use
   } catch (error) {
     console.error("Error updating isnew status:", error);
@@ -379,7 +400,9 @@ export const getWorkflows = async () => {
 
 export const deleteWorkflow = async (workflowId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/api/deleteWorkflow/${workflowId}`);
+    const response = await axios.delete(`${API_BASE_URL}/api/deleteWorkflow/${workflowId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.error("Failed to delete workflow:", error);
@@ -488,6 +511,7 @@ export const uploadDataset = async (file) => {
     const response = await fetch(`${API_BASE_URL}/upload-dataset`, {
       method: "POST",
       body: formData,
+      credentials: "include", // <-- add this
     });
 
     return await response.json();
@@ -503,6 +527,7 @@ export const getColumns = async (filename) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ filename }),
+      credentials: "include", // <-- add this
     });
 
     return await response.json();
@@ -518,6 +543,7 @@ export const getDatasetSample = async (filename) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ filename }),
+      credentials: "include", // <-- add this
     });
 
     return await response.json();
@@ -527,7 +553,6 @@ export const getDatasetSample = async (filename) => {
   }
 };
 
-// api/api.js
 export const trainModel = async (filename, target, features, modelType, modelName) => {
   const response = await fetch(`${API_BASE_URL}/train-model`, {
     method: 'POST',
@@ -539,15 +564,16 @@ export const trainModel = async (filename, target, features, modelType, modelNam
       target,
       features,
       model_type: modelType,
-      model_name: modelName  // Add model name to the request
+      model_name: modelName
     }),
+    credentials: "include", // <-- add this
   });
-  
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Training failed');
   }
-  
+
   return await response.json();
 };
 
@@ -678,3 +704,41 @@ export const generateIncidentReport = async ({ dateRange, severities, statuses }
     throw error; // Re-throw to let the calling component handle it
   }
 };
+
+export const fetchIncidentActions = async (incidentId) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/api/soc/v0_90/incident/actions/${incidentId}`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching incident actions:", error);
+    return { error: "Failed to fetch actions" };
+  }
+};
+
+export const fetchloggeduserdetails = async () => {
+  try {
+    const response = await axios.get(API_BASE_URL + "/logged_user_details", {
+      withCredentials: true,
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching logged user details:", error);
+    return [];
+  }
+};
+
+
+// Add this interceptor once
+// axios.interceptors.response.use(
+//   response => response,
+//   error => {
+//     if (error.response && error.response.status === 401) {
+//       // Redirect to login page
+//       window.location.href = "/login";
+//     }
+//     return Promise.reject(error);
+//   }
+// );

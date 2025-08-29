@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Table, Tag } from "antd";
-import { fetchIncidents } from "api/api"; // Import the fetchIncidents function
+import React, { useState, useEffect, useRef } from "react";
+import { Table, Tag, Input, Button } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { fetchIncidents } from "api/api";
+import { fetchIncidentActions } from "api/api"; // ✅ Import your API
 import { incidentTypeMapping } from "../../../components/util/mapping";
 
 const DashboardIncidentTable = () => {
@@ -11,39 +13,48 @@ const DashboardIncidentTable = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch incidents using the reusable API function
         const response = await fetchIncidents({ status: "Mitigated" });
 
         if (Array.isArray(response)) {
-          // Ensure all datetimestamp values are in valid format before sorting
-          const formattedData = response.map((incident) => {
-            let formattedTimestamp = incident.datetimestamp;
+          // Format timestamp
+          const formattedData = await Promise.all(
+            response.map(async (incident) => {
+              let formattedTimestamp = incident.datetimestamp;
 
-            // Check if the datetimestamp is valid
-            if (!isNaN(Date.parse(formattedTimestamp))) {
-              formattedTimestamp = new Date(formattedTimestamp)
-                .toISOString()
-                .replace("T", " ")
-                .substring(0, 19); // Convert to "YYYY-MM-DD HH:MM:SS"
-            } else {
-              console.warn("Invalid date:", incident.datetimestamp);
-              formattedTimestamp = "0000-00-00 00:00:00"; // Fallback
-            }
+              if (!isNaN(Date.parse(formattedTimestamp))) {
+                formattedTimestamp = new Date(formattedTimestamp)
+                  .toISOString()
+                  .replace("T", " ")
+                  .substring(0, 19);
+              } else {
+                formattedTimestamp = "0000-00-00 00:00:00";
+              }
 
-            return {
-              ...incident,
-              datetimestamp: formattedTimestamp,
-            };
-          });
+              // ✅ Fetch actions for each incident
+              let actions = [];
+              try {
+                const actionResponse = await fetchIncidentActions(incident.incidentid);
+                if (actionResponse && Array.isArray(actionResponse.actions)) {
+                  actions = actionResponse.actions;
+                }
+              } catch (error) {
+                console.error(`Error fetching actions for ${incident.incidentid}:`, error);
+              }
 
-          // Sort by timestamp (latest first)
+              return {
+                ...incident,
+                datetimestamp: formattedTimestamp,
+                actions, // ✅ Add actions to incident data
+              };
+            })
+          );
+
           const sortedData = formattedData.sort(
             (a, b) => new Date(b.datetimestamp) - new Date(a.datetimestamp)
           );
 
           setData(sortedData);
         } else {
-          console.error("API response is not an array:", response);
           setData([]);
         }
       } catch (error) {
@@ -57,13 +68,45 @@ const DashboardIncidentTable = () => {
     fetchData();
   }, []);
 
-  const widthIncidentID = 50;
-  const widthTimestamp = 50;
-  const widthAttackType = 50;
-  const widthDescription = 50;
-  const widthMitreID = 50;
-  const widthPlaybookID = 50;
-  const widthStatus = 50;
+  const widthIncidentID = 100;
+  const widthTimestamp = 150;
+  const widthAttackType = 120;
+  const widthDescription = 250;
+  const widthMitreID = 100;
+  const widthActions = 250;
+  const widthStatus = 150;
+
+  const searchInput = useRef(null);
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => confirm()}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Button
+          type="primary"
+          onClick={() => confirm()}
+          icon={<SearchOutlined />}
+          size="small"
+          style={{ width: 90, marginRight: 8 }}
+        >
+          Search
+        </Button>
+        <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
+          Reset
+        </Button>
+      </div>
+    ),
+    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
+    onFilter: (value, record) =>
+      record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : "",
+  });
 
   const columns = [
     {
@@ -71,7 +114,7 @@ const DashboardIncidentTable = () => {
       dataIndex: "incidentid",
       key: "incidentid",
       fixed: "left",
-      align: "center", // Center-align header & content
+      align: "center",
       width: widthIncidentID,
     },
     {
@@ -80,6 +123,8 @@ const DashboardIncidentTable = () => {
       key: "datetimestamp",
       align: "center",
       width: widthTimestamp,
+      sorter: (a, b) => new Date(a.datetimestamp) - new Date(b.datetimestamp),
+      defaultSortOrder: "descend",
     },
     {
       title: "Incident Type",
@@ -102,14 +147,24 @@ const DashboardIncidentTable = () => {
       key: "attack_id",
       align: "center",
       width: widthMitreID,
+      ...getColumnSearchProps("attack_id"),
     },
     {
-      title: "Playbook ID",
-      dataIndex: "playbookid",
-      key: "playbookid",
+      title: "Actions",
+      dataIndex: "actions",
+      key: "actions",
       align: "center",
-      width: widthPlaybookID,
-      render: (playbookid) => (playbookid ? playbookid : "No Playbook Assigned"),
+      width: widthActions,
+      render: (actions) =>
+        actions && actions.length > 0 ? (
+          actions.map((action, index) => (
+            <Tag color="blue" key={index} style={{ marginBottom: 4 }}>
+              {action}
+            </Tag>
+          ))
+        ) : (
+          "No Actions"
+        ),
     },
     {
       title: "Status",
@@ -117,15 +172,24 @@ const DashboardIncidentTable = () => {
       key: "status",
       align: "center",
       width: widthStatus,
+      filters: [
+        { text: "Mitigated", value: "mitigated" },
+        { text: "Manually Mitigated", value: "manually mitigated" },
+      ],
+      onFilter: (value, record) => record.status.toLowerCase() === value,
       render: (status) => {
-        let color = "red"; // Default color
+        let color = "red";
         let text = "Under Investigation";
-
-        if (status && status.toLowerCase() === "mitigated") {
-          color = "green";
-          text = "Mitigated";
+        if (status) {
+          const lowerStatus = status.toLowerCase();
+          if (lowerStatus === "mitigated") {
+            color = "green";
+            text = "Mitigated";
+          } else if (lowerStatus === "manually mitigated") {
+            color = "blue";
+            text = "Manually Mitigated";
+          }
         }
-
         return <Tag color={color}>{text}</Tag>;
       },
     },
@@ -150,11 +214,12 @@ const DashboardIncidentTable = () => {
         loading={loading}
         rowKey="incidentid"
         pagination={{ pageSize: 10 }}
-        scroll={{ x: "max-content", y: 400 }} // Enable scroll to freeze headers
-        bordered // Adds a border for clarity
+        scroll={{ x: "max-content", y: 400 }}
+        bordered
       />
     </div>
   );
 };
 
 export default DashboardIncidentTable;
+
