@@ -512,7 +512,7 @@ const FlowCanvasInner = ({ nodes, setNodes, edges, setEdges, results = {}, readO
           </span>
         </div>
       </Modal>
-      {/* KeyValueMapper Modal */}}
+      {/* KeyValueMapper Modal */}
       <Modal
         open={mapperModal.visible}
         title="Key Value Mapper"

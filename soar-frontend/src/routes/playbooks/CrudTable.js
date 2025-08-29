@@ -31,7 +31,7 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
     loadData();
   }, []);
 
-
+/*
   const handleDelete = async (playbookId) => {
     console.log("Deleting playbook with ID:", playbookId);
   
@@ -57,7 +57,47 @@ const PlaybookCrudTable = ({ openModalHandler }, ref) => {
       message.error("Error occurred while deleting.");
     }
   };
-  
+*/
+
+  const handleDelete = async (playbookId) => {
+    console.log("Deleting playbook with ID:", playbookId);
+
+    try {
+      // ✅ Step 1: Delete MITRE mapping first
+      const mitreDeleteResponse = await deleteMitrePlaybookMapping(playbookId);
+
+      if (mitreDeleteResponse?.status !== 200) {
+        const backendMessage =
+          mitreDeleteResponse?.data?.message || "Failed to delete MITRE mapping.";
+        message.error(backendMessage);
+        return; // ⛔ Stop here, don’t try to delete playbook
+      }
+
+      // ✅ Step 2: Delete the playbook itself
+      const result = await deletePlaybook(playbookId);
+
+      if (result?.status === 200) {
+        message.success(result?.data?.message || "Playbook Deleted!");
+        setData((prevData) =>
+          prevData.filter((p) => p.playbook_id !== playbookId)
+        );
+      } else {
+        const backendMessage =
+          result?.data?.message || "Failed to delete playbook.";
+        message.error(backendMessage);
+      }
+    } catch (error) {
+      console.error("Error deleting playbook and MITRE mapping:", error);
+
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error occurred while deleting.";
+      message.error(backendMessage);
+    }
+  };
+
+
 
   // ✅ Expose reload method to parent using ref
   useImperativeHandle(ref, () => ({
